@@ -1,0 +1,26 @@
+<h1>New Game!?</h1>
+<p>Start a new game by putting stuff in here.</p>
+
+<form action="" method="POST">{% csrf_token %}
+    <p>
+        <label>World Name?</label>
+        <input type="text" value="" ng-model="world_name" />
+    </p>
+    <p>
+        <button ng-click="getRandomWorldName()">Random</button>
+    </p>
+
+    <p>
+        <label>Leader Name?</label>
+        <input type="text" value="" ng-model="leader_name" />
+    </p>
+    <p>
+        <label>People Name?</label>
+        <input type="text" value="" ng-model="people_name" />
+    </p>
+    <p>
+        <button ng-click="getRandomCivName()">Random</button>
+    </p>
+
+    <p><input type="submit" value="Make that game" /></p>
+</form>

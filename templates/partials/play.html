@@ -1,0 +1,22 @@
+
+<form>
+    {% for color in colors %}
+    <input type="radio" ng-model="currentColor" value="#{{ color.1 }}"> {{ color.0 }}
+    {% endfor %}
+    <br/>
+    <input type="radio" ng-model="currentPlacement" value="unit"> unit
+    <input type="radio" ng-model="currentPlacement" value="background"> background
+</form>
+
+<div id="board">
+    <div class="grid-row" ng-repeat="row in rows">
+        <div class="grid-square disable-select" 
+             ng-repeat="square in row"
+             ng-click="modifySquare(square)"
+             ng-style="{backgroundColor: square.color}"
+             ng-class="{unit: square.unit}"
+        >
+            
+        </div>
+    </div>
+</div>

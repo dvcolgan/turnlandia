@@ -1,0 +1,30 @@
+<h1>Create Thine Account</h1>
+<p>Tell Us All About Yourself</p>
+
+<form novalidate name="form">
+    <p>
+    <label><strong>Username?</strong> <small><em>What shall we call you?  Also log in with this.</em></small></label>
+    <input type="text" name="username" required unique="username" value="" ng-model="newAccount.username" />
+    <span ng-show="form.username.$error.required">Please enter a username</span>
+    <span ng-show="form.username.$error.unique">That username is already taken</span>
+    </p>
+
+    <p>
+    <label><strong>Email?</strong> <small><em>Every day we'll send you an activity summary.</em></small></label>
+    <input type="email" name="email" required unique="email" value="" ng-model="newAccount.email" blur="checkEmail" />
+    <span ng-show="form.email.$error.required">Please enter an email</span>
+    <span ng-show="form.email.$error.email">Please enter a valid email</span>
+    <span ng-show="form.email.$error.unique">That email is already taken</span>
+    </p>
+
+    <p>
+    <label><strong>Password?</strong> <small><em>Make it real secure.</em></small></label>
+    <input type="password" name="password" required value="" ng-model="newAccount.password" />
+    </p>
+    <p>
+    <label><strong>Password again?</strong> <small><em>Just in case you mistyped it.</em></small></label>
+    <input type="password" name="password2" required value="" ng-model="newAccount.password2" blur="checkPasswords" />
+    </p>
+
+    <p><input type="submit" value="Create that account!" ng-disabled="canSubmit()" /></p>
+</form>

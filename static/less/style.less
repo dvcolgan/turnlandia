@@ -1,0 +1,63 @@
+
+/* Clearfix */
+.cf:before, .cf:after { content:""; display:table; } .cf:after { clear:both; } .cf { zoom:1; }
+
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #111;
+    font-size: 16px;
+}
+
+#hud {
+    height: 100px;
+    width: 100%;
+    background-color: #888;
+}
+#board {
+    .grid-row {
+        height: 48px;
+        clear: both;
+        .grid-square {
+            background-image: url(/static/images/grid.png);
+            width: 40px;
+            height: 40px;
+            padding: 4px;
+            float: left;
+        }
+        .unit:after {
+            content: "";
+            width: 24px;
+            height: 24px;
+            border-radius: 18px;
+            border: 4px solid black;
+            background-color: white;
+            display: block;
+            position: relative;
+            left: 4px;
+            top: 4px;
+        }
+    }
+}
+
+label {
+    display: block;
+}
+
+button, input[type="submit"], input[type="button"] {
+    font-size: 120%;
+}
+
+input.ng-invalid.ng-dirty {
+    background-color: #FA787E;
+}
+
+input.ng-valid.ng-dirty {
+    background-color: #78FA89;
+}
+
+.disable-select {
+    -webkit-user-select: none;  
+    -moz-user-select: none;    
+    -ms-user-select: none;      
+    user-select: none;
+}
