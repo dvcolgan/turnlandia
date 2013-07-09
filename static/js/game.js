@@ -4,18 +4,17 @@ var CreateAccountController, GameController, PlayController, gameApp, randomChoi
 gameApp = angular.module('gameApp', []);
 
 gameApp.config(function($routeProvider) {
-  $routeProvider.when('/create-account/', {
-    templateUrl: 'partials/create-account.html',
-    controller: CreateAccountController
-  });
-  $routeProvider.when('/new-game/', {
-    templateUrl: 'partials/new-game.html',
-    controller: GameController
-  });
-  return $routeProvider.when('/play/', {
+  $routeProvider.when('/board/:centerX/:centerY/', {
     templateUrl: 'partials/play.html',
-    controller: PlayController
+    controller: 'PlayController'
   });
+  return $routeProvider.otherwise({
+    redirectTo: '/board/0/0/'
+  });
+});
+
+gameApp.config(function($httpProvider) {
+  return $httpProvider.defaults.headers.post['X-CSRFToken'] = $('input[name=csrfmiddlewaretoken]').val();
 });
 
 gameApp.config(function($interpolateProvider) {
@@ -30,42 +29,48 @@ gameApp.directive('blur', function() {
   };
 });
 
-gameApp.directive("repeatPassword", function() {
+gameApp.directive('valueMatches', function() {
   return {
     require: "ngModel",
-    link: function(scope, elem, attrs, ctrl) {
-      var otherInput;
-      otherInput = elem.inheritedData("$formController")[attrs.repeatPassword];
-      ctrl.$parsers.push(function(value) {
-        if (value === otherInput.$viewValue) {
-          ctrl.$setValidity("repeat", true);
-          return value;
+    scope: {
+      valueMatches: '='
+    },
+    link: function(scope, element, attrs, ctrl) {
+      return scope.$watch((function() {
+        var combined;
+        combined = null;
+        if (scope.valueMatches && ctrl.$viewValue) {
+          combined = scope.valueMatches + '_' + ctrl.$viewValue;
         }
-        return ctrl.$setValidity("repeat", false);
-      });
-      return otherInput.$parsers.push(function(value) {
-        ctrl.$setValidity("repeat", value === ctrl.$viewValue);
-        return value;
-      });
+        return combined;
+      }), (function(value) {
+        if (value) {
+          return ctrl.$parsers.unshift(function(viewValue) {
+            var origin;
+            origin = scope.valueMatches;
+            if (origin !== viewValue) {
+              ctrl.$setValidity("valueMatches", false);
+              return void 0;
+            } else {
+              ctrl.$setValidity("valueMatches", true);
+              return viewValue;
+            }
+          });
+        }
+      }));
     }
   };
 });
 
-gameApp.directive('unique', function($http, $compile) {
+gameApp.directive('uniqueUsername', function($http, $compile) {
   return {
     require: 'ngModel',
     restrict: 'A',
     link: function(scope, element, attrs, ctrl) {
-      var spinner;
-      spinner = angular.element('<img src="/static/images/ajax-loader.gif" />');
-      element.append(spinner);
-      $compile(spinner)(scope);
-      spinner.hide();
       return ctrl.$parsers.push(function(viewValue) {
-        spinner.show();
         if (viewValue) {
-          $http.get('/api/account/exists/' + attrs.unique + '/' + viewValue + '/').success(function(data, status, headers, config) {
-            spinner.hide();
+          $http.get('/api/account/exists/username/' + viewValue + '/').success(function(data, status, headers, config) {
+            console.log('here');
             if (data.taken) {
               return ctrl.$setValidity('unique', false);
             } else {
@@ -74,8 +79,6 @@ gameApp.directive('unique', function($http, $compile) {
           }).error(function(data, status, headers, config) {
             return alert('could not connect to server');
           });
-        } else {
-          spinner.hide();
         }
         return viewValue;
       });
@@ -94,16 +97,18 @@ randomChoice = function(collection) {
   return collection[Math.floor(Math.random() * collection.length)];
 };
 
-CreateAccountController = function($scope) {
+CreateAccountController = function($scope, $http, $location) {
   $scope.newAccount = {
     username: '',
-    email: '',
     password: '',
     password2: ''
   };
-  $scope.passwordsMatch = null;
-  return $scope.canSubmit = function() {
-    return !($scope.newAccount.username !== '' && $scope.newAccount.email !== '' && $scope.newAccount.password !== '' && $scope.newAccount.password === $scope.newAccount.password2);
+  return $scope.submit = function() {
+    return $http.post('/api/account/', $scope.newAccount).success(function(data, status, headers, config) {
+      return $location.path('/play/');
+    }).error(function(data, status, headers, config) {
+      return alert(data.error);
+    });
   };
 };
 
@@ -123,45 +128,113 @@ GameController = function($scope, Data) {
   };
 };
 
-PlayController = function($scope) {
-  var i, j;
-  $scope.rows = (function() {
-    var _i, _results;
-    _results = [];
-    for (j = _i = 0; _i < 15; j = ++_i) {
-      _results.push((function() {
-        var _j, _results1;
+PlayController = function($scope, $http, $timeout, $routeParams) {
+  $scope.getViewWidth = function() {
+    return Math.floor((angular.element(window).width() - (48 + 20)) / 48);
+  };
+  $scope.getViewHeight = function() {
+    angular.element(window).height();
+    return Math.floor((angular.element(window).height() - 220.) / 48);
+  };
+  $scope.fetchBoard = function(centerX, centerY) {
+    return $http.get('/api/sector/' + centerX + '/' + centerY + '/' + $scope.getViewWidth() + '/' + $scope.getViewHeight() + '/').success(function(data, status, headers, config) {
+      var square, _i, _j, _k, _len, _ref, _ref1, _ref2, _ref3, _ref4, _results, _results1;
+      $scope.data = data;
+      $scope.centerX = parseInt(centerX);
+      $scope.centerY = parseInt(centerY);
+      _ref = $scope.data.squares;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        square = _ref[_i];
+        square.left = ((square.x - ($scope.centerX - data.view_width / 2)) * 48) + 'px';
+        square.top = ((square.y - ($scope.centerY - data.view_height / 2)) * 48) + 'px';
+      }
+      $scope.topCoords = (function() {
+        _results = [];
+        for (var _j = _ref1 = $scope.centerX - data.view_width / 2, _ref2 = $scope.centerX + data.view_width / 2; _ref1 <= _ref2 ? _j < _ref2 : _j > _ref2; _ref1 <= _ref2 ? _j++ : _j--){ _results.push(_j); }
+        return _results;
+      }).apply(this);
+      $scope.sideCoords = (function() {
         _results1 = [];
-        for (i = _j = 0; _j < 28; i = ++_j) {
-          _results1.push({
-            color: 'white',
-            unit: '',
-            row: i,
-            col: j
-          });
-        }
+        for (var _k = _ref3 = $scope.centerY - data.view_height / 2, _ref4 = $scope.centerY + data.view_height / 2; _ref3 <= _ref4 ? _k < _ref4 : _k > _ref4; _ref3 <= _ref4 ? _k++ : _k--){ _results1.push(_k); }
         return _results1;
-      })());
+      }).apply(this);
+      $scope.data.board_width = ($scope.data.view_width * 48) + 'px';
+      $scope.data.board_height = ($scope.data.view_height * 48) + 'px';
+      return $scope.unitsRemaining = data.remaining_counts;
+    }).error(function(data, status, headers, config) {
+      return alert(data.error);
+    });
+  };
+  $scope.fetchBoard($routeParams.centerX, $routeParams.centerY);
+  $scope.findSquare = function(x, y) {
+    var square, _i, _len, _ref;
+    _ref = $scope.data.squares;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      square = _ref[_i];
+      if (square.x === x && square.y === y) {
+        return square;
+      }
     }
-    return _results;
-  })();
-  $scope.currentColor = '1E77B4';
-  $scope.currentPlacement = 'unit';
-  return $scope.modifySquare = function(square) {
-    if ($scope.currentPlacement === 'unit') {
-      if (square.unit === 'unit') {
-        return square.unit = '';
-      } else {
-        square.unit = 'unit';
-        return square.color = $scope.currentColor;
-      }
-    } else if ($scope.currentPlacement === 'background') {
-      if (square.color === $scope.currentColor) {
-        square.color = 'white';
-        return square.unit = '';
-      } else {
-        return square.color = $scope.currentColor;
-      }
+    throw 'Square not loaded';
+  };
+  $scope.modifyUnit = function(square, action) {
+    var square8, squares1, squares2, squares4;
+    if (action === 'initial') {
+      square8 = square;
+      squares4 = [$scope.findSquare(square.x - 1, square.y), $scope.findSquare(square.x + 1, square.y), $scope.findSquare(square.x, square.y - 1), $scope.findSquare(square.x, square.y + 1)];
+      squares2 = [$scope.findSquare(square.x - 1, square.y - 1), $scope.findSquare(square.x + 1, square.y + 1), $scope.findSquare(square.x + 1, square.y - 1), $scope.findSquare(square.x - 1, square.y + 1)];
+      squares1 = [$scope.findSquare(square.x - 1, square.y - 1), $scope.findSquare(square.x + 1, square.y + 1), $scope.findSquare(square.x + 1, square.y - 1), $scope.findSquare(square.x - 1, square.y + 1)];
+      return $http.post('/api/square/' + square.x + '/' + square.y + '/' + action + '/', {
+        action: action
+      }).success(function(data, status, headers, config) {}).error(function(data, status, headers, config) {});
+    } else {
+      return $http.post('/api/square/' + square.x + '/' + square.y + '/' + action + '/', {
+        action: action
+      }).success(function(data, status, headers, config) {
+        var found, i, remaining, unit, _i, _j, _k, _len, _len1, _ref, _ref1, _ref2, _results;
+        if (action === 'place') {
+          found = false;
+          _ref = square.units;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            unit = _ref[_i];
+            if (unit.color === data.unit.color) {
+              unit.amount = data.unit.amount;
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            square.units.push(data.unit);
+          }
+        } else if (action === 'remove') {
+          for (i = _j = 0, _ref1 = square.units.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
+            if (square.units[i].color === $scope.currentColor) {
+              if (data.amount === 0) {
+                square.units.splice(i, 1);
+              } else {
+                square.units[i].amount = data.amount;
+              }
+              break;
+            }
+          }
+        }
+        _ref2 = $scope.unitsRemaining;
+        _results = [];
+        for (_k = 0, _len1 = _ref2.length; _k < _len1; _k++) {
+          remaining = _ref2[_k];
+          if (remaining.color === $scope.currentColor) {
+            remaining.remaining = data.units_remaining;
+            break;
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      }).error(function(data, status, headers, config) {
+        return alert(data.error);
+      });
     }
   };
+  $scope.currentColor = 'blue';
+  return $scope.unitAction = 'place';
 };

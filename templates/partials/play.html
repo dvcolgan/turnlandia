@@ -1,22 +1,86 @@
 
-<form>
-    {% for color in colors %}
-    <input type="radio" ng-model="currentColor" value="#{{ color.1 }}"> {{ color.0 }}
-    {% endfor %}
-    <br/>
-    <input type="radio" ng-model="currentPlacement" value="unit"> unit
-    <input type="radio" ng-model="currentPlacement" value="background"> background
+<div class="action-buttons disable-select cf">
+    <!-- TODO something is causing these radio buttons to have a thin strip above and below the icon to not click the button
+    it seems to be that padding doesnt let you click on things
+        -->
+    <label ng-class="{active: unitAction === 'initial' }"><input type="radio" ng-model="unitAction" value="initial" ><img src="{{ STATIC_URL }}images/place-icon.png" />  Initial Placement</label>
+
+    <label ng-class="{active: unitAction === 'place' }"><input type="radio" ng-model="unitAction" value="place" ><img src="{{ STATIC_URL }}images/place-icon.png" />  Place Unit</label>
+    <label ng-class="{active: unitAction === 'remove'}"><input type="radio" ng-model="unitAction" value="remove"><img src="{{ STATIC_URL }}images/remove-icon.png" /> Remove Unit</label>
+    <label ng-class="{active: unitAction === 'settle'}"><input type="radio" ng-model="unitAction" value="settle"><img src="{{ STATIC_URL }}images/settle-icon.png" /> Settle Units</label>
+    <label ng-class="{active: unitAction === 'give'  }"><input type="radio" ng-model="unitAction" value="give"  ><img src="{{ STATIC_URL }}images/give-icon.png" />   Give Units</label>
+    <label ng-class="{active: unitAction === 'wall'  }"><input type="radio" ng-model="unitAction" value="wall"  ><img src="{{ STATIC_URL }}images/wall-icon.png" />   Build Wall</label>
+</div>
+
+    <!--
+    <div class="arrow-controls">
+        <a class="go-left "><i class="foundicon-left-arrow"></i></a>
+        <a class="go-up   "><i class="foundicon-up-arrow"></i></a>
+        <a class="go-down "><i class="foundicon-down-arrow"></i></a>
+        <a class="go-right"><i class="foundicon-right-arrow"></i></a>
+    </div>
+    -->
+
+<!--
+<input ng-model="centerX" />
+<input ng-model="centerY" />
+<button ng-click="fetchBoard(centerX, centerY)">Go</button>
+
+<form class="row">
+    <div class="large-1 columns" ng-repeat="count in unitsRemaining">
+        <input ng-model="$parent.currentColor"
+            type="radio" 
+            id="{[{ count.color }]}-field"
+            name="color-picker"
+            value="{[{ count.color }]}">
+        <label for="{[{ count.color }]}-field" style="text-transform: capitalize">{[{ count.color }]}</label>
+        <span ng-model="count.remaining">{[{ count.remaining }]}</span>
+    </div>
 </form>
 
-<div id="board">
-    <div class="grid-row" ng-repeat="row in rows">
-        <div class="grid-square disable-select" 
-             ng-repeat="square in row"
-             ng-click="modifySquare(square)"
-             ng-style="{backgroundColor: square.color}"
-             ng-class="{unit: square.unit}"
-        >
-            
+<br/>
+<input type="radio" ng-model="unitAction" id="place-field" value="place">
+<label for="place-field">Place Unit</label>
+<input type="radio" ng-model="unitAction" id="remove-field" value="remove">
+<label for="remove-field">Remove Unit</label>
+-->
+
+<div id="top-coords" class="cf">
+    <div class="top-coord" ng-repeat="coord in topCoords">{[{ coord }]}</div>
+</div>
+<div id="side-coords">
+    <div class="side-coord" ng-repeat="coord in sideCoords">{[{ coord }]}</div>
+</div>
+<div id="board" ng-style="{width: data.board_width, height: data.board_height}">
+    <div class="grid-square disable-select" 
+            ng-repeat="square in data.squares"
+            ng-click="modifyUnit(square, unitAction)"
+            ng-style="{
+                borderColor: currentColor,
+                backgroundColor: square.color,
+                top: square.top,
+                left: square.left,
+                cursor: unitAction != 'remove' ? 'pointer' : 'not-allowed'
+            }">
+        <div class="unit" 
+             ng-repeat="unit in square.units"
+             ng-class="{
+                 first: $index == 0,
+                 second: $index == 1,
+                 third: $index == 2,
+                 fourth: $index == 3,
+                 one: square.units.length == 1,
+                 two: square.units.length == 2,
+                 three: square.units.length == 3,
+                 four: square.units.length == 4
+             }"
+             ng-style="{
+                backgroundColor: unit.color,
+                borderBottomWidth: ((unit.amount + 3)/2) + 'px',
+                marginTop: -((unit.amount + 3)/2) + 'px'
+             }">
+            <span ng-model="unit">{[{ unit.amount }]}</span>
         </div>
     </div>
 </div>
+

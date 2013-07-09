@@ -1,3 +1,4 @@
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline;}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block;}body{line-height:1;}ol,ul{list-style:none;}blockquote,q{quotes:none;}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none;}table{border-collapse:collapse;border-spacing:0;}
 
 /* Clearfix */
 .cf:before, .cf:after { content:""; display:table; } .cf:after { clear:both; } .cf { zoom:1; }
@@ -6,58 +7,364 @@ body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: #111;
     font-size: 16px;
+    line-height: 16px;
+    background-image: url(/static/images/tiny_grid.png);
 }
 
-#hud {
-    height: 100px;
-    width: 100%;
-    background-color: #888;
+h1,h2,h3,h4 {
+    font-family: 'Patua One', cursive;
+    text-shadow: 1px 1px 2px black;
+    margin-bottom: 20px;
 }
-#board {
-    .grid-row {
-        height: 48px;
-        clear: both;
-        .grid-square {
-            background-image: url(/static/images/grid.png);
-            width: 40px;
-            height: 40px;
-            padding: 4px;
-            float: left;
+h1 { font-size: 48px; line-height: 48px; }
+h2 { font-size: 36px; line-height: 36px; }
+h3 { font-size: 24px; line-height: 24px; }
+h4 { font-size: 18px; line-height: 18px; }
+
+p {
+    margin-bottom: 12px;
+}
+
+small {
+    font-size: 80%;
+}
+em {
+    font-style: italic;
+}
+strong {
+    font-weight: bold;
+}
+
+.panel {
+    color: white;
+    margin: 0 auto;
+    width: 500px;
+    background-color: #f8f8f8;
+    background-image: url(/static/images/tweed.png);
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid #444;
+    box-shadow: 4px 4px 4px #888;
+    margin-top: 20px;
+}
+
+.color-swatch {
+    width: 120px;
+    text-align: center;
+    font-size: 17px;
+    height: 50px;
+    border: 2px solid #333;
+    position: relative;
+}
+form {
+    input[type="text"], input[type="password"] {
+        border: 2px solid #444;
+        border-radius: 4px;
+        padding: 4px;
+    }
+    table {
+        width: 100%;
+        td {
+            width: 50%;
+            vertical-align: middle;
+            text-align: left;
+            padding-right: 8px;
+
+            input {
+                width: 90%;
+            }
         }
-        .unit:after {
-            content: "";
-            width: 24px;
-            height: 24px;
-            border-radius: 18px;
-            border: 4px solid black;
-            background-color: white;
-            display: block;
-            position: relative;
-            left: 4px;
-            top: 4px;
+        tr:nth-child(even) td {
+            padding-bottom: 10px;
+        }
+    }
+    .form-error, .errorlist {
+        color: red;
+    }
+    //input.ng-invalid.ng-dirty {
+    //    background-color: #FA787E;
+    //}
+
+    //input.ng-valid.ng-dirty {
+    //    background-color: #78FA89;
+    //}
+}
+
+#top-coords {
+    margin-left: 48px;
+    .top-coord {
+        width: 48px;
+        height: 20px;
+        text-align: center;
+        float: left;
+    }
+}
+
+#side-coords {
+    float: left;
+    .side-coord {
+        width: 48px;
+        height: 48px;
+        line-height: 48px;
+        text-align: center;
+    }
+}
+
+#board {
+    margin-left: 48px;
+    position: relative;
+    border: 2px solid #444;
+    .grid-square {
+        background-image: url(/static/images/grid.png);
+        width: 48px;
+        height: 48px;
+        position: absolute;
+        &:hover {
+            width: 48px;
+            height: 48px;
+            border: 6px solid red;
+            margin-left: -6px;
+            margin-top: -6px;
+            border-radius: 6px;
+            z-index: 10;
+        }
+    }
+    .unit {
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+        text-align: center;
+        font-weight: bold;
+        color: white;
+        text-shadow: 1px 0 0 black, 0 -1px 0 black, 0 1px 0 black, -1px 0 0 black;
+        font-size: 16px;
+        border-radius: 30px;
+        border: 2px solid black;
+        display: block;
+        position: absolute;
+
+        &.first { z-index: 100; }
+        &.second { z-index: 200; }
+        &.third { z-index: 300; }
+        &.fourth { z-index: 400; }
+
+        &.first.one {
+            left: 8px;
+            top: 8px;
+        }
+
+        &.first.two {
+            left: -1px;
+            top: -1px;
+        }
+        &.second.two {
+            left: 17px;
+            top: 17px;
+        }
+
+        &.first.three {
+            left: -4px;
+            top: -4px;
+        }
+        &.second.three {
+            left: 20px;
+            top: 6px;
+        }
+        &.third.three {
+            left: 1px;
+            top: 20px;
+        }
+
+        &.first.four {
+            left: -4px;
+            top: -4px;
+        }
+        &.second.four {
+            left: 20px;
+            top: -4px;
+        }
+        &.third.four {
+            left: 20px;
+            top: 20px;
+        }
+        &.fourth.four {
+            left: -4px;
+            top: 20px;
         }
     }
 }
 
-label {
-    display: block;
+.action-buttons {
+    -webkit-transition: all 1s ease-in;
+    margin: 20px;
+    label {
+        line-height: 24px;
+        display: block;
+        float: left;
+        padding: 8px 20px;
+        border: 2px solid #444;
+        border-bottom-width: 5px;
+        color: white;
+        font-size: 20px;
+        background-image: url(/static/images/bumpy.png);
+        cursor: pointer;
+        background-color: #7AAF7A;
+        &:first-child {
+            border-left: 2px solid #444;
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+        }
+        &:last-child {
+            border-right: 2px solid #444;
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+        &:hover {
+            color: yellow;
+            border-bottom-width: 7px;
+            margin-top: -2px;
+        }
+        &:active, &.active {
+            background-color: #2BA02B;
+            border-color: black;
+        }
+        &:active {
+            border-bottom-width: 0px;
+            margin-top: 5px;
+        }
+        &.active {
+            border-bottom-width: 2px;
+            margin-top: 3px;
+        }
+        input[type="radio"] {
+            visibility: hidden;
+            display: none;
+        }
+        img {
+            vertical-align: middle;
+        }
+    }
 }
 
-button, input[type="submit"], input[type="button"] {
-    font-size: 120%;
+.arrow-controls {
+    width: 150px;
+    height: 106px;
+    font-size: 24px;
+    position: relative;
+    .button {
+        position: absolute;
+        padding: 8px 14px;
+    }
+    .go-left {
+        left: 0;
+        top: 24px;
+    }
+    .go-up {
+        left: 50px;
+        top: 0;
+    }
+    .go-down {
+        left: 50px;
+        bottom: 0;
+    }
+    .go-right {
+        right: 0;
+        top: 24px;
+    }
 }
 
-input.ng-invalid.ng-dirty {
-    background-color: #FA787E;
-}
 
-input.ng-valid.ng-dirty {
-    background-color: #78FA89;
-}
+//input.ng-invalid.ng-dirty {
+//    background-color: #FA787E;
+//}
+//
+//input.ng-valid.ng-dirty {
+//    background-color: #78FA89;
+//}
 
 .disable-select {
-    -webkit-user-select: none;  
-    -moz-user-select: none;    
-    -ms-user-select: none;      
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
+}
+
+.icon-editor {
+    background-color: white;
+    border: 1px solid black;
+    box-shadow: 2px 2px 2px black;
+    width: 528px;
+    height: 528px;
+    .icon-editor-row {
+        clear: both;
+        .icon-editor-pixel {
+            width: 20px;
+            height: 20px;
+            border: 1px dotted #888;
+            float: left;
+            cursor: crosshair;
+            &:active, &:focus {
+                cursor: crosshair;
+            }
+        }
+    }
+}
+.icon-editor-small {
+    background-color: white;
+    .icon-editor-row {
+        clear: both;
+        .icon-editor-pixel {
+            width: 20px;
+            height: 20px;
+            border: 1px solid white;
+            float: left;
+        }
+    }
+}
+
+
+.button-holder {
+    height: 50px;
+    width: 100%;
+}
+.call-to-action-button {
+    position: relative;
+    width: 220px;
+    text-align: center;
+    display: block;
+    padding: 8px 20px;
+    border: 2px solid black;
+    border-bottom-width: 5px;
+    border-radius: 4px;
+    color: white;
+    font-size: 20px;
+    background-image: url(/static/images/bumpy.png);
+    cursor: pointer;
+    background-color: #2BA02B;
+    text-decoration: none;
+    &:hover {
+        text-decoration: none;
+        color: yellow;
+        border-bottom-width: 7px;
+        top: -2px;
+    }
+    &:active {
+        border-bottom-width: 2px;
+        top: 5px;
+    }
+}
+
+.mbs {
+    margin-bottom: 10px;
+}
+.mbl {
+    margin-bottom: 20px;
+}
+.pbs {
+    padding-bottom: 10px;
+}
+.pbl {
+    padding-bottom: 20px;
 }

@@ -1,0 +1,12 @@
+<div class="img-editor disable-select">
+    <div class="img-editor-row"
+         ng-repeat="row in imgData"
+        >
+        <div class="img-editor-pixel"
+             ng-repeat="pixel in row"
+             ng-style="{backgroundColor: pixel.color}"
+             ng-click="setPixel(pixel, currentColor)"
+            >
+        </div>
+    </div>
+</div>

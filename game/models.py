@@ -1,5 +1,7 @@
 from django.db import models
-from account.models import *
+from django.db.models import Sum
+from django.contrib.auth.models import *
+from game.models import *
 
 # Unit colors and then background colors
 COLORS = [
@@ -61,55 +63,33 @@ WORLD_NAMES = [
     'Peru',
 ]
 
-class AccountManager(BaseUserManager):
-
-    def create_user(self, email, password=None, **extra_fields):
-        now = timezone.now()
-        email = AccountManager.normalize_email(email)
-        account = self.model(email=email,
-                          is_staff=False, is_active=True, is_superuser=False,
-                          last_login=now, date_joined=now, **extra_fields)
-
-        account.set_password(password)
-        account.save(using=self._db)
-        return account
-
-    def create_superuser(self, email, password, **extra_fields):
-        u = self.create_user(email, password, **extra_fields)
-        u.is_staff = True
-        u.is_active = True
-        u.is_superuser = True
-        u.save(using=self._db)
-        return u
 
 
-class Account(AbstractBaseUser):
+class Account(AbstractBaseUser, PermissionsMixin):
 
     username = models.CharField(max_length=255, unique=True)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(blank=True)
+    color = models.CharField(max_length=10, blank=True)
+    leader_name = models.CharField(max_length=255, blank=True)
+    people_name = models.CharField(max_length=255, blank=True)
+    total_units = models.IntegerField(default=30)
 
-    is_staff = models.BooleanField(default=False,
-        help_text='Designates whether the user can log into this admin site.')
-    is_active = models.BooleanField(default=True,
-        help_text='Designates whether this user should be treated as '
-                    'active. Unselect this instead of deleting accounts.')
-    is_superuser = models.BooleanField(default=False,
-        help_text='Designates that this user has all permissions without '
-                    'explicitly assigning them.')
+    is_staff = models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.')
+    is_active = models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.')
+
     date_joined = models.DateTimeField(default=timezone.now)
 
-    objects = AccountManager()
+    objects = UserManager()
 
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email']
-
+    REQUIRED_FIELDS = []
 
     class Meta:
         verbose_name = 'account'
         verbose_name_plural = 'accounts'
 
     def __unicode__(self):
-        return self.username + ' (' + self.email + ')'
+        return self.username
 
     def get_username(self):
         return self.username
@@ -124,40 +104,38 @@ class Account(AbstractBaseUser):
         send_mail(subject, message, from_email, [self.email])
 
 
-
-class Game(models.Model):
-    world_name = models.CharField(max_length=255)
-    started = models.BooleanField(default=False)
-
-    def __unicode__(self):
-        return self.world_name
-
-# We need to be able to view the whole world at a very high level view, sort of like google maps
-# But then be able to zoom in closely to a 48x48px square size grid
-# Currently we don't support zooming in and out otherwise
-# A sector is 100x100
-class Sector(models.Model):
-    
-
-
-
-# Represents an account that has joined a game and stores data for that player applicable only for this game
-class Player(models.Model):
-    account = models.ForeignKey(Account, related_name='players')
-    #game = models.ForeignKey(Game, related_name='players')
-    color = models.CharField(max_length=10)
-    leader_name = models.CharField(max_length=255)
-    people_name = models.CharField(max_length=255)
-
 class Square(models.Model):
     x = models.IntegerField()
     y = models.IntegerField()
-    owner = models.ForeignKey(Player, related_name='squares_owned')
+    owner = models.ForeignKey(Account, related_name='squares_owned', null=True, blank=True)
+
+    def __unicode__(self):
+        return '(%d, %d)' % (self.x, self.y)
+
+
+class UnitManager(models.Manager):
+    def total_placed_units(self, owner):
+        return self.model.objects.filter(owner=owner).aggregate(total=Sum('amount'))['total']
+        
+
+
+
 
 class Unit(models.Model):
-    player = models.ForeignKey(Player, related_name='units')
-    game = models.ForeignKey(Game, related_name='units')
-    x = models.IntegerField()
-    y = models.IntegerField()
+    owner = models.ForeignKey(Account, related_name='units')
+    square = models.ForeignKey(Square, related_name='units')
+    amount = models.IntegerField()
+    last_turn_amount = models.IntegerField(default=0)
+
+    objects = UnitManager()
+
+    def __unicode__(self):
+        return unicode(self.square)
 
 
+class Setting(models.Model):
+    name = models.CharField(max_length=255)
+    value = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return '%s: %s' % (self.name, self.value)

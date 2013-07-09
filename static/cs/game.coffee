@@ -2,18 +2,28 @@ gameApp = angular.module 'gameApp', []
 
 gameApp.config ($routeProvider) ->
 
-    $routeProvider.when '/create-account/',
-        templateUrl: 'partials/create-account.html'
-        controller: CreateAccountController
+    #$routeProvider.when '/create-account/',
+    #    templateUrl: 'partials/create-account.html'
+    #    controller: 'CreateAccountController'
 
-    $routeProvider.when '/new-game/',
-        templateUrl: 'partials/new-game.html'
-        controller: GameController
+    #$routeProvider.when '/new-game/',
+    #    templateUrl: 'partials/new-game.html'
+    #    controller: 'GameController'
 
-    $routeProvider.when '/play/',
+        #$routeProvider.when '/edit-icon/',
+        #    templateUrl: 'partials/edit-icon.html'
+        #    controller: EditIconController
+        
+
+    $routeProvider.when '/board/:centerX/:centerY/',
         templateUrl: 'partials/play.html'
-        controller: PlayController
+        controller: 'PlayController'
 
+    $routeProvider.otherwise
+        redirectTo: '/board/0/0/'
+
+gameApp.config ($httpProvider) ->
+    $httpProvider.defaults.headers.post['X-CSRFToken'] = $('input[name=csrfmiddlewaretoken]').val()
 
 gameApp.config ($interpolateProvider) ->
     $interpolateProvider.startSymbol('{[{').endSymbol('}]}')
@@ -26,41 +36,44 @@ gameApp.directive 'blur', ->
 
 #gameApp.directive('uniqueOnServer', [
 
-gameApp.directive "repeatPassword", ->
+#http://stackoverflow.com/questions/14012239/password-check-directive-in-angularjs
+gameApp.directive 'valueMatches', ->
     return {
         require: "ngModel"
-        link: (scope, elem, attrs, ctrl) ->
-            otherInput = elem.inheritedData("$formController")[attrs.repeatPassword]
+        scope:
+            valueMatches: '='
+        link: (scope, element, attrs, ctrl) ->
+            scope.$watch (->
+                combined = null
 
-            ctrl.$parsers.push (value) ->
-                if value == otherInput.$viewValue
-                    ctrl.$setValidity("repeat", true)
-                    return value
-                ctrl.$setValidity("repeat", false)
-
-            otherInput.$parsers.push (value) ->
-                ctrl.$setValidity("repeat", value == ctrl.$viewValue)
-                return value
+                if scope.valueMatches and ctrl.$viewValue
+                    combined = scope.valueMatches + '_' + ctrl.$viewValue
+                return combined
+            ), ((value) ->
+                # TODO something is still wrong in here, this just doesn't want to work
+                if (value)
+                    ctrl.$parsers.unshift (viewValue) ->
+                        origin = scope.valueMatches
+                        if origin != viewValue
+                            ctrl.$setValidity("valueMatches", false)
+                            return undefined
+                        else
+                            ctrl.$setValidity("valueMatches", true)
+                            return viewValue
+            )
     }
 
-gameApp.directive 'unique', ($http, $compile) ->
+
+gameApp.directive 'uniqueUsername', ($http, $compile) ->
     return {
         require: 'ngModel'
         restrict: 'A'
         link: (scope, element, attrs, ctrl) ->
-            spinner = angular.element('<img src="/static/images/ajax-loader.gif" />')
-            element.append(spinner)
-            $compile(spinner)(scope)
-            spinner.hide()
-
-            #using push() here to run it as the last parser, after we are sure that other validators were run
             ctrl.$parsers.push (viewValue) ->
-                spinner.show()
-                #spinner.spin()
                 if viewValue
-                    $http.get('/api/account/exists/' + attrs.unique + '/' + viewValue + '/')
+                    $http.get('/api/account/exists/username/' + viewValue + '/')
                         .success((data, status, headers, config) ->
-                            spinner.hide()
+                            console.log 'here'
                             if data.taken
                                 ctrl.$setValidity('unique', false)
                             else
@@ -69,10 +82,49 @@ gameApp.directive 'unique', ($http, $compile) ->
                         .error((data, status, headers, config) ->
                             alert('could not connect to server')
                         )
-                else
-                    spinner.hide()
                 return viewValue
     }
+
+
+
+
+
+
+
+
+    #gameApp.directive 'imgEditor', ($http, $compile) ->
+    #    return {
+    #        replace: true
+    #        restrict: 'E'
+    #        scope: {}
+    #        templateUrl: 'directives/img-editor.html'
+    #        link: (scope, element, attrs, ctrl) ->
+    #        controller: 
+    #    }
+    #
+    #
+    #EditIconController = ($scope) ->
+    #    $scope.iconData = []
+    #    for i in [0...24]
+    #        row = []
+    #        for j in [0...24]
+    #            row.push({
+    #                color: 'white'
+    #            })
+    #        $scope.iconData.push(row)
+    #
+    #    $scope.currentColor = 'black'
+    #
+    #    $scope.setPixel = (pixel, color) ->
+    #        pixel.color = color
+
+
+
+
+
+
+
+
 
 
 gameApp.factory 'Data', ->
@@ -122,28 +174,26 @@ gameApp.factory 'Data', ->
         ]
     }
 
+
+
 randomChoice = (collection) ->
     collection[Math.floor(Math.random()*collection.length)]
 
-CreateAccountController = ($scope) ->
+CreateAccountController = ($scope, $http, $location) ->
     $scope.newAccount =
         username: ''
-        email: ''
         password: ''
         password2: ''
-    $scope.passwordsMatch = null
 
-    $scope.canSubmit = ->
-        not ($scope.newAccount.username != '' and
-             $scope.newAccount.email != '' and
-             $scope.newAccount.password != '' and
-             $scope.newAccount.password == $scope.newAccount.password2)
-        
-    
-    #$scope.
-    #$scope.checkPasswords = ->
-    #    if $scope.form.password != $scope.form.password2
-    #        $scope.passwordError = 
+    $scope.submit = ->
+        $http.post('/api/account/', $scope.newAccount)
+            .success((data, status, headers, config) ->
+                $location.path('/play/')
+            )
+            .error((data, status, headers, config) ->
+                alert(data.error)
+            )
+
 
 
 
@@ -160,29 +210,109 @@ GameController = ($scope, Data) ->
         $scope.people_name = names[1]
 
 
-PlayController = ($scope) ->
-    $scope.rows = (({
-        color: 'white'
-        unit: ''
-        row: i
-        col: j
-    } for i in [0...28]) for j in [0...15])
 
-    $scope.currentColor = '1E77B4'
-    $scope.currentPlacement = 'unit'
+PlayController = ($scope, $http, $timeout, $routeParams) ->
+    $scope.getViewWidth = ->
+        Math.floor((angular.element(window).width() - (48+20)) / 48)
+    $scope.getViewHeight = ->
+        angular.element(window).height()
+        Math.floor((angular.element(window).height() - (220)) / 48)
 
-    $scope.modifySquare = (square) ->
-        if $scope.currentPlacement == 'unit'
-            if square.unit == 'unit'
-                square.unit = ''
-            else
-                square.unit = 'unit'
-                square.color = $scope.currentColor
+    $scope.fetchBoard = (centerX, centerY) ->
+        
+        $http.get('/api/sector/'+centerX+'/'+centerY+'/'+$scope.getViewWidth()+'/'+$scope.getViewHeight()+'/')
+            .success((data, status, headers, config) ->
+                $scope.data = data
+                $scope.centerX = parseInt(centerX)
+                $scope.centerY = parseInt(centerY)
+                for square in $scope.data.squares
+                    square.left = ((square.x-($scope.centerX-data.view_width /2)) * 48) + 'px'
+                    square.top =  ((square.y-($scope.centerY-data.view_height/2)) * 48) + 'px'
+                $scope.topCoords = [$scope.centerX-data.view_width/2...$scope.centerX+data.view_width/2]
+                $scope.sideCoords = [$scope.centerY-data.view_height/2...$scope.centerY+data.view_height/2]
+                $scope.data.board_width = ($scope.data.view_width * 48) + 'px'
+                $scope.data.board_height = ($scope.data.view_height * 48) + 'px'
+                $scope.unitsRemaining = data.remaining_counts
+            )
+            .error((data, status, headers, config) ->
+                alert(data.error)
+            )
+    $scope.fetchBoard($routeParams.centerX, $routeParams.centerY)
 
-        else if $scope.currentPlacement == 'background'
-            if square.color == $scope.currentColor
-                square.color = 'white'
-                square.unit = ''
-            else
-                square.color = $scope.currentColor
+    $scope.findSquare = (x, y) ->
+        for square in $scope.data.squares
+            if square.x == x and square.y == y
+                return square
+        throw 'Square not loaded'
+
+    $scope.modifyUnit = (square, action) ->
+        if action == 'initial'
+            # Set the 8 on the square clicked on
+            square8 = square
+            # Set 4 4s around the 8
+            squares4 = [
+                $scope.findSquare(square.x-1, square.y)
+                $scope.findSquare(square.x+1, square.y)
+                $scope.findSquare(square.x, square.y-1)
+                $scope.findSquare(square.x, square.y+1)
+            ]
+            squares2 = [
+                $scope.findSquare(square.x-1, square.y-1)
+                $scope.findSquare(square.x+1, square.y+1)
+                $scope.findSquare(square.x+1, square.y-1)
+                $scope.findSquare(square.x-1, square.y+1)
+            ]
+            squares1 = [
+                $scope.findSquare(square.x-1, square.y-1)
+                $scope.findSquare(square.x+1, square.y+1)
+                $scope.findSquare(square.x+1, square.y-1)
+                $scope.findSquare(square.x-1, square.y+1)
+            ]
+
+            $http.post('/api/square/' + square.x + '/' + square.y + '/' + action + '/', {
+                action: action
+            }).success((data, status, headers, config) ->
+            )
+            .error((data, status, headers, config) ->
+            )
+
+        else
+            $http.post('/api/square/' + square.x + '/' + square.y + '/' + action + '/', {
+                action: action
+            }).success((data, status, headers, config) ->
+                if action == 'place'
+                    # If there is already a unit of this color on this square, update the amount,
+                    # otherwise add the whole unit
+                    found = false
+                    for unit in square.units
+                        # TODO this needs to be fixed to use the account's color so the units will get a color
+                        if unit.color == data.unit.color
+                            unit.amount = data.unit.amount
+                            found = true
+                            break
+                    if not found
+                        square.units.push(data.unit)
+
+
+                else if action == 'remove'
+                    for i in [0...square.units.length]
+                        if square.units[i].color == $scope.currentColor
+                            if data.amount == 0
+                                square.units.splice(i, 1)
+                            else
+                                square.units[i].amount = data.amount
+                            break
+
+
+                for remaining in $scope.unitsRemaining
+                    if remaining.color == $scope.currentColor
+                        remaining.remaining = data.units_remaining
+                        break
+            )
+            .error((data, status, headers, config) ->
+                alert(data.error)
+            )
+
+    $scope.currentColor = 'blue'
+    $scope.unitAction = 'place'
 

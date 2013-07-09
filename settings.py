@@ -62,7 +62,7 @@ STATIC_ROOT = os.path.join(PROJECT_DIR, 'site-static')
 STATIC_URL = '/static/'
 
 
-AUTH_USER_MODEL = 'account.Account'
+AUTH_USER_MODEL = 'game.Account'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_URL = '/logout/'
@@ -120,6 +120,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.messages',
     'django.contrib.admin',
+    'widget_tweaks',
     'rest_framework',
     'util',
     'game',

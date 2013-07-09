@@ -26,16 +26,26 @@ class AccountSerializer(serializers.ModelSerializer):
     password = PasswordField()
     class Meta:
         model = Account
-        fields = ('id', 'username', 'email', 'password', 'date_joined', 'last_login')
+        fields = ('id', 'username', 'email', 'color', 'leader_name', 'people_name', 'total_units', 'password', 'date_joined', 'last_login')
 
-
-
-class PlayerSerializer(serializers.ModelSerializer):
-    name = serializers.Field(source='account.name')
+class UnitSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Player
+        model = Unit
 
-class GameSerializer(serializers.ModelSerializer):
-    players = PlayerSerializer(many=True, required=False)
+class SquareSerializer(serializers.ModelSerializer):
+    units = UnitSerializer()
     class Meta:
-        model = Game
+        model = Square
+
+
+
+
+#class PlayerSerializer(serializers.ModelSerializer):
+#    name = serializers.Field(source='account.name')
+#    class Meta:
+#        model = Player
+#
+#class GameSerializer(serializers.ModelSerializer):
+#    players = PlayerSerializer(many=True, required=False)
+#    class Meta:
+#        model = Game

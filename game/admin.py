@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django import forms
 from game.models import *
 
 class AccountCreationForm(forms.ModelForm):
@@ -7,7 +10,7 @@ class AccountCreationForm(forms.ModelForm):
 
     class Meta:
         model = Account
-        fields = ('username', 'email')
+        fields = ('username', 'email', 'color', 'leader_name', 'people_name')
 
     def clean_password2(self):
         # Check that the two password entries match
@@ -47,13 +50,15 @@ class AccountAdmin(UserAdmin):
     # The forms to add and change user instances
     form = AccountChangeForm
     add_form = AccountCreationForm
+    filter_horizontal = ()
+    list_filter = []
 
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
-    list_display = ('username', 'email', 'is_superuser', 'last_login', 'date_joined')
+    list_display = ('username', 'email', 'leader_name', 'people_name', 'is_superuser', 'last_login', 'date_joined')
     fieldsets = (
-        (None, {'fields': ('username', 'email', 'password')}),
+        (None, {'fields': ('username', 'email', 'color', 'leader_name', 'people_name', 'password')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
@@ -63,7 +68,8 @@ class AccountAdmin(UserAdmin):
             'fields': ('email', 'password1', 'password2')}
         ),
     )
-    search_fields = ('username', 'email')
-    ordering = ('email',)
+    search_fields = ('username', 'email', 'leader_name', 'people_name')
+    ordering = ('username', 'email')
 
 admin.site.register(Account, AccountAdmin)
+admin.site.register(Unit)

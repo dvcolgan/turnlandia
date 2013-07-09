@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Account Settings{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}js/colorpicker/css/colorpicker.css">
+{% endblock %}
+{% block foot %}
+<script src="{{ STATIC_URL }}js/colorpicker/colorpicker.min.js"></script>
+<script>
+    $(document).ready(function(){
+        var startingColor = $('#id_color').val() || '#ffffff';
+        debugger
+        $('#id_color').css('background-color', startingColor).css('color', startingColor);
+        $('#id_color').ColorPicker({
+            color: startingColor,
+            onShow: function (colpkr) {
+                $(colpkr).fadeIn(100);
+                return false;
+            },
+            onChange: function (hsb, hex, rgb) {
+                $('#id_color').val('#' + hex).css('background-color', '#' + hex).css('color', '#' + hex);
+            },
+            onHide: function (colpkr) {
+                $(colpkr).fadeOut(100);
+                return false;
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+
+{% block content %}
+<div class="panel">
+    <h1>Set up your Account</h1>
+
+    {{ form.non_field_errors }}
+    <form action="" method="POST">{% csrf_token %}
+        <table class="mbl">
+        <tbody>
+
+        <tr>
+            <td colspan="2">
+                <label>
+                    <strong>Email?</strong>
+                    <small><em>Optional, if you set it we'll email you a daily summary of the game.</em></small>
+                </label>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                {{ form.email }}
+            </td>
+            <td>
+                {{ form.email.errors }}
+            </td>
+        </tr>
+        </tbody>
+        </table>
+
+        <table class="mbl">
+        <tbody>
+        <tr>
+            <td colspan="2">
+                <label>
+                    <strong>Team Color?</strong>
+                    <small><em>What color should your game pieces be?</em></small>
+                </label>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                {{ form.color|add_class:"color-swatch"|attr:"placeholder: Click Me" }}
+            </td>
+            <td>
+                {{ form.color.errors }}
+            </td>
+        </tr>
+
+        </tbody>
+        </table>
+
+        <table class="mbl" ng-app>
+        <tbody>
+
+        <tr>
+            <td colspan="2">
+                <label>
+                    <strong>Your Title?</strong>
+                    <small><em>What do the people of your country call you?</em></small>
+                </label>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                {{ form.leader_name|attr:'ng-model:leaderName'|attr:'placeholder: Gandalf, Strong Bad, Larry King Live, etc' }}
+            </td>
+            <td>
+                {{ form.leader_name.errors }}
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2">
+                <label>
+                    <strong>Your People Name?</strong>
+                    <small><em>What do you call the people of you country?</em></small>
+                </label>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                {{ form.people_name|attr:'ng-model:peopleName'|attr:'placeholder: Hylians, Hobbits, Koopas, etc' }}
+            </td>
+            <td>
+                {{ form.people_name.errors }}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                {% verbatim %}
+                <span ng-show="leaderName">Hail {{ leaderName }}</span><span ng-show="leaderName && !peopleName">!</span><span ng-show="leaderName && peopleName">, leader of the {{ peopleName }}!</span>
+                {% endverbatim %}
+            </td>
+        </tr>
+
+        </tbody>
+        </table>
+        <div class="button-holder">
+            <input type="submit" class="call-to-action-button" value="Make it so!" />
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+
