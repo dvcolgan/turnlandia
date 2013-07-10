@@ -29,10 +29,12 @@ class AccountSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'email', 'color', 'leader_name', 'people_name', 'total_units', 'password', 'date_joined', 'last_login')
 
 class UnitSerializer(serializers.ModelSerializer):
+    owner_color = serializers.Field(source='owner.color')
     class Meta:
         model = Unit
 
 class SquareSerializer(serializers.ModelSerializer):
+    owner_color = serializers.Field(source='owner.color')
     units = UnitSerializer()
     class Meta:
         model = Square

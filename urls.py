@@ -32,8 +32,6 @@ urlpatterns = patterns('',
 
     url(r'', include('django.contrib.auth.urls')),
 
-    # If nothing else matches, redirect to the # url
-    url(r'^(?P<path>.*)/$', 'game.views.angular_redirector'),
 )
 
 if settings.DEBUG:

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load custom_tags %}
+{% block title %}Play that Game{% endblock %}
+
+{% block head %}
+<script>
+    window.accountID = {{ request.user.id }};
+    window.accountColor = '{{ request.user.color }}';
+</script>
+{% endblock %}
+
+{% block body_class %}game{% endblock %}
+
+{% block content %}
+<!--
+<div id="players-summary">
+    <ul data-bind="foreach: players">
+        <li data-bind="text: leader_name + ', leader of the ' + people_name"></li>
+    </ul>
+</div>
+-->
+
+<div class="action-buttons disable-select cf">
+    <!-- TODO something is causing these radio buttons to have a thin strip above and below the icon to not click the button
+    it seems to be that padding doesnt let you click on things
+        -->
+        <!--
+    <label data-bind="css: { active: unitAction() === 'initial' }"><input type="radio" data-bind="checked: unitAction" value="initial"><img src="{{ STATIC_URL }}images/place-icon.png" /> Initial Placement</label>
+    -->
+    <label data-bind="css: { active: unitAction() === 'place'   }">
+        <div class="unit" data-bind="
+                    style: {
+                        backgroundColor: accountColor,
+                        borderBottomWidth: ((unitsRemaining() + 3)/2) + 'px',
+                        marginTop: -((unitsRemaining() + 3)/2) + 'px'
+                    },
+                    text: unitsRemaining"></div>
+        <input type="radio" data-bind="checked: unitAction" value="place"  >
+        <img src="{{ STATIC_URL }}images/place-icon.png" /> Place Unit
+    </label>
+    <label data-bind="css: { active: unitAction() === 'remove'  }"><input type="radio" data-bind="checked: unitAction" value="remove" ><img src="{{ STATIC_URL }}images/remove-icon.png"/> Remove Unit</label>
+    <label data-bind="css: { active: unitAction() === 'settle'  }"><input type="radio" data-bind="checked: unitAction" value="settle" ><img src="{{ STATIC_URL }}images/settle-icon.png"/> Settle Units</label>
+    <!--
+    TODO implement me
+    <label data-bind="css: { active: unitAction() === 'give'    }"><input type="radio" data-bind="checked: unitAction" value="give"   ><img src="{{ STATIC_URL }}images/give-icon.png"  /> Give Units</label>
+    -->
+    <label data-bind="css: { active: unitAction() === 'wall'    }"><input type="radio" data-bind="checked: unitAction" value="wall"   ><img src="{{ STATIC_URL }}images/wall-icon.png"  /> Build Wall</label>
+</div>
+
+<!--
+<div class="arrow-controls">
+    <a class="go-left "><i class="foundicon-left-arrow"></i></a>
+    <a class="go-up   "><i class="foundicon-up-arrow"></i></a>
+    <a class="go-down "><i class="foundicon-down-arrow"></i></a>
+    <a class="go-right"><i class="foundicon-right-arrow"></i></a>
+</div>
+-->
+
+<div id="top-coords" class="cf" data-bind="foreach: topCoords">
+    <div class="top-coord" data-bind="text: $data"></div>
+</div>
+<div id="side-coords" class="cf" data-bind="foreach: sideCoords">
+    <div class="side-coord" data-bind="text: $data"></div>
+</div>
+
+<div id="board">
+    <!-- ko foreach: squares -->
+        <div class="grid-square disable-select" data-bind="
+             click: $root.modifyUnit,
+             style: {
+                 borderColor: $root.currentColor,
+                 backgroundColor: ownerColor,
+                 top: top,
+                 left: left,
+                 cursor: $root.currentCursor()
+             }">
+            <!-- ko foreach: units -->
+                <div class="unit" 
+                    data-bind="css: $root.getUnitClass($index, $parent),
+                    style: {
+                        backgroundColor: ownerColor,
+                        borderBottomWidth: ((amount() + 3)/2) + 'px',
+                        marginTop: -((amount() + 3)/2) + 'px'
+                    },
+                    text: amount">
+                </div>
+            <!-- /ko -->
+            <div class="wall" data-bind="
+                visible: wallHealth() > 0,
+                text: wallHealth">
+            </div>
+            <div class="resource" data-bind="
+                visible: resourceAmount() > 0,
+                text: resourceAmount">
+            </div>
+        </div>
+    <!-- /ko -->
+</div>
+{% endblock %}

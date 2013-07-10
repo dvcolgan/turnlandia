@@ -108,6 +108,8 @@ class Square(models.Model):
     x = models.IntegerField()
     y = models.IntegerField()
     owner = models.ForeignKey(Account, related_name='squares_owned', null=True, blank=True)
+    resource_amount = models.IntegerField(default=0)
+    wall_health = models.IntegerField(default=0)
 
     def __unicode__(self):
         return '(%d, %d)' % (self.x, self.y)
@@ -115,7 +117,11 @@ class Square(models.Model):
 
 class UnitManager(models.Manager):
     def total_placed_units(self, owner):
-        return self.model.objects.filter(owner=owner).aggregate(total=Sum('amount'))['total']
+        total = self.model.objects.filter(owner=owner).aggregate(total=Sum('amount'))['total']
+        if total == None:
+            return 0
+        else:
+            return total
         
 
 
@@ -133,9 +139,17 @@ class Unit(models.Model):
         return unicode(self.square)
 
 
+class SettingManager(models.Manager):
+    def get_current_day(self):
+        return Setting.objects.get(name='Current Day').value
+        
+
+
 class Setting(models.Model):
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
+
+    objects = SettingManager()
 
     def __unicode__(self):
         return '%s: %s' % (self.name, self.value)

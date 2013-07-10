@@ -6,10 +6,16 @@
 {% block content %}
 <div class="panel">
     <h1>Log Thou In</h1>
+
+    {% if not form.non_field_errors %}
     <p>You approach a tightly locked gatehouse.  You knock firmly on the door.
     The peephole flings open, and an old hag appears.</p>
+    {% else %}
+    <p>Unimpressed, she angrily bellows out:</p>
+    <p class="errorlist">I don't know anyone with that name or that password!</p>
+    <p>Once again,</p>
+    {% endif %}
 
-    {{ form.non_field_errors }}
     <form action="" method="POST">{% csrf_token %}
         <table class="mbl">
         <tbody>
@@ -61,7 +67,7 @@
         </tbody>
         </table>
         <div class="button-holder">
-            <input type="submit" class="call-to-action-button" value="Log It On In!" />
+            <input type="submit" class="call-to-action-button" value="Let me in!" />
         </div>
     </form>
 </div>

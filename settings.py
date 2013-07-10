@@ -64,7 +64,7 @@ STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = 'game.Account'
 LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/game/'
 LOGOUT_URL = '/logout/'
 
 STATICFILES_DIRS = (

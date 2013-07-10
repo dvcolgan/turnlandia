@@ -6,30 +6,8 @@
 {% block head %}
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}js/colorpicker/css/colorpicker.css">
 {% endblock %}
-{% block foot %}
-<script src="{{ STATIC_URL }}js/colorpicker/colorpicker.min.js"></script>
-<script>
-    $(document).ready(function(){
-        var startingColor = $('#id_color').val() || '#ffffff';
-        debugger
-        $('#id_color').css('background-color', startingColor).css('color', startingColor);
-        $('#id_color').ColorPicker({
-            color: startingColor,
-            onShow: function (colpkr) {
-                $(colpkr).fadeIn(100);
-                return false;
-            },
-            onChange: function (hsb, hex, rgb) {
-                $('#id_color').val('#' + hex).css('background-color', '#' + hex).css('color', '#' + hex);
-            },
-            onHide: function (colpkr) {
-                $(colpkr).fadeOut(100);
-                return false;
-            }
-        });
-    });
-</script>
-{% endblock %}
+
+{% block body_class %}settings{% endblock %}
 
 
 {% block content %}
@@ -82,7 +60,7 @@
         </tbody>
         </table>
 
-        <table class="mbl" ng-app>
+        <table class="mbl">
         <tbody>
 
         <tr>
@@ -95,7 +73,7 @@
         </tr>
         <tr>
             <td>
-                {{ form.leader_name|attr:'ng-model:leaderName'|attr:'placeholder: Gandalf, Strong Bad, Larry King Live, etc' }}
+                {{ form.leader_name|attr:'placeholder: Gandalf, Strong Bad, Larry King Live, etc' }}
             </td>
             <td>
                 {{ form.leader_name.errors }}
@@ -112,7 +90,7 @@
         </tr>
         <tr>
             <td>
-                {{ form.people_name|attr:'ng-model:peopleName'|attr:'placeholder: Hylians, Hobbits, Koopas, etc' }}
+                {{ form.people_name|attr:'placeholder: Hylians, Hobbits, Koopas, etc' }}
             </td>
             <td>
                 {{ form.people_name.errors }}
@@ -120,9 +98,7 @@
         </tr>
         <tr>
             <td colspan="2">
-                {% verbatim %}
-                <span ng-show="leaderName">Hail {{ leaderName }}</span><span ng-show="leaderName && !peopleName">!</span><span ng-show="leaderName && peopleName">, leader of the {{ peopleName }}!</span>
-                {% endverbatim %}
+                Hail <span data-bind="text: leaderName"></span><span data-bind="visible: !leaderName()">!</span><span data-bind="visible: leaderName() && peopleName()">, leader of the <span data-bind="text: peopleName"></span>!</span>
             </td>
         </tr>
 

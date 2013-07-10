@@ -26,25 +26,14 @@ import ipdb
 import datetime
 
 def home(request):
+    day_counter = Setting.objects.get_current_day()
     player_count = Account.objects.count()
     return render(request, 'home.html', locals())
 
-@login_required
-def game(request):
-    # The base template if used by itself has an ng-view in it
-    return render(request, 'base.html', locals())
-
-@login_required
-def partials(request, folder, template_file):
-    colors = COLORS
-    return render(request, folder + '/' + template_file, locals())
-
-@login_required
-def angular_redirector(request, path):
-    return HttpResponseRedirect('/game/#/' + path)
-
 
 def create_account(request):
+    day_counter = Setting.objects.get_current_day()
+    player_count = Account.objects.count()
     if request.method == 'POST':
         form = CreateAccountForm(request.POST)
         if form.is_valid():
@@ -69,6 +58,8 @@ def create_account(request):
 
 @login_required
 def settings(request):
+    day_counter = Setting.objects.get_current_day()
+    player_count = Account.objects.count()
     if request.method == 'POST':
         form = SettingsForm(request.POST, instance=request.user)
         if form.is_valid():
@@ -78,6 +69,12 @@ def settings(request):
         form = SettingsForm(instance=request.user)
 
     return render(request, 'settings.html', locals())
+
+@login_required
+def game(request):
+    day_counter = Setting.objects.get_current_day()
+    player_count = Account.objects.count()
+    return render(request, 'game.html', locals())
 
 class AccountAPIView(RetrieveAPIView, ListAPIView):
     permission_classes = (IsAuthenticated,)
@@ -101,20 +98,22 @@ def api_email_existence(request, email):
 def api_sector(request, x, y, view_width, view_height):
     try:
         x = int(x)
-        y = int(x)
+        y = int(y)
         view_width = int(view_width)
         view_height = int(view_height)
     except:
         raise Http404
+
+    # TODO a lot of this function can be computed on the turn change and then cached, do this if we get a bunch of traffic
 
     if x > 10000 or x < -10000 or y > 10000 or y < -10000:
         return Response({
             'error': 'I really don\'t feel like fetching the map that far out.'
         }, status=status.HTTP_400_BAD_REQUEST)
 
-    if view_width > 50 or view_height > 40:
+    if view_width > 100 or view_height > 70:
         return Response({
-            'error': 'Yo dog, you can\'t seriously have a screen that big.'
+            'error': 'Yo dog, you can\'t seriously have a screen that big.  If you do, let the admin know though and I\'ll increase the max screen size.'
         }, status=status.HTTP_400_BAD_REQUEST)
 
     if view_width < 1 or view_height < 1:
@@ -122,10 +121,12 @@ def api_sector(request, x, y, view_width, view_height):
             'error': 'What is this, a quantum computer?  Your screen size must be expressed in positive numbers.'
         }, status=status.HTTP_400_BAD_REQUEST)
 
-    upper_x = x+(view_width/2)-1
-    lower_x = x-(view_width/2)
-    upper_y = y+(view_height/2)-1
-    lower_y = y-(view_height/2)
+
+    # derived by black magic on a note card
+    upper_x = int(math.floor(view_width/2.0-0.25))+x
+    lower_x = int(math.ceil(-view_width/2.0-0.25))+x
+    upper_y = int(math.floor(view_height/2.0-0.25))+y
+    lower_y = int(math.ceil(-view_height/2.0-0.25))+y
 
     squares = (Square.objects.filter(x__lte=upper_x)
                              .filter(x__gte=lower_x)
@@ -144,8 +145,8 @@ def api_sector(request, x, y, view_width, view_height):
     if squares.count() != view_width * view_height:
         # Nobody has gone out here yet, create the squares that don't exist
         batch = []
-        for this_y in range(lower_y, upper_y):
-            for this_x in range(lower_x, upper_x):
+        for this_y in range(lower_y, upper_y+1):
+            for this_x in range(lower_x, upper_x+1):
                 if get_object_or_None(Square, x=this_x, y=this_y) == None:
                     batch.append(Square(x=this_x, y=this_y))
         Square.objects.bulk_create(batch)
@@ -168,13 +169,10 @@ def api_sector(request, x, y, view_width, view_height):
     squares = squares.order_by('y', 'x')
 
     return Response({
-        'x': x,
-        'y': y,
         # TODO This will get more and more ineffecient as the number of players increases, not actually players visible, just all players
         'players_visible': AccountSerializer(Account.objects.all(), many=True).data,
-        'units_remaining': request.user.total_units - Unit.objects.total_placed_units(request.user),
-        'view_width': view_width,
-        'view_height': view_height,
+        'total_units': request.user.total_units,
+        'units_placed': Unit.objects.total_placed_units(request.user),
         'squares': SquareSerializer(squares, many=True).data,
     })
     
@@ -204,11 +202,7 @@ def api_square_unit_action(request, x, y, action):
         unit.save()
         serializer = UnitSerializer(unit)
 
-        return Response({
-            #'units_remaining': request.user.total_units - Unit.objects.count(),
-            'units_remaining': request.user.total_units - Unit.objects.total_placed_units(request.user),
-            'unit': serializer.data,
-        })
+        return Response({})
 
     elif action == 'remove':
         unit = get_object_or_None(Unit, square=square, owner=request.user)
@@ -220,61 +214,76 @@ def api_square_unit_action(request, x, y, action):
             else:
                 unit.save()
                 amount = unit.amount
-            return Response({
-                'amount': amount,
-                'units_remaining': request.user.total_units - Unit.objects.total_placed_units(request.user),
-            })
         else:
-            return Response({
-                'error': 'Unit does not exist there.'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            amount = 0
+        return Response({})
+
+    elif action == 'settle':
+        unit = get_object_or_None(Unit, square=square, owner=request.user)
+        if unit:
+            square.resource_amount += unit.amount * 4
+            square.save()
+            unit.delete()
+
+        return Response({})
+
+    elif action == 'wall':
+        unit = get_object_or_None(Unit, square=square, owner=request.user)
+        if unit:
+            square.wall_health += unit.amount * 2
+            square.save()
+            unit.delete()
+
+        return Response({})
+
 
     elif action == 'initial':
+        if request.user.total_units == 0 and Square.objects.filter(owner=request.user).count() == 0:
 
-        try:
-            # This needs to be made atomic, if it fails in the middle, it could be problematic
-            placement = {
-                8: [
-                    Square.objects.get(x=x, y=y),
-                ],
-                4: [
-                    Square.objects.get(x=x-1, y=y),
-                    Square.objects.get(x=x+1, y=y),
-                    Square.objects.get(x=x,   y=y-1),
-                    Square.objects.get(x=x,   y=y+1),
-                ],
-                2: [
-                    Square.objects.get(x=x-1, y=y-1),
-                    Square.objects.get(x=x+1, y=y+1),
-                    Square.objects.get(x=x+1, y=y-1),
-                    Square.objects.get(x=x-1, y=y+1),
-                ],
-                1: [
-                    Square.objects.get(x=x-1, y=y-1),
-                    Square.objects.get(x=x+1, y=y+1),
-                    Square.objects.get(x=x+1, y=y-1),
-                    Square.objects.get(x=x-1, y=y+1),
-                ],
-            }
-            for count, squares in placement.iteritems():
-                for square in squares:
-                    if square.units.count() != 0:
-                        return Response({'error': 'There is already a unit there.'}, status=status.HTTP_400_BAD_REQUEST)
-            # If there are no problems, create the units
-            for count, squares in placement.iteritems():
-                for square in squares:
-                    Unit.objects.create(
-                        owner=request.user,
-                        square=square,
-                        amount=count,
-                    )
-            return Response({
-                'units_remaining': 0,
-                'units': Unit.objects.filter(owner=request.user),
-            })
-                        
-        except:
-            return Response({'error': 'Squares do not exist.'}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                # This needs to be made atomic, if it fails in the middle, it could be problematic
+                placement = {
+                    8: [
+                        Square.objects.get(x=x, y=y),
+                    ],
+                    4: [
+                        Square.objects.get(x=x-1, y=y),
+                        Square.objects.get(x=x+1, y=y),
+                        Square.objects.get(x=x,   y=y-1),
+                        Square.objects.get(x=x,   y=y+1),
+                    ],
+                    2: [
+                        Square.objects.get(x=x-1, y=y-1),
+                        Square.objects.get(x=x+1, y=y+1),
+                        Square.objects.get(x=x+1, y=y-1),
+                        Square.objects.get(x=x-1, y=y+1),
+                    ],
+                    1: [
+                        Square.objects.get(x=x,   y=y-2),
+                        Square.objects.get(x=x,   y=y+2),
+                        Square.objects.get(x=x+2, y=y),
+                        Square.objects.get(x=x-2, y=y),
+                    ],
+                }
+                for count, squares in placement.iteritems():
+                    for square in squares:
+                        if square.units.count() != 0:
+                            return Response({'error': 'There is already a unit there.'}, status=status.HTTP_400_BAD_REQUEST)
+                # If there are no problems, create the units
+                for count, squares in placement.iteritems():
+                    for square in squares:
+                        Unit.objects.create(
+                            owner=request.user,
+                            square=square,
+                            amount=count,
+                        )
+                        print 'creating unit'
+                return Response({})
+                            
+            except:
+                return Response({'error': 'Squares do not exist.'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': 'You can only do an initial placement if you have no units.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
     else:

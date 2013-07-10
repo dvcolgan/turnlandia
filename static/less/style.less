@@ -11,8 +11,12 @@ body {
     background-image: url(/static/images/tiny_grid.png);
 }
 
+@grid-size: 42px;
+@unit-size: 20px;
+@wall-size: 36px;
+
 h1,h2,h3,h4 {
-    font-family: 'Patua One', cursive;
+    font-family: 'Patua One', sans-serif;
     text-shadow: 1px 1px 2px black;
     margin-bottom: 20px;
 }
@@ -20,6 +24,10 @@ h1 { font-size: 48px; line-height: 48px; }
 h2 { font-size: 36px; line-height: 36px; }
 h3 { font-size: 24px; line-height: 24px; }
 h4 { font-size: 18px; line-height: 18px; }
+
+ul {
+    margin-bottom: 12px;
+}
 
 p {
     margin-bottom: 12px;
@@ -56,6 +64,15 @@ strong {
     border: 2px solid #333;
     position: relative;
 }
+.form-error, .errorlist {
+    color: red;
+}
+.pull-left {
+    float: left;
+}
+.pull-right {
+    float: right;
+}
 form {
     input[type="text"], input[type="password"] {
         border: 2px solid #444;
@@ -78,9 +95,6 @@ form {
             padding-bottom: 10px;
         }
     }
-    .form-error, .errorlist {
-        color: red;
-    }
     //input.ng-invalid.ng-dirty {
     //    background-color: #FA787E;
     //}
@@ -90,11 +104,46 @@ form {
     //}
 }
 
+#header-bar {
+    background-color: #ccc;
+    height: 20px;
+    width: 100%;
+    color: black;
+    border-bottom: 1px solid #888;
+    .top-menu.pull-left li {
+        border-right: 2px solid #888;
+    }
+    .top-menu.pull-right li {
+        border-left: 2px solid #888;
+    }
+    .top-menu {
+        margin-bottom: 0;
+        li {
+            float: left;
+            display: block;
+            height: 20px;
+            a {
+                text-decoration: none;
+                padding: 0 10px;
+                line-height: 20px;
+                height: 20px;
+                display: block;
+                color: black;
+                &:hover {
+                    text-decoration: underline;
+                    background-color: #444;
+                    color: white;
+                }
+            }
+        }
+    }
+}
+
 #top-coords {
-    margin-left: 48px;
+    margin-left: @grid-size;
     .top-coord {
-        width: 48px;
-        height: 20px;
+        width: @grid-size;
+        height: @grid-size/2;
         text-align: center;
         float: left;
     }
@@ -103,25 +152,23 @@ form {
 #side-coords {
     float: left;
     .side-coord {
-        width: 48px;
-        height: 48px;
-        line-height: 48px;
+        width: @grid-size;
+        height: @grid-size;
+        line-height: @grid-size;
         text-align: center;
     }
 }
 
 #board {
-    margin-left: 48px;
+    margin-left: @grid-size;
     position: relative;
     border: 2px solid #444;
     .grid-square {
-        background-image: url(/static/images/grid.png);
-        width: 48px;
-        height: 48px;
+        background-image: url(/static/images/grid-small.png);
+        width: @grid-size;
+        height: @grid-size;
         position: absolute;
         &:hover {
-            width: 48px;
-            height: 48px;
             border: 6px solid red;
             margin-left: -6px;
             margin-top: -6px;
@@ -129,17 +176,43 @@ form {
             z-index: 10;
         }
     }
+    .resource {
+        background-image: url(/static/images/resource-tile.png);
+        width: @grid-size;
+        height: @grid-size;
+        line-height: @grid-size;
+        color: white;
+        text-shadow: 1px 0 0 black, 0 -1px 0 black, 0 1px 0 black, -1px 0 0 black;
+        text-align: center;
+        font-weight: bold;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+    .wall {
+        background-image: url(/static/images/wall-tile.png);
+        width: @grid-size;
+        height: @grid-size;
+        line-height: @grid-size;
+        text-align: center;
+        color: white;
+        text-shadow: 1px 0 0 black, 0 -1px 0 black, 0 1px 0 black, -1px 0 0 black;
+        font-weight: bold;
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
     .unit {
-        width: 32px;
-        height: 32px;
-        line-height: 32px;
+        width: @unit-size;
+        height: @unit-size;
+        line-height: @unit-size;
         text-align: center;
         font-weight: bold;
         color: white;
         text-shadow: 1px 0 0 black, 0 -1px 0 black, 0 1px 0 black, -1px 0 0 black;
         font-size: 16px;
-        border-radius: 30px;
-        border: 2px solid black;
+        border-radius: @unit-size;
+        border: 1px solid black;
         display: block;
         position: absolute;
 
@@ -149,59 +222,59 @@ form {
         &.fourth { z-index: 400; }
 
         &.first.one {
-            left: 8px;
-            top: 8px;
+            left: 11px;
+            top: 11px;
         }
 
         &.first.two {
-            left: -1px;
-            top: -1px;
+            left: 0px;
+            top: 0px;
         }
         &.second.two {
-            left: 17px;
-            top: 17px;
+            right: 0px;
+            bottom: 0px;
         }
 
         &.first.three {
-            left: -4px;
-            top: -4px;
+            left: 0px;
+            top: 0px;
         }
         &.second.three {
-            left: 20px;
-            top: 6px;
+            right: 0px;
+            top: 8px;
         }
         &.third.three {
-            left: 1px;
-            top: 20px;
+            left: 4px;
+            bottom: 0px;
         }
 
         &.first.four {
-            left: -4px;
-            top: -4px;
+            left: 2px;
+            top: -2px;
         }
         &.second.four {
-            left: 20px;
-            top: -4px;
+            right: -2px;
+            top: 2px;
         }
         &.third.four {
-            left: 20px;
-            top: 20px;
+            right: 2px;
+            bottom: -2px;
         }
         &.fourth.four {
-            left: -4px;
-            top: 20px;
+            left: -2px;
+            bottom: 2px;
         }
     }
 }
 
 .action-buttons {
-    -webkit-transition: all 1s ease-in;
-    margin: 20px;
+    margin: 10px;
+    display: block;
     label {
         line-height: 24px;
         display: block;
         float: left;
-        padding: 8px 20px;
+        padding: 4px 6px;
         border: 2px solid #444;
         border-bottom-width: 5px;
         color: white;
@@ -209,6 +282,21 @@ form {
         background-image: url(/static/images/bumpy.png);
         cursor: pointer;
         background-color: #7AAF7A;
+        .unit {
+            width: @unit-size;
+            height: @unit-size;
+            line-height: @unit-size;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 0 0 black, 0 -1px 0 black, 0 1px 0 black, -1px 0 0 black;
+            font-size: 16px;
+            border-radius: @unit-size;
+            border: 1px solid black;
+            display: block;
+            float: right;
+            margin-left: 8px;
+        }
         &:first-child {
             border-left: 2px solid #444;
             border-top-left-radius: 4px;
@@ -367,4 +455,8 @@ form {
 }
 .pbl {
     padding-bottom: 20px;
+}
+
+#players-summary {
+    float: right;
 }
