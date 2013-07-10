@@ -65,7 +65,8 @@ GAME = {
       vm.accountColor = window.accountColor;
       vm.players = ko.observableArray([]);
       vm.currentColor = ko.observable('blue');
-      vm.unitAction = ko.observable('initial');
+      vm.totalUnits = ko.observable(0);
+      vm.unitAction = ko.observable('place');
       vm.unitsRemaining = ko.observable(0);
       vm.currentCursor = ko.computed = function() {
         switch (vm.unitAction()) {
@@ -100,7 +101,7 @@ GAME = {
         _ref = vm.squares();
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           square = _ref[_i];
-          if (square.x === x && square.y === y) {
+          if (square.x() === x && square.y() === y) {
             return square;
           }
         }
@@ -143,7 +144,7 @@ GAME = {
       };
       vm.modifyUnit = function(square, event) {
         var count, found, i, placement, squares, unit, _i, _j, _k, _l, _len, _len1, _m, _ref, _ref1, _ref2, _ref3, _results, _results1, _results2;
-        $.ajax('/api/square/' + square.x + '/' + square.y + '/' + vm.unitAction() + '/', {
+        $.ajax('/api/square/' + square.x() + '/' + square.y() + '/' + vm.unitAction() + '/', {
           contentType: "application/json",
           data: ko.toJSON(square),
           type: 'POST',
@@ -156,9 +157,9 @@ GAME = {
         if (vm.unitAction() === 'initial') {
           placement = {
             8: [square],
-            4: [vm.findSquare(square.x - 1, square.y), vm.findSquare(square.x + 1, square.y), vm.findSquare(square.x, square.y - 1), vm.findSquare(square.x, square.y + 1)],
-            2: [vm.findSquare(square.x - 1, square.y - 1), vm.findSquare(square.x + 1, square.y + 1), vm.findSquare(square.x + 1, square.y - 1), vm.findSquare(square.x - 1, square.y + 1)],
-            1: [vm.findSquare(square.x - 2, square.y), vm.findSquare(square.x + 2, square.y), vm.findSquare(square.x, square.y - 2), vm.findSquare(square.x, square.y + 2)]
+            4: [vm.findSquare(square.x() - 1, square.y()), vm.findSquare(square.x() + 1, square.y()), vm.findSquare(square.x(), square.y() - 1), vm.findSquare(square.x(), square.y() + 1)],
+            2: [vm.findSquare(square.x() - 1, square.y() - 1), vm.findSquare(square.x() + 1, square.y() + 1), vm.findSquare(square.x() + 1, square.y() - 1), vm.findSquare(square.x() - 1, square.y() + 1)],
+            1: [vm.findSquare(square.x() - 2, square.y()), vm.findSquare(square.x() + 2, square.y()), vm.findSquare(square.x(), square.y() - 2), vm.findSquare(square.x(), square.y() + 2)]
           };
           for (count in placement) {
             squares = placement[count];
@@ -168,14 +169,15 @@ GAME = {
                 square.units.push({
                   owner: vm.accountID,
                   ownerColor: vm.accountColor,
-                  square: square.id,
+                  square: square.id(),
                   amount: ko.observable(parseInt(count)),
                   last_turn_amount: 0
                 });
               }
             }
           }
-          return vm.unitsRemaining(0);
+          vm.unitsRemaining(0);
+          return vm.unitAction('place');
         } else if (vm.unitAction() === 'place') {
           if (vm.unitsRemaining() > 0) {
             found = false;
@@ -190,10 +192,11 @@ GAME = {
               }
             }
             if (!found) {
+              vm.unitsRemaining(vm.unitsRemaining() - 1);
               return square.units.push({
                 owner: vm.accountID,
                 ownerColor: vm.accountColor,
-                square: square.id,
+                square: square.id(),
                 amount: ko.observable(1),
                 last_turn_amount: 0
               });
@@ -267,6 +270,7 @@ GAME = {
                 });
               }
               vmSquare = vmSquares[i];
+              vmSquare.id(square.id);
               vmSquare.left(((square.x + xOffset) * GRID_SIZE) + 'px');
               vmSquare.top(((square.y + yOffset) * GRID_SIZE) + 'px');
               vmSquare.units(units);
@@ -279,10 +283,16 @@ GAME = {
               console.log('updating square');
             }
             vm.unitsRemaining(data.total_units - data.units_placed);
+            vm.totalUnits(data.total_units);
             _ref2 = data.players_visible;
             for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
               player = _ref2[_k];
               vm.players.push(player);
+            }
+            if (data.is_initial) {
+              vm.unitAction('initial');
+            } else {
+              vm.unitAction('place');
             }
             return $('.spinner').hide();
           } else {
@@ -298,6 +308,7 @@ GAME = {
             top: ko.observable(0),
             units: ko.observableArray([]),
             owner: ko.observable(0),
+            id: ko.observable(0),
             ownerColor: ko.observable(''),
             x: ko.observable(0),
             y: ko.observable(0),

@@ -72,7 +72,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
     color = models.CharField(max_length=10, blank=True)
     leader_name = models.CharField(max_length=255, blank=True)
     people_name = models.CharField(max_length=255, blank=True)
-    total_units = models.IntegerField(default=30)
+    total_units = models.IntegerField(default=0)
 
     is_staff = models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.')
     is_active = models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.')

@@ -96,7 +96,10 @@ GAME =
             vm.accountColor = window.accountColor
             vm.players = ko.observableArray([])
             vm.currentColor = ko.observable('blue')
-            vm.unitAction = ko.observable('initial')
+            vm.totalUnits = ko.observable(0)
+
+            vm.unitAction = ko.observable('place')
+
             vm.unitsRemaining = ko.observable(0)
             vm.currentCursor = ko.computed = ->
                 switch vm.unitAction()
@@ -123,7 +126,7 @@ GAME =
 
             vm.findSquare = (x, y) ->
                 for square in vm.squares()
-                    if square.x == x and square.y == y
+                    if square.x() == x and square.y() == y
                         return square
                 return null
 
@@ -163,7 +166,8 @@ GAME =
                 # TODO - perhaps at some point if there are too many requests going on,
                 # group all the actions of the last say 10 seconds together and push them all into one request
                 # the payload is nothing more than the x, y, and action
-                $.ajax '/api/square/' + square.x + '/' + square.y + '/' + vm.unitAction() + '/',
+
+                $.ajax '/api/square/' + square.x() + '/' + square.y() + '/' + vm.unitAction() + '/',
                     contentType: "application/json"
                     data: ko.toJSON(square)
                     type: 'POST'
@@ -177,22 +181,22 @@ GAME =
                     placement =
                         8: [square]
                         4: [
-                            vm.findSquare(square.x-1, square.y)
-                            vm.findSquare(square.x+1, square.y)
-                            vm.findSquare(square.x, square.y-1)
-                            vm.findSquare(square.x, square.y+1)
+                            vm.findSquare(square.x()-1, square.y())
+                            vm.findSquare(square.x()+1, square.y())
+                            vm.findSquare(square.x(), square.y()-1)
+                            vm.findSquare(square.x(), square.y()+1)
                         ]
                         2: [
-                            vm.findSquare(square.x-1, square.y-1)
-                            vm.findSquare(square.x+1, square.y+1)
-                            vm.findSquare(square.x+1, square.y-1)
-                            vm.findSquare(square.x-1, square.y+1)
+                            vm.findSquare(square.x()-1, square.y()-1)
+                            vm.findSquare(square.x()+1, square.y()+1)
+                            vm.findSquare(square.x()+1, square.y()-1)
+                            vm.findSquare(square.x()-1, square.y()+1)
                         ]
                         1: [
-                            vm.findSquare(square.x-2, square.y)
-                            vm.findSquare(square.x+2, square.y)
-                            vm.findSquare(square.x, square.y-2)
-                            vm.findSquare(square.x, square.y+2)
+                            vm.findSquare(square.x()-2, square.y())
+                            vm.findSquare(square.x()+2, square.y())
+                            vm.findSquare(square.x(), square.y()-2)
+                            vm.findSquare(square.x(), square.y()+2)
                         ]
 
                     for count, squares of placement
@@ -201,10 +205,11 @@ GAME =
                                 square.units.push
                                     owner: vm.accountID
                                     ownerColor: vm.accountColor
-                                    square: square.id
+                                    square: square.id()
                                     amount: ko.observable(parseInt(count))
                                     last_turn_amount: 0
                     vm.unitsRemaining(0)
+                    vm.unitAction('place')
 
 
                 else if vm.unitAction() == 'place'
@@ -219,10 +224,11 @@ GAME =
                                 found = true
                                 break
                         if not found
+                            vm.unitsRemaining(vm.unitsRemaining()-1)
                             square.units.push({
                                 owner: vm.accountID
                                 ownerColor: vm.accountColor
-                                square: square.id
+                                square: square.id()
                                 amount: ko.observable(1)
                                 last_turn_amount: 0 # This may take some work to get working
                             })
@@ -277,6 +283,7 @@ GAME =
                                 })
 
                             vmSquare = vmSquares[i]
+                            vmSquare.id(square.id)
                             vmSquare.left(((square.x+xOffset) * GRID_SIZE) + 'px')
                             vmSquare.top(((square.y+yOffset) * GRID_SIZE) + 'px')
                             vmSquare.units(units)
@@ -300,10 +307,16 @@ GAME =
                             #    resourceAmount: ko.observable(square.resource_amount)
                             #})
                         vm.unitsRemaining(data.total_units - data.units_placed)
+                        vm.totalUnits(data.total_units)
                         for player in data.players_visible
                             vm.players.push(player)
                         #ng-style="{width: data.board_width, height: data.board_height}"
                         # at some point resize the board on screen resize
+                        if data.is_initial
+                            vm.unitAction('initial')
+                        else
+                            vm.unitAction('place')
+
                         $('.spinner').hide()
                     else
                         alert(JSON.stringify(data))
@@ -318,6 +331,7 @@ GAME =
                         top: ko.observable(0)
                         units: ko.observableArray([])
                         owner: ko.observable(0)
+                        id: ko.observable(0)
                         ownerColor: ko.observable('')
                         x: ko.observable(0)
                         y: ko.observable(0)

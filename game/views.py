@@ -172,6 +172,8 @@ def api_sector(request, x, y, view_width, view_height):
         # TODO This will get more and more ineffecient as the number of players increases, not actually players visible, just all players
         'players_visible': AccountSerializer(Account.objects.all(), many=True).data,
         'total_units': request.user.total_units,
+        #TODO this appears once elsewhere.  make it a function
+        'is_initial': (request.user.total_units == 0 and Square.objects.filter(owner=request.user).count() == 0),
         'units_placed': Unit.objects.total_placed_units(request.user),
         'squares': SquareSerializer(squares, many=True).data,
     })
@@ -198,10 +200,9 @@ def api_square_unit_action(request, x, y, action):
             unit.amount += 1
         else:
             unit = Unit(square=square, owner=request.user, amount=1)
-
         unit.save()
-        serializer = UnitSerializer(unit)
-
+        request.user.total_units -= 1
+        request.user.save()
         return Response({})
 
     elif action == 'remove':
@@ -210,12 +211,11 @@ def api_square_unit_action(request, x, y, action):
             unit.amount -= 1
             if unit.amount == 0:
                 unit.delete()
-                amount = 0
             else:
                 unit.save()
-                amount = unit.amount
-        else:
-            amount = 0
+            request.user.total_units -= 1
+            request.user.save()
+
         return Response({})
 
     elif action == 'settle':
@@ -224,6 +224,8 @@ def api_square_unit_action(request, x, y, action):
             square.resource_amount += unit.amount * 4
             square.save()
             unit.delete()
+            request.user.total_units -= unit.amount * 4
+            request.user.save()
 
         return Response({})
 
@@ -233,6 +235,8 @@ def api_square_unit_action(request, x, y, action):
             square.wall_health += unit.amount * 2
             square.save()
             unit.delete()
+            request.user.total_units -= unit.amount * 2
+            request.user.save()
 
         return Response({})
 
@@ -278,12 +282,14 @@ def api_square_unit_action(request, x, y, action):
                             amount=count,
                         )
                         print 'creating unit'
+                request.user.total_units = 36
+                request.user.save()
                 return Response({})
                             
             except:
                 return Response({'error': 'Squares do not exist.'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({'error': 'You can only do an initial placement if you have no units.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'You can only do an initial placement if you have no units or squares.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
     else:
