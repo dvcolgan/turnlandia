@@ -234,6 +234,33 @@ GAME =
 
                 else if vm.unitAction() == 'place'
                     if vm.unplacedUnits() > 0
+                        canPlace = false
+                        if square.owner() == vm.accountID
+                            canPlace = true
+                        else
+                            other = vm.findSquare(square.col-1, square.row)
+                            if other and other.owner() == vm.accountID
+                                canPlace = true
+
+                            else
+                                other = vm.findSquare(square.col+1, square.row)
+                                if other and other.owner() == vm.accountID
+                                    canPlace = true
+
+                                else
+                                    other = vm.findSquare(square.col, square.row-1)
+                                    if other and other.owner() == vm.accountID
+                                        canPlace = true
+
+                                    else
+                                        other = vm.findSquare(square.col, square.row+1)
+                                        if other and other.owner() == vm.accountID
+                                            canPlace = true
+
+                        if not canPlace
+                            alert('You can only place units on a square you own or adjacent to a square you own.')
+                            return
+
                         # If there is already a unit of this color on this square, update the amount,
                         # otherwise add the whole unit
                         found = false

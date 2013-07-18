@@ -159,6 +159,8 @@ class SquareManager(models.Manager):
 
 class SquareOccupiedException(Exception):
     pass
+class InvalidPlacementException(Exception):
+    pass
 
 class Square(models.Model):
     col = models.IntegerField()
@@ -171,14 +173,42 @@ class Square(models.Model):
 
     def place_unit(self, account):
         if account.unplaced_units > 0:
-            unit = get_object_or_None(Unit, square=self, owner=account)
-            if unit:
-                unit.amount += 1
+            # Only allow placing on or adjacent to your own square
+            can_place = False
+            if self.owner == account:
+                can_place = True
+
             else:
-                unit = Unit(square=self, owner=account, amount=1)
-            unit.save()
-            account.unplaced_units -= 1
-            account.save()
+                square = get_object_or_None(Square, col=self.col-1, row=self.row)
+                if square != None and square.owner == account:
+                    can_place = True
+
+                else:
+                    square = get_object_or_None(Square, col=self.col+1, row=self.row)
+                    if square != None and square.owner == account:
+                        can_place = True
+
+                    else:
+                        square = get_object_or_None(Square, col=self.col, row=self.row-1)
+                        if square != None and square.owner == account:
+                            can_place = True
+
+                        else:
+                            square = get_object_or_None(Square, col=self.col, row=self.row+1)
+                            if square != None and square.owner == account:
+                                can_place = True
+
+            if can_place:
+                unit = get_object_or_None(Unit, square=self, owner=account)
+                if unit:
+                    unit.amount += 1
+                else:
+                    unit = Unit(square=self, owner=account, amount=1)
+                unit.save()
+                account.unplaced_units -= 1
+                account.save()
+            else:
+                raise InvalidPlacementException()
 
     def remove_unit(self, account):
         unit = get_object_or_None(Unit, square=self, owner=account)

@@ -150,7 +150,7 @@ GAME = {
         };
       };
       vm.modifyUnit = function(square, event) {
-        var count, found, i, placement, squares, unit, _i, _j, _k, _l, _len, _len1, _len2, _m, _n, _ref, _ref1, _ref2, _ref3, _results, _results1, _results2;
+        var canPlace, count, found, i, other, placement, squares, unit, _i, _j, _k, _l, _len, _len1, _len2, _m, _n, _ref, _ref1, _ref2, _ref3, _results, _results1, _results2;
         if (!(Math.abs(lastViewX - vm.viewX()) < 5 && Math.abs(lastViewY - vm.viewY()) < 5)) {
           return;
         }
@@ -204,6 +204,34 @@ GAME = {
           return vm.unitAction('place');
         } else if (vm.unitAction() === 'place') {
           if (vm.unplacedUnits() > 0) {
+            canPlace = false;
+            if (square.owner() === vm.accountID) {
+              canPlace = true;
+            } else {
+              other = vm.findSquare(square.col - 1, square.row);
+              if (other && other.owner() === vm.accountID) {
+                canPlace = true;
+              } else {
+                other = vm.findSquare(square.col + 1, square.row);
+                if (other && other.owner() === vm.accountID) {
+                  canPlace = true;
+                } else {
+                  other = vm.findSquare(square.col, square.row - 1);
+                  if (other && other.owner() === vm.accountID) {
+                    canPlace = true;
+                  } else {
+                    other = vm.findSquare(square.col, square.row + 1);
+                    if (other && other.owner() === vm.accountID) {
+                      canPlace = true;
+                    }
+                  }
+                }
+              }
+            }
+            if (!canPlace) {
+              alert('You can only place units on a square you own or adjacent to a square you own.');
+              return;
+            }
             found = false;
             _ref = square.units();
             for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {

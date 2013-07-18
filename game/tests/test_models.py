@@ -82,3 +82,14 @@ class TestModels(object):
         with assert_raises(SquareOccupiedException):
             center_square.initial_placement(account2)
 
+    def test_placement(self):
+        pass
+        #Square.objects.get_region(-10, -10, 20, 20)
+        #account1 = Account.objects.create(people_name="p", color="#FF0000", username="a1", password="p", leader_name="l")
+        #account2 = Account.objects.create(people_name="p", color="#00FF00", username="a2", password="p", leader_name="l")
+
+        #center_square = Square.objects.get(col=0, row=0)
+        #center_square.owner = account1
+
+
+
