@@ -236,7 +236,7 @@ class Square(models.Model):
             unit.delete()
 
     def initial_placement(self, account):
-        if account.unplaced_units == 0 and Square.objects.filter(owner=account).count() == 0:
+        if Unit.objects.filter(owner=account).count() == 0 and Square.objects.filter(owner=account).count() == 0:
 
             # This needs to be made atomic, if it fails in the middle, it could be problematic
             placement = {

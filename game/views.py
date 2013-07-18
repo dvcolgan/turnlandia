@@ -127,12 +127,17 @@ def api_sector(request, col, row, width, height):
 
     squares = Square.objects.get_region(col, row, width, height)
 
+    is_initial = (
+        Unit.objects.filter(owner=request.user).count() == 0 and
+        Square.objects.filter(owner=request.user).count() == 0
+    )
+
     return Response({
         # TODO This will get more and more ineffecient as the number of players increases, not actually players visible, just all players
         'players_visible': AccountSerializer(Account.objects.all(), many=True).data,
         'unplaced_units': request.user.unplaced_units,
         #TODO this appears once elsewhere.  make it a function
-        'is_initial': (request.user.unplaced_units == 0 and Unit.objects.filter(owner=request.user).count() == 0),
+        'is_initial': is_initial,
         'units_placed': Unit.objects.total_placed_units(request.user),
         'squares': SquareSerializer(squares, many=True).data,
     })
