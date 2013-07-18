@@ -25,13 +25,6 @@ h2 { font-size: 36px; line-height: 36px; }
 h3 { font-size: 24px; line-height: 24px; }
 h4 { font-size: 18px; line-height: 18px; }
 
-ul {
-    margin-bottom: 12px;
-}
-
-p {
-    margin-bottom: 12px;
-}
 
 small {
     font-size: 80%;
@@ -41,6 +34,9 @@ em {
 }
 strong {
     font-weight: bold;
+}
+a {
+    color: #ccc;
 }
 
 .panel {
@@ -54,6 +50,26 @@ strong {
     border: 2px solid #444;
     box-shadow: 4px 4px 4px #888;
     margin-top: 20px;
+    &.wide {
+        width: 650px;
+    }
+    ul, ol {
+        margin-bottom: 12px;
+        li {
+            margin-left: 20px;
+            margin-bottom: 4px;
+        }
+    }
+    ul li {
+        list-style-type: disc;
+    }
+    ol li {
+        list-style-type: decimal;
+    }
+    p {
+        margin-bottom: 12px;
+    }
+
 }
 
 .color-swatch {
@@ -163,16 +179,27 @@ form {
     margin-left: @grid-size;
     position: relative;
     border: 2px solid #444;
+    overflow: hidden;
+
+    .sector {
+        position: absolute;
+        width: @grid-size*10;
+        height: @grid-size*10;
+        &:active {
+            cursor: move;
+        }
+    }
     .grid-square {
         background-image: url(/static/images/grid-small.png);
         width: @grid-size;
         height: @grid-size;
         position: absolute;
         &:hover {
-            border: 6px solid red;
+            border: 6px solid black;
+            box-shadow: inset 0 0 0 1px white;
             margin-left: -6px;
             margin-top: -6px;
-            border-radius: 6px;
+            border-radius: 3px;
             z-index: 10;
         }
     }

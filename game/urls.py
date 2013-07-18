@@ -10,6 +10,8 @@ urlpatterns = patterns('game.views',
 
     url(r'^game/$', 'game', name='game'),
 
+    url(r'^how-to-play/$', 'how_to_play', name='how-to-play'),
+
     #url(r'^api/account/$', ListCreateAPIView.as_view(serializer_class=AccountSerializer, model=Account), name='api-account'),
     #url(r'^api/account/(?P<pk>\d+)/$', RetrieveAPIView.as_view(serializer_class=AccountSerializer, model=Account), name='api-account'),
     #url(r'^api/account/exists/username/(?P<username>.+)/$', 'api_username_existence', name='api-username-existence'),
@@ -41,9 +43,9 @@ urlpatterns = patterns('game.views',
     #    name='api-game'
     #),
 
-    url(r'^api/sector/(?P<x>[0-9-]+)/(?P<y>[0-9-]+)/(?P<view_width>[0-9]+)/(?P<view_height>[0-9]+)/$', 'api_sector', name='api-sector'),
+    url(r'^api/sector/(?P<col>[0-9-]+)/(?P<row>[0-9-]+)/(?P<width>[0-9]+)/(?P<height>[0-9]+)/$', 'api_sector', name='api-sector'),
 
-    url(r'^api/square/(?P<x>[0-9-]+)/(?P<y>[0-9-]+)/(?P<action>initial|place|remove|settle|give|wall)/$', 'api_square_unit_action', name='api-square-unit-action'),
+    url(r'^api/square/(?P<col>[0-9-]+)/(?P<row>[0-9-]+)/(?P<action>initial|place|remove|settle|give|wall)/$', 'api_square_unit_action', name='api-square-unit-action'),
 
     #url(r'^api/player/$',
     #    ListCreateAPIView.as_view(

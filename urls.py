@@ -13,7 +13,7 @@ urlpatterns = patterns('',
 
     url(r'', include('game.urls')),
 
-    #url(r'^qunit-tests/', TemplateView.as_view(template_name='qunit-tests.html'), name='qunit-tests'),
+    url(r'^qunit-tests/', TemplateView.as_view(template_name='qunit-tests.html'), name='qunit-tests'),
     url(r'^login/$', 'django.contrib.auth.views.login', {
         'template_name': 'login.html',
     }, 'login'),

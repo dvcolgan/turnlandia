@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load custom_tags %}
+{% block title %}How To Play{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div class="panel wide">
+    <h1>Rules of Turn Based Game</h1>
+    <p><strong>Note! These rules are still being fleshed out and may change in the future.</strong></p>
+    <h2>Overview</h2>
+    <p>Welcome to Turn Based Game, a massively multiplayer online board game (MMOBG).</p>
+    <p>The goal of this game is to control land and defend it from other players by strategically allocating your units.</p>
+
+    <h2>Setup</h2>
+    <p>To play you must first create an account.  We will ask for the following information:</p>
+    <ul>
+        <li>Username and password - used to log in</li>
+        <li>Email - optional, if you set it, we will email you an activity summary every day (coming soon!)</li>
+        <li>A team color - all of your units will use this color, as well as tiles you own</li>
+        <li>A leader name - be creative and make up a title for yourself</li>
+        <li>A people name - similarly, make up a name for the people in your empire</li>
+    </ul>
+
+    <h2>Choosing an initial settlement</h2>
+    <p>After this you will be taken to the game board.  In order to begin playing, you need to set up a home base.  <strong>Your initial encampment must not contain any other player's territory.</strong></p>
+    <p>From here on, you can click on a button at the top of the screen and then click on a square to apply that action to that square:
+    <ul>
+        <li><strong>Place Unit</strong> - take a unit from your unused unit pile and place it on that square.  You can place a unit on any square you control or any square that is adjacent to a square you control.  The number next to this button shows how many you have left to place.</li>
+        <li><strong>Remove Unit</strong> - remove a unit from that square and add it to your unused pile.</li>
+        <li><strong>Settle Unit</strong> - convert all units owned by you on a square to 4x that many resources.  Resources are explained below.</li>
+        <li><strong>Build Wall</strong> - convert all units owned by you on a square to a wall with 2x that much health.  Walls are explained below.</li>
+    </ul>
+
+    <h2>Resolution</h2>
+    <p>All players make moves at the same time.  At the end of the day (midnight EST), resolution happens.  The following stages occur:</p>
+    <ol>
+        <li>Any square on which there is only a single player's unit becomes owned by that player.</li>
+        <li>Any square with a resource amount that is owned by a player will generate one unit for that player and reduce the number of resources on that square by one.</li>
+        <li>Any square on which there is a wall and a number of units, the wall's health will be reduced by a number equal to the number of units on the square.  If the wall's health is reduced to zero, the wall is destroyed.</li>
+        <li>For any square on which there are units belonging to more than one player, a battle will take place.  Using a Risk-like methodology, units will be removed until only one player's units are left, and that player will then control that square.  The player with more units has a higher likelihood of winning.</li>
+    </ol>
+
+    <h2>Resources</h2>
+    <p>Battles reduce the number of units you control, and resources are the way you get more units.  As previously discussed, controlling a square that has resources will gain you one unit per turn, but this also drains the resources on that square.  Settling units replenishes the resources on a square.  Since you gain 4 resources for every one unit committed, settling is like an investment: you set aside units now in order to gain 4x that many over the course of several turns.</p>
+
+    <h2>Walls</h2>
+    <p>Unlike some games, walls are not owned by any player.  When you build a wall, you forfeit that square.  However, because the builder chooses where a wall is placed, you can slow the spread of an enemy with them.  Anyone can attack a wall at any time.  Settlements can not be created on a walled square.</p>
+</div>
+{% endblock %}
+
+

@@ -18,10 +18,10 @@ FILEPATH = os.path.abspath(__file__)
 DEBUG = True
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'turnbased.sqlite',
-        'TEST_NAME': 'turnbased_test.sqlite',
-        'USER': '',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'turnbased',
+        'TEST_NAME': 'turnbased_test',
+        'USER': 'dcolgan',
         'PASSWORD': '',
         'HOST': '',
         'PORT': '',
@@ -124,11 +124,13 @@ INSTALLED_APPS = (
     'rest_framework',
     'util',
     'game',
+    'django_nose',
     'south',
 )
 
 SOUTH_TESTS_MIGRATE = False
 SKIP_SOUTH_TESTS = True
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 LOGGING = {
     'version': 1,
@@ -161,3 +163,14 @@ LOGGING = {
 import warnings
 import exceptions
 warnings.filterwarnings("ignore", category=exceptions.RuntimeWarning, module='django.db.backends.sqlite3.base', lineno=53)
+
+import sys
+if 'test' in sys.argv:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'turnbased_test'
+    }
+    # Greatly speed up password hashing
+    PASSWORD_HASHERS = (
+        'django.contrib.auth.hashers.MD5PasswordHasher',
+    )

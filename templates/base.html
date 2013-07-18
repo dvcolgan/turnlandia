@@ -21,7 +21,7 @@
     -->
     <div id="header-bar">
         <ul class="top-menu pull-left">
-            <li><a href="{% url 'home' %}">Codename Land Grab</a></li>
+            <li><a href="{% url 'home' %}">Turn Based Game</a></li>
 
             {% if request.user.is_authenticated %}
             <li><a href="{% url 'game' %}">{{ player_count }} players on turn {{ day_counter }}</a></li>
@@ -32,11 +32,12 @@
         <ul class="top-menu pull-right">
             {% if request.user.is_authenticated %}
             <li><a href="{% url 'game' %}">Game</a></li>
+            <li><a href="{% url 'how-to-play' %}">How to Play</a></li>
             <li><a href="{% url 'settings' %}">Account Settings</a></li>
             <li><a href="{% url 'logout' %}">Log Out</a></li>
-
             {% else %}
-            <li><a href="{% url 'logout' %}">Log In</a></li>
+            <li><a href="{% url 'how-to-play' %}">How to Play</a></li>
+            <li><a href="{% url 'login' %}">Log In</a></li>
             {% endif %}
         </ul>
     </div>
@@ -44,9 +45,9 @@
     <script src='{{ STATIC_URL }}js/jquery-2.0.1.min.js'></script>
     <script src="{{ STATIC_URL }}js/colorpicker/colorpicker.min.js"></script>
     <script src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
-    <script src="{{ STATIC_URL }}js/spin.min.js"></script>
     <script src="{{ STATIC_URL }}js/knockout-2.3.0.js"></script>
-    <script src='{{ STATIC_URL }}js/game.js'></script>
+    <script src="{{ STATIC_URL }}js/spin.min.js"></script>
+    <script src="{{ STATIC_URL }}js/game.js"></script>
     {% block foot %}{% endblock %}
 </body>
 </html>

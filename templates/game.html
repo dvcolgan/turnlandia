@@ -7,11 +7,35 @@
     window.accountID = {{ request.user.id }};
     window.accountColor = '{{ request.user.color }}';
 </script>
+<style type="text/css">
+    #canvas {
+        display: block;
+        margin: 0 auto;
+    }
+</style>
+{% endblock %}
+
+{% block goesinfoot %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/lib/impact/impact.js"></script>
+<script>
+    ig.prefix = '{{ STATIC_URL }}';
+    ig.lib = 'js/lib/';
+</script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/lib/game/main.js"></script>
 {% endblock %}
 
 {% block body_class %}game{% endblock %}
 
+{% block canvas %}
+	<canvas id="canvas"></canvas>
+{% endblock %}
+
+
+
+
 {% block content %}
+
+
 <!--
 <div id="players-summary">
     <ul data-bind="foreach: players">
@@ -19,6 +43,7 @@
     </ul>
 </div>
 -->
+
 
 <div class="action-buttons disable-select cf">
     <!-- TODO something is causing these radio buttons to have a thin strip above and below the icon to not click the button
@@ -33,10 +58,9 @@
         <div class="unit" data-bind="
                     style: {
                         backgroundColor: accountColor,
-                        borderBottomWidth: ((unitsRemaining() + 3)/2) + 'px',
-                        marginTop: -((unitsRemaining() + 3)/2) + 'px'
+                        borderBottomWidth: '3px'
                     },
-                    text: unitsRemaining"></div>
+                    text: unplacedUnits"></div>
         <input type="radio" data-bind="checked: unitAction" value="place"  >
         <img src="{{ STATIC_URL }}images/place-icon.png" /> Place Unit
     </label>
@@ -50,52 +74,66 @@
     <!-- /ko -->
 </div>
 
-<!--
+{% comment %}
+<div class="current-x-y">
+    <span data-bind="text: viewX() + ' ' + viewY()"></span>
+</div>
+{% endcomment %}
+
+{% comment %}
 <div class="arrow-controls">
     <a class="go-left "><i class="foundicon-left-arrow"></i></a>
     <a class="go-up   "><i class="foundicon-up-arrow"></i></a>
     <a class="go-down "><i class="foundicon-down-arrow"></i></a>
     <a class="go-right"><i class="foundicon-right-arrow"></i></a>
 </div>
--->
+{% endcomment %}
 
-<div id="top-coords" class="cf" data-bind="foreach: topCoords">
+<div id="top-coords" class="disable-select cf" data-bind="foreach: topCoords">
     <div class="top-coord" data-bind="text: $data"></div>
 </div>
-<div id="side-coords" class="cf" data-bind="foreach: sideCoords">
+<div id="side-coords" class="disable-select cf" data-bind="foreach: sideCoords">
     <div class="side-coord" data-bind="text: $data"></div>
 </div>
 
 <div id="board">
-    <!-- ko foreach: squares -->
-        <div class="grid-square disable-select" data-bind="
-             click: $root.modifyUnit,
-             style: {
-                 borderColor: $root.currentColor,
-                 backgroundColor: ownerColor,
-                 top: top,
-                 left: left,
-                 cursor: $root.currentCursor()
-             }">
-            <!-- ko foreach: units -->
-                <div class="unit" 
-                    data-bind="css: $root.getUnitClass($index, $parent),
+    <!-- ko foreach: sectors -->
+        <div class="sector disable-select" data-bind="
+            style: {
+                left: (col * GRID_SIZE + $parent.viewX()) + 'px',
+                top: (row * GRID_SIZE + $parent.viewY()) + 'px'
+            }
+            ">
+            <!-- ko foreach: squares -->
+                <div class="grid-square" data-bind="
+                    click: $root.modifyUnit,
                     style: {
                         backgroundColor: ownerColor,
-                        borderBottomWidth: ((amount() + 3)/2) + 'px',
-                        marginTop: -((amount() + 3)/2) + 'px'
-                    },
-                    text: amount">
+                        top: top,
+                        left: left,
+                        cursor: $root.currentCursor()
+                    }">
+                    <!-- ko foreach: units -->
+                        <div class="unit" 
+                            data-bind="css: $root.getUnitClass($index, $parent),
+                            style: {
+                                backgroundColor: ownerColor,
+                                borderBottomWidth: ((amount() + 3)/2) + 'px',
+                                marginTop: -((amount() + 3)/2) + 'px'
+                            },
+                            text: amount">
+                        </div>
+                    <!-- /ko -->
+                    <div class="wall" data-bind="
+                        visible: wallHealth() > 0,
+                        text: wallHealth">
+                    </div>
+                    <div class="resource" data-bind="
+                        visible: resourceAmount() > 0,
+                        text: resourceAmount">
+                    </div>
                 </div>
             <!-- /ko -->
-            <div class="wall" data-bind="
-                visible: wallHealth() > 0,
-                text: wallHealth">
-            </div>
-            <div class="resource" data-bind="
-                visible: resourceAmount() > 0,
-                text: resourceAmount">
-            </div>
         </div>
     <!-- /ko -->
 </div>

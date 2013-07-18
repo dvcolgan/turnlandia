@@ -164,12 +164,6 @@ h4 {
   font-size: 18px;
   line-height: 18px;
 }
-ul {
-  margin-bottom: 12px;
-}
-p {
-  margin-bottom: 12px;
-}
 small {
   font-size: 80%;
 }
@@ -178,6 +172,9 @@ em {
 }
 strong {
   font-weight: bold;
+}
+a {
+  color: #ccc;
 }
 .panel {
   color: white;
@@ -190,6 +187,27 @@ strong {
   border: 2px solid #444;
   box-shadow: 4px 4px 4px #888;
   margin-top: 20px;
+}
+.panel.wide {
+  width: 650px;
+}
+.panel ul,
+.panel ol {
+  margin-bottom: 12px;
+}
+.panel ul li,
+.panel ol li {
+  margin-left: 20px;
+  margin-bottom: 4px;
+}
+.panel ul li {
+  list-style-type: disc;
+}
+.panel ol li {
+  list-style-type: decimal;
+}
+.panel p {
+  margin-bottom: 12px;
 }
 .color-swatch {
   width: 120px;
@@ -286,6 +304,15 @@ form table tr:nth-child(even) td {
   margin-left: 42px;
   position: relative;
   border: 2px solid #444;
+  overflow: hidden;
+}
+#board .sector {
+  position: absolute;
+  width: 420px;
+  height: 420px;
+}
+#board .sector:active {
+  cursor: move;
 }
 #board .grid-square {
   background-image: url(/static/images/grid-small.png);
@@ -294,10 +321,11 @@ form table tr:nth-child(even) td {
   position: absolute;
 }
 #board .grid-square:hover {
-  border: 6px solid red;
+  border: 6px solid black;
+  box-shadow: inset 0 0 0 1px white;
   margin-left: -6px;
   margin-top: -6px;
-  border-radius: 6px;
+  border-radius: 3px;
   z-index: 10;
 }
 #board .resource {
