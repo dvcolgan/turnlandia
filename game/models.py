@@ -230,7 +230,7 @@ class Square(models.Model):
 
     def build_wall(self, account):
         unit = get_object_or_None(Unit, square=self, owner=account)
-        if unit:
+        if self.resource_amount == 0 and unit != None:
             self.wall_health += unit.amount * 2
             self.save()
             unit.delete()

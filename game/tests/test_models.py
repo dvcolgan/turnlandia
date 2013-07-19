@@ -10,6 +10,42 @@ import ipdb
 #    r = requests.post('http://localhost:8081' + relative_url, payload)
 #    return r.json()
 
+class TestSquare(object):
+    @classmethod
+    def setup_class(cls):
+        # Create the squares by looking at them
+        Square.objects.get_region(-10, -10, 20, 20)
+        cls.account1 = Account.objects.create(people_name="p", color="#FF0000", username="a1", password="p", leader_name="l")
+        cls.account2 = Account.objects.create(people_name="p", color="#00FF00", username="a2", password="p", leader_name="l")
+
+
+    def test_initial_placement(self):
+
+        center_square = Square.objects.get(col=0, row=0)
+        center_square.initial_placement(self.account1)
+        assert_equal(center_square.owner, self.account1, 'The placer should now own the squares')
+        
+        with assert_raises(SquareOccupiedException):
+            center_square.initial_placement(self.account2)
+
+    def test_build_wall(self):
+        # Place 4 resources
+        center_square = Square.objects.get(col=0, row=0)
+        center_square.resource_amount = 4
+        center_square.owner = self.account1
+        center_square.save()
+
+        # Place 4 units
+        self.account1.unplaced_units = 4
+        self.account1.save()
+        for i in range(4):
+            center_square.place_unit(self.account1)
+
+        center_square.build_wall(self.account1)
+        assert_equals(center_square.wall_health, 0, 'A wall cannot be built on a resource.')
+
+
+
 
 class TestModels(object):
 
@@ -69,18 +105,6 @@ class TestModels(object):
 
         Square.objects.all().delete()
         
-    def test_initial_placement(self):
-        # Create the squares by looking at them
-        Square.objects.get_region(-10, -10, 20, 20)
-        account1 = Account.objects.create(people_name="p", color="#FF0000", username="a1", password="p", leader_name="l")
-        account2 = Account.objects.create(people_name="p", color="#00FF00", username="a2", password="p", leader_name="l")
-
-        center_square = Square.objects.get(col=0, row=0)
-        center_square.initial_placement(account1)
-        assert_equal(center_square.owner, account1, 'The placer should now own the squares')
-        
-        with assert_raises(SquareOccupiedException):
-            center_square.initial_placement(account2)
 
     def test_placement(self):
         pass

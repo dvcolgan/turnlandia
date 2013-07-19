@@ -1,4 +1,4 @@
-GRID_SIZE = 42
+GRID_SIZE = 48
 SECTOR_SIZE = 10
 
 randomChoice = (collection) ->

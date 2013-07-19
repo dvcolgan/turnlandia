@@ -12,7 +12,7 @@ class Command(BaseCommand):
         for square in Square.objects.all():
 
             # If you are the only one claiming this square, you get it
-            if square.resource_amount > 0 and square.owner:
+            if square.resource_amount > 0 and square.owner != None:
                 found = False
                 for unit in square.units.all():
                     if unit.owner == square.owner:

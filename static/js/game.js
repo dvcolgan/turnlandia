@@ -2,7 +2,7 @@
 var GAME, GRID_SIZE, SECTOR_SIZE, getColRowFromHash, getCoordsHalfOffset, getViewHeight, getViewWidth, getXYFromColRow, randomChoice,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-GRID_SIZE = 42;
+GRID_SIZE = 48;
 
 SECTOR_SIZE = 10;
 
