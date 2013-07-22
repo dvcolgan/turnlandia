@@ -1,3 +1,10 @@
+autogenerate a color, or don't let you past without a color
+usernames noncase sensitive
+style login page
+
+add twitch tv dev schedule on the site
+
+outline peoples territory with a red line or something
 Signs to trash talk people with
 Prevent walls built on settlements and vice versa
 Save an image of the entire viewable board at the end of every day
@@ -23,3 +30,5 @@ ad-free, some sort of premium hat for payers of $5 a month
 add an undo feature, if for nothing else, the last action
 
 scroll the coordinates when you scroll the map
+
+make exceptions and throw them at people on stream

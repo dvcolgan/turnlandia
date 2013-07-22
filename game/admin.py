@@ -71,7 +71,13 @@ class AccountAdmin(UserAdmin):
     search_fields = ('username', 'email', 'leader_name', 'people_name')
     ordering = ('username', 'email')
 
+class SquareAdmin(admin.ModelAdmin):
+    list_display = ('col', 'row', 'owner', 'resource_amount', 'wall_health')
+    search_fields = ('col', 'row', 'resource_amount', 'wall_health')
+    # Could do a custom callable sort that ads the two together
+    ordering = ('col', 'row')
+
 admin.site.register(Account, AccountAdmin)
 admin.site.register(Unit)
-admin.site.register(Square)
+admin.site.register(Square, SquareAdmin)
 admin.site.register(Setting)

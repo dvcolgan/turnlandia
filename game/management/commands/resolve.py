@@ -27,6 +27,30 @@ class Command(BaseCommand):
 
         print 'ALL DONE'
 
+    def generate_units_from_resources(self):
+        for square in Square.objects.all():
+
+            # If you are the only one claiming this square, you get it
+            if square.resource_amount > 0 and square.owner != None:
+                found = False
+                for unit in square.units.all():
+                    if unit.owner == square.owner:
+                        unit.amount += 1
+                        square.resource_amount -= 1
+                        unit.save()
+                        square.save()
+                        found = True
+                        break
+                if not found:
+                    # There are no units on the square, so add a new one
+                    square.units.add(Unit(
+                        owner=square.owner,
+                        square=square,
+                        amount = 1
+                    ))
+                    square.resource_amount -= 1
+                    square.save()
+
     def attack_walls(self):
         for square in Square.objects.all():
             if square.wall_health > 0 and square.units.count() > 0:
@@ -62,29 +86,6 @@ class Command(BaseCommand):
                         unit.delete()
                 print
 
-    def generate_units_from_resources(self):
-        for square in Square.objects.all():
-
-            # If you are the only one claiming this square, you get it
-            if square.resource_amount > 0 and square.owner != None:
-                found = False
-                for unit in square.units.all():
-                    if unit.owner == square.owner:
-                        unit.amount += 1
-                        square.resource_amount -= 1
-                        unit.save()
-                        square.save()
-                        found = True
-                        break
-                if not found:
-                    # There are no units on the square, so add a new one
-                    square.units.add(Unit(
-                        owner=square.owner,
-                        square=square,
-                        amount = 1
-                    ))
-                    square.resource_amount -= 1
-                    square.save()
 
     def assign_squares_ownership(self):
         for square in Square.objects.all():
