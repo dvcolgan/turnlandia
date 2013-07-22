@@ -4,72 +4,76 @@
 {% block title %}Log In{% endblock %}
 
 {% block content %}
-<div class="panel">
-    <h1>Log Thou In</h1>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-6 col-lg-offset-3">
+            <h1>Log Thou In</h1>
 
-    {% if not form.non_field_errors %}
-    <p>You approach a tightly locked gatehouse.  You knock firmly on the door.
-    The peephole flings open, and an old hag appears.</p>
-    {% else %}
-    <p>Unimpressed, she angrily bellows out:</p>
-    <p class="errorlist">I don't know anyone with that name or that password!</p>
-    <p>Once again,</p>
-    {% endif %}
+            {% if not form.non_field_errors %}
+            <p>You approach a tightly locked gatehouse.  You knock firmly on the door.
+            The peephole flings open, and an old hag appears.</p>
+            {% else %}
+            <p>Unimpressed, she angrily bellows out:</p>
+            <p class="errorlist">I don't know anyone with that name or that password!</p>
+            <p>Once again,</p>
+            {% endif %}
 
-    <form action="" method="POST">{% csrf_token %}
-        <table class="mbl">
-        <tbody>
+            <form action="" method="POST">{% csrf_token %}
+                <table class="mbl">
+                <tbody>
 
-        <tr>
-            <td colspan="2">
-                <label>
-                    <strong>"Who are you?"</strong>
-                    <small><em>she yells.</em></small>
-                </label>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                {{ form.username|attr:'placeholder:username' }}
-            </td>
-            <td>
-                {{ form.username.errors }}
-            </td>
-        </tr>
+                <tr>
+                    <td colspan="2">
+                        <label>
+                            <strong>"Who are you?"</strong>
+                            <small><em>she yells.</em></small>
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{ form.username|attr:'placeholder:username' }}
+                    </td>
+                    <td>
+                        {{ form.username.errors }}
+                    </td>
+                </tr>
 
-        <!--
-        <p>
-        <label><strong>Email?</strong> <small><em>Every day we'll send you an activity summary.</em></small></label>
-        <input type="email" name="email" required unique="email" value="" ng-model="newAccount.email" blur="checkEmail" />
+                <!--
+                <p>
+                <label><strong>Email?</strong> <small><em>Every day we'll send you an activity summary.</em></small></label>
+                <input type="email" name="email" required unique="email" value="" ng-model="newAccount.email" blur="checkEmail" />
 #<span ng-show="form.email.$error.required">Please enter an email</span>
-        <span ng-show="form.email.$error.email">Please enter a valid email</span>
-        <span ng-show="form.email.$error.unique">That email is already taken</span>
-        </p>
-        -->
+                <span ng-show="form.email.$error.email">Please enter a valid email</span>
+                <span ng-show="form.email.$error.unique">That email is already taken</span>
+                </p>
+                -->
 
 
-        <tr>
-            <td colspan="2">
-                <label>
-                    <strong>"What's the Password?"</strong>
-                    <small><em>she then asks.</em></small>
-                </label>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                {{ form.password|attr:'placeholder:password' }}
-            </td>
-            <td>
-                {{ form.password.errors }}
-            </td>
-        </tr>
-        </tbody>
-        </table>
-        <div class="button-holder">
-            <input type="submit" class="call-to-action-button" value="Let me in!" />
+                <tr>
+                    <td colspan="2">
+                        <label>
+                            <strong>"What's the Password?"</strong>
+                            <small><em>she then asks.</em></small>
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{ form.password|attr:'placeholder:password' }}
+                    </td>
+                    <td>
+                        {{ form.password.errors }}
+                    </td>
+                </tr>
+                </tbody>
+                </table>
+                <div class="button-holder">
+                    <input type="submit" class="call-to-action-button" value="Let me in!" />
+                </div>
+            </form>
+            <a href="{% url 'create-account' %}">Or Create an Account</a>
         </div>
-    </form>
-    <a href="{% url 'create-account' %}">Or Create an Account</a>
+    </div>
 </div>
 {% endblock %}

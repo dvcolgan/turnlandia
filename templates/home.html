@@ -6,13 +6,17 @@
 {% endblock %}
 
 {% block content %}
-<div class="panel">
-    <h1>Turn Based Game</h1>
-    <h2>A Massively Multiplayer Online Board Game (MMOBG)</h2>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-6 col-lg-offset-3">
+            <div class="well">
+                <h1>Turn Based Game</h1>
+                <h2>A Massively Multiplayer<br/>Online Board Game (MMOBG)</h2>
 
-    <p>Join {{ player_count }} Other Players on an infinite board</p>
-    <div class="button-holder">
-        <a href="{% url 'create-account' %}" class="call-to-action-button">Play Now!</a>
+                <p>Join {{ player_count }} Other Players on an infinite board</p>
+                <a href="{% url 'create-account' %}" class="btn btn-success">Sign Up Now for Free!</a>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

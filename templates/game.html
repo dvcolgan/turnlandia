@@ -30,11 +30,29 @@
 	<canvas id="canvas"></canvas>
 {% endblock %}
 
+{% block game_toolbar %}
+<div class="navbar-btn btn-group action-buttons" data-bind="radio: unitAction">
+    <!-- ko if: unitAction() === 'initial' -->
+    <button class="btn btn-success" type="button" data-bind="css: {active: unitAction() == 'initial'}" data-value="initial"><img src="{{ STATIC_URL }}images/place-icon.png" /> Initial Placement</button>
+    <!-- /ko -->
+
+    <!-- ko ifnot: unitAction() === 'initial' -->
+    <button class="btn btn-success" type="button" data-bind="css: {active: unitAction() == 'place'}" data-value="place"><img src="{{ STATIC_URL }}images/place-icon.png" /> Place Unit <span data-bind="text: '(' + unplacedUnits() + ')'"></span></button>
+    <button class="btn btn-success" type="button" data-bind="css: {active: unitAction() == 'remove'}" data-value="remove"><img src="{{ STATIC_URL }}images/remove-icon.png"/> Remove Unit</button>
+    <button class="btn btn-success" type="button" data-bind="css: {active: unitAction() == 'settle'}" data-value="settle"><img src="{{ STATIC_URL }}images/settle-icon.png"/> Settle Units</button>
+    <button class="btn btn-success" type="button" data-bind="css: {active: unitAction() == 'wall'}" data-value="wall"><img src="{{ STATIC_URL }}images/wall-icon.png"  /> Build Wall</button>
+    <!-- /ko -->
+
+    <!--
+    TODO implement me
+    <label class="btn btn-success" data-bind="css: { active: unitAction() === 'give'    }"><button type="button" data-bind="checked: unitAction" value="give"   ><img src="{{ STATIC_URL }}images/give-icon.png"  /> Give Units</label>
+    -->
+</div>
+{% endblock %}
 
 
 
 {% block content %}
-
 
 <!--
 <div id="players-summary">
@@ -44,35 +62,6 @@
 </div>
 -->
 
-
-<div class="action-buttons disable-select cf">
-    <!-- TODO something is causing these radio buttons to have a thin strip above and below the icon to not click the button
-    it seems to be that padding doesnt let you click on things
-        -->
-    <!-- ko if: unitAction() === 'initial' -->
-    <label data-bind="css: { active: unitAction() === 'initial' }"><input type="radio" data-bind="checked: unitAction" value="initial"><img src="{{ STATIC_URL }}images/place-icon.png" /> Initial Placement</label>
-    <!-- /ko -->
-
-    <!-- ko ifnot: unitAction() === 'initial' -->
-    <label data-bind="css: { active: unitAction() === 'place'   }">
-        <div class="unit" data-bind="
-                    style: {
-                        backgroundColor: accountColor,
-                        borderBottomWidth: '3px'
-                    },
-                    text: unplacedUnits"></div>
-        <input type="radio" data-bind="checked: unitAction" value="place"  >
-        <img src="{{ STATIC_URL }}images/place-icon.png" /> Place Unit
-    </label>
-    <label data-bind="css: { active: unitAction() === 'remove'  }"><input type="radio" data-bind="checked: unitAction" value="remove" ><img src="{{ STATIC_URL }}images/remove-icon.png"/> Remove Unit</label>
-    <label data-bind="css: { active: unitAction() === 'settle'  }"><input type="radio" data-bind="checked: unitAction" value="settle" ><img src="{{ STATIC_URL }}images/settle-icon.png"/> Settle Units</label>
-    <!--
-    TODO implement me
-    <label data-bind="css: { active: unitAction() === 'give'    }"><input type="radio" data-bind="checked: unitAction" value="give"   ><img src="{{ STATIC_URL }}images/give-icon.png"  /> Give Units</label>
-    -->
-    <label data-bind="css: { active: unitAction() === 'wall'    }"><input type="radio" data-bind="checked: unitAction" value="wall"   ><img src="{{ STATIC_URL }}images/wall-icon.png"  /> Build Wall</label>
-    <!-- /ko -->
-</div>
 
 {% comment %}
 <div class="current-x-y">
@@ -92,7 +81,7 @@
 <div id="top-coords" class="disable-select cf" data-bind="foreach: topCoords">
     <div class="top-coord" data-bind="text: $data"></div>
 </div>
-<div id="side-coords" class="disable-select cf" data-bind="foreach: sideCoords">
+<div id="side-coords" class="pull-left disable-select cf" data-bind="foreach: sideCoords">
     <div class="side-coord" data-bind="text: $data"></div>
 </div>
 
@@ -102,8 +91,7 @@
             style: {
                 left: (col * GRID_SIZE + $parent.viewX()) + 'px',
                 top: (row * GRID_SIZE + $parent.viewY()) + 'px'
-            }
-            ">
+            }">
             <!-- ko foreach: squares -->
                 <div class="grid-square" data-bind="
                     click: $root.modifyUnit,
@@ -119,7 +107,8 @@
                             style: {
                                 backgroundColor: ownerColor,
                                 borderBottomWidth: ((amount() + 3)/2) + 'px',
-                                marginTop: -((amount() + 3)/2) + 'px'
+                                marginTop: -((amount() + 3)/2) + 'px',
+                                height: (22 + amount()/2) + 'px'
                             },
                             text: amount">
                         </div>

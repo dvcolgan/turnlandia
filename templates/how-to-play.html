@@ -6,7 +6,11 @@
 {% endblock %}
 
 {% block content %}
-<div class="panel wide">
+<div class="container">
+    <div class="row">
+        <div class="col-lg-7 col-lg-offset-3">
+            <div class="well">
+
     <h1>Rules of Turn Based Game</h1>
     <p><strong>Note! These rules are still being fleshed out and may change in the future.</strong></p>
     <h2>Overview</h2>
@@ -36,10 +40,10 @@
     <h2>Resolution</h2>
     <p>All players make moves at the same time.  At the end of the day (midnight EST), resolution happens.  The following stages occur:</p>
     <ol>
-        <li>Any square on which there is only a single player's unit becomes owned by that player.</li>
-        <li>Any square with a resource amount that is owned by a player will generate one unit for that player and reduce the number of resources on that square by one.</li>
         <li>Any square on which there is a wall and a number of units, the wall's health will be reduced by a number equal to the number of units on the square.  If the wall's health is reduced to zero, the wall is destroyed.</li>
         <li>For any square on which there are units belonging to more than one player, a battle will take place.  Using a Risk-like methodology, units will be removed until only one player's units are left, and that player will then control that square.  The player with more units has a higher likelihood of winning.</li>
+        <li>Any square on which there is only a single player's unit becomes owned by that player.</li>
+        <li>Any square with a resource amount that is owned by a player will generate one unit for that player and reduce the number of resources on that square by one.</li>
     </ol>
 
     <h2>Resources</h2>
@@ -47,7 +51,8 @@
 
     <h2>Walls</h2>
     <p>Unlike some games, walls are not owned by any player.  When you build a wall, you forfeit that square.  However, because the builder chooses where a wall is placed, you can slow the spread of an enemy with them.  Anyone can attack a wall at any time.  Settlements can not be created on a walled square, and walls can not be placed on a settlement.</p>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
-
-

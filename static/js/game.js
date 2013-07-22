@@ -15,7 +15,7 @@ getViewWidth = function() {
 };
 
 getViewHeight = function() {
-  return Math.floor(($(window).height() - (110 + 24)) / GRID_SIZE);
+  return Math.floor(($(window).height() - 96) / GRID_SIZE);
 };
 
 getCoordsHalfOffset = function(position, length) {
@@ -150,7 +150,7 @@ GAME = {
         };
       };
       vm.modifyUnit = function(square, event) {
-        var canPlace, count, found, i, other, placement, squares, unit, _i, _j, _k, _l, _len, _len1, _len2, _m, _n, _ref, _ref1, _ref2, _ref3, _results, _results1, _results2;
+        var canPlace, count, found, i, other, placement, squares, unit, _i, _j, _k, _l, _len, _len1, _len2, _m, _n, _ref, _ref1, _ref2, _ref3, _results, _results1;
         if (!(Math.abs(lastViewX - vm.viewX()) < 5 && Math.abs(lastViewY - vm.viewY()) < 5)) {
           return;
         }
@@ -272,11 +272,25 @@ GAME = {
           }
           return _results;
         } else if (vm.unitAction() === 'settle') {
-          _results1 = [];
           for (i = _m = 0, _ref2 = square.units().length; 0 <= _ref2 ? _m < _ref2 : _m > _ref2; i = 0 <= _ref2 ? ++_m : --_m) {
             unit = square.units()[i];
             if (unit.owner === vm.accountID) {
+              if (square.wallHealth() > 0) {
+                alert('You can not settle on a square with a wall.');
+                return;
+              }
               square.resourceAmount(square.resourceAmount() + unit.amount() * 4);
+              square.units.splice(i, 1);
+              break;
+            }
+          }
+        } else if (vm.unitAction() === 'wall') {
+          _results1 = [];
+          for (i = _n = 0, _ref3 = square.units().length; 0 <= _ref3 ? _n < _ref3 : _n > _ref3; i = 0 <= _ref3 ? ++_n : --_n) {
+            unit = square.units()[i];
+            if (unit.owner === vm.accountID) {
+              square.wallHealth(square.wallHealth() + unit.amount() * 2);
+              square.resourceAmount(0);
               square.units.splice(i, 1);
               break;
             } else {
@@ -284,19 +298,6 @@ GAME = {
             }
           }
           return _results1;
-        } else if (vm.unitAction() === 'wall') {
-          _results2 = [];
-          for (i = _n = 0, _ref3 = square.units().length; 0 <= _ref3 ? _n < _ref3 : _n > _ref3; i = 0 <= _ref3 ? ++_n : --_n) {
-            unit = square.units()[i];
-            if (unit.owner === vm.accountID) {
-              square.wallHealth(square.wallHealth() + unit.amount() * 2);
-              square.units.splice(i, 1);
-              break;
-            } else {
-              _results2.push(void 0);
-            }
-          }
-          return _results2;
         }
       };
       sectorsLoaded = {};

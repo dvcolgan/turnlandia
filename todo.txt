@@ -1,2 +1,25 @@
 Signs to trash talk people with
 Prevent walls built on settlements and vice versa
+Save an image of the entire viewable board at the end of every day
+Scale down the images of the board and implement a google maps style zoom feature
+you can zoom whenever you want, but you can only do actions at the lowest zoom level
+make a bug tracker
+chat functionality
+private messaging
+feedback thingy
+    suggest new leader and people names
+    report bugs
+    vote for new features
+leaderboard
+    number of squares controlled
+    number of units
+
+
+add a credits page
+
+donations link
+ad-free, some sort of premium hat for payers of $5 a month
+
+add an undo feature, if for nothing else, the last action
+
+scroll the coordinates when you scroll the map

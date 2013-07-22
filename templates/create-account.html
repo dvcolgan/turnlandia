@@ -4,69 +4,35 @@
 {% block title %}Create An Account{% endblock %}
 
 {% block content %}
-<div class="panel">
-    <h1>Create Thine Account</h1>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-4 col-lg-offset-4">
 
-    {{ form.non_field_errors }}
-    <form action="" method="POST">{% csrf_token %}
-        <table class="mbl">
-        <tbody>
-
-        <tr>
-            <td colspan="2">
-                <label>
-                    <strong>Username?</strong>
-                    <small><em>Log in with this.</em></small>
-                </label>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                {{ form.username }}
-            </td>
-            <td>
-                {{ form.username.errors }}
-            </td>
-        </tr>
-
-        <tr>
-            <td colspan="2">
-                <label>
-                    <strong>Password?</strong>
-                    <small><em>Make it real secure.</em></small>
-                </label>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                {{ form.password1 }}
-            </td>
-            <td>
-                {{ form.password1.errors }}
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <label>
-                    <strong>Retype Password?</strong>
-                    <small><em>Just in case.</em></small>
-                </label>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                {{ form.password2 }}
-            </td>
-            <td>
-                {{ form.password2.errors }}
-            </td>
-        </tr>
-        </tbody>
-        </table>
-        <div class="button-holder">
-            <input type="submit" class="call-to-action-button" value="Create that account!" />
+            <div class="well">
+                {{ form.non_field_errors }}
+                <form action="" method="POST">{% csrf_token %}
+                    <legend>Just a few questions for you:</legend>
+                    <div class="form-group">
+                        <label>Username? <small><em>Log in with this.</em></small></label>
+                        {{ form.username|add_class:"form-control" }}
+                        {{ form.username.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label>Password? <small><em>Make it real secure.</em></small></label>
+                        {{ form.password1|add_class:"form-control" }}
+                        {{ form.password1.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label>Retype Password? <small><em>Just in case.</em></small></label>
+                        {{ form.password2|add_class:"form-control" }}
+                        {{ form.password2.errors }}
+                    </div>
+                    <input type="submit" class="btn btn-success" value="Create that account!" />
+                </form>
+            </div>
         </div>
-    </form>
+    </div>
+</div>
 </div>
 {% endblock %}
 

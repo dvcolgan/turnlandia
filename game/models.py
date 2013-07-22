@@ -162,6 +162,7 @@ class SquareOccupiedException(Exception):
 class InvalidPlacementException(Exception):
     pass
 
+
 class Square(models.Model):
     col = models.IntegerField()
     row = models.IntegerField()
@@ -223,14 +224,15 @@ class Square(models.Model):
 
     def settle_units(self, account):
         unit = get_object_or_None(Unit, square=self, owner=account)
-        if unit:
+        if unit and self.wall_health == 0:
             self.resource_amount += unit.amount * 4
             self.save()
             unit.delete()
 
     def build_wall(self, account):
         unit = get_object_or_None(Unit, square=self, owner=account)
-        if self.resource_amount == 0 and unit != None:
+        if unit != None:
+            self.resource_amount = 0
             self.wall_health += unit.amount * 2
             self.save()
             unit.delete()

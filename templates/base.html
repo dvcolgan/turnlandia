@@ -14,24 +14,26 @@
     {% block head %}{% endblock %}
 
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/style.css">
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css">
 </head>
 <body class="{% block body_class %}{% endblock %}">
     <!--
-    <div class="project-wonderful-box" id="pw_adbox_67850_5_0"><table cellpadding="0" cellspacing="0" style="margin-bottom: 0;border-style:none;width:728px;background-color:#ffffff;"><tbody><tr style="background-color:#ffffff;"><td style="width:728px;background-color:#ffffff;vertical-align:top;text-align:center;"><a href="" target="_blank"><img src="{{ STATIC_URL }}images/ad.png" width="728" height="90" border="0" title="PokéFarm - Adopt an Egg, Join a World!" alt="PokéFarm - Adopt an Egg, Join a World!"></a></td></tr><tr><td style="background-color:#ffffff;" colspan="1"><center><a style="font-size:10px;color:#0000ff;line-height:1.2;text-decoration:none;font-weight:bold;background-color:#ffffff;font-family:tahoma,verdana,arial,helvetica,sans-serif;text-transform: none;letter-spacing:normal;text-shadow:none;white-space:normal;word-spacing:normal;" href="" target="_blank">Ads by Project Wonderful!  Your ad here, right now: $0</a></center></td></tr></tbody></table></div>
+    <div class="project-wonderful-box" id="pw_adbox_67850_5_0"><table cellpadding="0" cellspacing="0" style="margin-bottom: 0;border-style:none;width:728px;background-color:#ffffff;"><tbody><tr style="background-color:#ffffff;"><td style="width:728px;background-color:#ffffff;vertical-align:top;text-align:center;"><a href="" target="_blank"><img src="{{ STATIC_URL }}images/ad.png" width="728" height="90" border="0"></a></td></tr><tr><td style="background-color:#ffffff;" colspan="1"><center><a style="font-size:10px;color:#0000ff;line-height:1.2;text-decoration:none;font-weight:bold;background-color:#ffffff;font-family:tahoma,verdana,arial,helvetica,sans-serif;text-transform: none;letter-spacing:normal;text-shadow:none;white-space:normal;word-spacing:normal;" href="" target="_blank">Ads by Project Wonderful!  Your ad here, right now: $0</a></center></td></tr></tbody></table></div>
     -->
-    <div id="header-bar">
-        <ul class="top-menu pull-left">
-            <li><a href="{% url 'home' %}">Turn Based Game</a></li>
-
+    <div class="navbar navbar-inverse">
+        {% if request.user.is_authenticated %}
+        <a class="navbar-brand" href="{% url 'game' %}">Turn. Based. Game.</a>
+        {% else %}
+        <a class="navbar-brand" href="{% url 'home' %}">Turn. Based. Game.</a>
+        {% endif %}
+        {% block game_toolbar %}{% endblock %}
+        <ul class="nav navbar-nav pull-right">
             {% if request.user.is_authenticated %}
             <li><a href="{% url 'game' %}">{{ player_count }} players on turn {{ day_counter }}</a></li>
             {% else %}
             <li><a href="{% url 'create-account' %}">Join {{ player_count }} players on turn {{ day_counter }}</a></li>
             {% endif %}
-        </ul>
-        <ul class="top-menu pull-right">
             {% if request.user.is_authenticated %}
-            <li><a href="{% url 'game' %}">Game</a></li>
             <li><a href="{% url 'how-to-play' %}">How to Play</a></li>
             <li><a href="{% url 'settings' %}">Account Settings</a></li>
             <li><a href="{% url 'logout' %}">Log Out</a></li>
@@ -41,14 +43,17 @@
             {% endif %}
         </ul>
     </div>
+
     {% block content %}{% endblock %}
+
     <script src='{{ STATIC_URL }}js/jquery-2.0.1.min.js'></script>
+    <script src='{{ STATIC_URL }}bootstrap/js/bootstrap.js'></script>
     <script src="{{ STATIC_URL }}js/colorpicker/colorpicker.min.js"></script>
     <script src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
     <script src="{{ STATIC_URL }}js/knockout-2.3.0.js"></script>
+    <script src="{{ STATIC_URL }}js/custom-knockout-bindings.js"></script>
     <script src="{{ STATIC_URL }}js/spin.min.js"></script>
     <script src="{{ STATIC_URL }}js/game.js"></script>
     {% block foot %}{% endblock %}
 </body>
 </html>
-

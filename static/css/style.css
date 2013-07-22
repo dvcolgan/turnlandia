@@ -1,213 +1,5 @@
-html,
-body,
-div,
-span,
-applet,
-object,
-iframe,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p,
-blockquote,
-pre,
-a,
-abbr,
-acronym,
-address,
-big,
-cite,
-code,
-del,
-dfn,
-em,
-img,
-ins,
-kbd,
-q,
-s,
-samp,
-small,
-strike,
-strong,
-sub,
-sup,
-tt,
-var,
-b,
-u,
-i,
-center,
-dl,
-dt,
-dd,
-ol,
-ul,
-li,
-fieldset,
-form,
-label,
-legend,
-table,
-caption,
-tbody,
-tfoot,
-thead,
-tr,
-th,
-td,
-article,
-aside,
-canvas,
-details,
-embed,
-figure,
-figcaption,
-footer,
-header,
-hgroup,
-menu,
-nav,
-output,
-ruby,
-section,
-summary,
-time,
-mark,
-audio,
-video {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  font-size: 100%;
-  font: inherit;
-  vertical-align: baseline;
-}
-article,
-aside,
-details,
-figcaption,
-figure,
-footer,
-header,
-hgroup,
-menu,
-nav,
-section {
-  display: block;
-}
 body {
-  line-height: 1;
-}
-ol,
-ul {
-  list-style: none;
-}
-blockquote,
-q {
-  quotes: none;
-}
-blockquote:before,
-blockquote:after,
-q:before,
-q:after {
-  content: '';
-  content: none;
-}
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-}
-/* Clearfix */
-.cf:before,
-.cf:after {
-  content: "";
-  display: table;
-}
-.cf:after {
-  clear: both;
-}
-.cf {
-  zoom: 1;
-}
-body {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  color: #111;
-  font-size: 16px;
-  line-height: 16px;
-  background-image: url(/static/images/tiny_grid.png);
-}
-h1,
-h2,
-h3,
-h4 {
-  font-family: 'Patua One', sans-serif;
-  text-shadow: 1px 1px 2px black;
-  margin-bottom: 20px;
-}
-h1 {
-  font-size: 48px;
-  line-height: 48px;
-}
-h2 {
-  font-size: 36px;
-  line-height: 36px;
-}
-h3 {
-  font-size: 24px;
-  line-height: 24px;
-}
-h4 {
-  font-size: 18px;
-  line-height: 18px;
-}
-small {
-  font-size: 80%;
-}
-em {
-  font-style: italic;
-}
-strong {
-  font-weight: bold;
-}
-a {
-  color: #ccc;
-}
-.panel {
-  color: white;
-  margin: 0 auto;
-  width: 500px;
-  background-color: #f8f8f8;
   background-image: url(/static/images/tweed.png);
-  padding: 20px;
-  border-radius: 8px;
-  border: 2px solid #444;
-  box-shadow: 4px 4px 4px #888;
-  margin-top: 20px;
-}
-.panel.wide {
-  width: 650px;
-}
-.panel ul,
-.panel ol {
-  margin-bottom: 12px;
-}
-.panel ul li,
-.panel ol li {
-  margin-left: 20px;
-  margin-bottom: 4px;
-}
-.panel ul li {
-  list-style-type: disc;
-}
-.panel ol li {
-  list-style-type: decimal;
-}
-.panel p {
-  margin-bottom: 12px;
 }
 .color-swatch {
   width: 120px;
@@ -217,72 +9,10 @@ a {
   border: 2px solid #333;
   position: relative;
 }
-.form-error,
-.errorlist {
-  color: red;
-}
-.pull-left {
-  float: left;
-}
-.pull-right {
-  float: right;
-}
-form input[type="text"],
-form input[type="password"] {
-  border: 2px solid #444;
-  border-radius: 4px;
-  padding: 4px;
-}
-form table {
-  width: 100%;
-}
-form table td {
-  width: 50%;
-  vertical-align: middle;
-  text-align: left;
-  padding-right: 8px;
-}
-form table td input {
-  width: 90%;
-}
-form table tr:nth-child(even) td {
-  padding-bottom: 10px;
-}
-#header-bar {
-  background-color: #ccc;
-  height: 20px;
-  width: 100%;
-  color: black;
-  border-bottom: 1px solid #888;
-}
-#header-bar .top-menu.pull-left li {
-  border-right: 2px solid #888;
-}
-#header-bar .top-menu.pull-right li {
-  border-left: 2px solid #888;
-}
-#header-bar .top-menu {
-  margin-bottom: 0;
-}
-#header-bar .top-menu li {
-  float: left;
-  display: block;
-  height: 20px;
-}
-#header-bar .top-menu li a {
-  text-decoration: none;
-  padding: 0 10px;
-  line-height: 20px;
-  height: 20px;
-  display: block;
-  color: black;
-}
-#header-bar .top-menu li a:hover {
-  text-decoration: underline;
-  background-color: #444;
-  color: white;
-}
 #top-coords {
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
   margin-left: 48px;
 }
 #top-coords .top-coord {
@@ -292,7 +22,9 @@ form table tr:nth-child(even) td {
   float: left;
 }
 #side-coords {
-  float: left;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
 }
 #side-coords .side-coord {
   width: 48px;
@@ -301,8 +33,10 @@ form table tr:nth-child(even) td {
   text-align: center;
 }
 #board {
+  background-color: white;
   margin-left: 48px;
   position: relative;
+  font-size: 16px;
   border: 2px solid #444;
   overflow: hidden;
 }
@@ -325,6 +59,8 @@ form table tr:nth-child(even) td {
   box-shadow: inset 0 0 0 1px white;
   margin-left: -6px;
   margin-top: -6px;
+  width: 60px;
+  height: 60px;
   border-radius: 3px;
   z-index: 10;
 }
@@ -342,7 +78,7 @@ form table tr:nth-child(even) td {
   left: 0;
 }
 #board .wall {
-  background-image: url(/static/images/wall-new.png);
+  background-image: url(/static/images/wall-tile.png);
   width: 48px;
   height: 48px;
   line-height: 48px;
@@ -355,9 +91,9 @@ form table tr:nth-child(even) td {
   top: 0;
 }
 #board .unit {
-  width: 20px;
-  height: 20px;
-  line-height: 20px;
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
   text-align: center;
   font-weight: bold;
   color: white;
@@ -421,71 +157,11 @@ form table tr:nth-child(even) td {
   bottom: 2px;
 }
 .action-buttons {
-  margin: 10px;
-  display: block;
+  margin-left: 48px;
+  margin-bottom: 6px;
 }
-.action-buttons label {
-  line-height: 24px;
-  display: block;
-  float: left;
-  padding: 4px 6px;
-  border: 2px solid #444;
-  border-bottom-width: 5px;
-  color: white;
-  font-size: 20px;
-  background-image: url(/static/images/bumpy.png);
-  cursor: pointer;
-  background-color: #7AAF7A;
-}
-.action-buttons label .unit {
-  width: 20px;
-  height: 20px;
-  line-height: 20px;
-  text-align: center;
-  font-weight: bold;
-  color: white;
-  text-shadow: 1px 0 0 #000000, 0 -1px 0 #000000, 0 1px 0 #000000, -1px 0 0 #000000;
+.action-buttons .btn {
   font-size: 16px;
-  border-radius: 20px;
-  border: 1px solid black;
-  display: block;
-  float: right;
-  margin-left: 8px;
-}
-.action-buttons label:first-child {
-  border-left: 2px solid #444;
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-}
-.action-buttons label:last-child {
-  border-right: 2px solid #444;
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-.action-buttons label:hover {
-  color: yellow;
-  border-bottom-width: 7px;
-  margin-top: -2px;
-}
-.action-buttons label:active,
-.action-buttons label.active {
-  background-color: #2BA02B;
-  border-color: black;
-}
-.action-buttons label:active {
-  border-bottom-width: 0px;
-  margin-top: 5px;
-}
-.action-buttons label.active {
-  border-bottom-width: 2px;
-  margin-top: 3px;
-}
-.action-buttons label input[type="radio"] {
-  visibility: hidden;
-  display: none;
-}
-.action-buttons label img {
-  vertical-align: middle;
 }
 .arrow-controls {
   width: 150px;
@@ -520,81 +196,6 @@ form table tr:nth-child(even) td {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-}
-.icon-editor {
-  background-color: white;
-  border: 1px solid black;
-  box-shadow: 2px 2px 2px black;
-  width: 528px;
-  height: 528px;
-}
-.icon-editor .icon-editor-row {
-  clear: both;
-}
-.icon-editor .icon-editor-row .icon-editor-pixel {
-  width: 20px;
-  height: 20px;
-  border: 1px dotted #888;
-  float: left;
-  cursor: crosshair;
-}
-.icon-editor .icon-editor-row .icon-editor-pixel:active,
-.icon-editor .icon-editor-row .icon-editor-pixel:focus {
-  cursor: crosshair;
-}
-.icon-editor-small {
-  background-color: white;
-}
-.icon-editor-small .icon-editor-row {
-  clear: both;
-}
-.icon-editor-small .icon-editor-row .icon-editor-pixel {
-  width: 20px;
-  height: 20px;
-  border: 1px solid white;
-  float: left;
-}
-.button-holder {
-  height: 50px;
-  width: 100%;
-}
-.call-to-action-button {
-  position: relative;
-  width: 220px;
-  text-align: center;
-  display: block;
-  padding: 8px 20px;
-  border: 2px solid black;
-  border-bottom-width: 5px;
-  border-radius: 4px;
-  color: white;
-  font-size: 20px;
-  background-image: url(/static/images/bumpy.png);
-  cursor: pointer;
-  background-color: #2BA02B;
-  text-decoration: none;
-}
-.call-to-action-button:hover {
-  text-decoration: none;
-  color: yellow;
-  border-bottom-width: 7px;
-  top: -2px;
-}
-.call-to-action-button:active {
-  border-bottom-width: 2px;
-  top: 5px;
-}
-.mbs {
-  margin-bottom: 10px;
-}
-.mbl {
-  margin-bottom: 20px;
-}
-.pbs {
-  padding-bottom: 10px;
-}
-.pbl {
-  padding-bottom: 20px;
 }
 #players-summary {
   float: right;

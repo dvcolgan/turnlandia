@@ -7,7 +7,7 @@ randomChoice = (collection) ->
 getViewWidth = ->
     Math.floor(($(window).width() - (48+20)) / GRID_SIZE)
 getViewHeight = ->
-    Math.floor(($(window).height() - (110+24)) / GRID_SIZE)
+    Math.floor(($(window).height() - 96) / GRID_SIZE)
 
 # given position and a width or height, return the coords that it would encompass
 getCoordsHalfOffset = (position, length) ->
@@ -297,6 +297,9 @@ GAME =
                     for i in [0...square.units().length]
                         unit = square.units()[i]
                         if unit.owner == vm.accountID
+                            if square.wallHealth() > 0
+                                alert('You can not settle on a square with a wall.')
+                                return
                             square.resourceAmount(square.resourceAmount()+unit.amount()*4)
                             square.units.splice(i, 1)
                             break
@@ -307,6 +310,7 @@ GAME =
                         unit = square.units()[i]
                         if unit.owner == vm.accountID
                             square.wallHealth(square.wallHealth()+unit.amount()*2)
+                            square.resourceAmount(0)
                             square.units.splice(i, 1)
                             break
 
@@ -473,8 +477,6 @@ GAME =
         #    top: (getViewHeight() * GRID_SIZE) / 2 - 120
         #    left: 'auto'
         #spinner = new Spinner(opts).spin($('#board').get(0))
-
-
 
 
 
