@@ -78,7 +78,7 @@ body {
   left: 0;
 }
 #board .wall {
-  background-image: url(/static/images/wall-tile.png);
+  background-image: url(/static/images/wall-new.png);
   width: 48px;
   height: 48px;
   line-height: 48px;

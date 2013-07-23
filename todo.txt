@@ -32,3 +32,9 @@ add an undo feature, if for nothing else, the last action
 scroll the coordinates when you scroll the map
 
 make exceptions and throw them at people on stream
+
+take down the game while it is resolving
+
+take down the site from 12 - 12:30
+
+add bases that if you lose them you die or something
