@@ -414,6 +414,8 @@ GAME =
             vm.loadSector(0, -20)
             vm.loadSector(-20, -20)
 
+            vm.loadSector(-30, 10)
+            vm.loadSector(-30, 0)
 
 
             $('#board').mousedown (event) ->

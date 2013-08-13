@@ -61,12 +61,15 @@ class Command(BaseCommand):
 
     def resolve_battles(self):
         for square in Square.objects.all():
-            if square.units.count() > 1:
+            while square.units.count() > 1:
+
+                # Find the unit with the highest amount
                 largest = 0
                 for unit in square.units.all():
                     if largest < unit.amount:
                         largest = unit.amount
 
+                # Calculate the score for each unit based on their amount
                 battle_scores = []
                 for unit in square.units.all():
                     battle_scores.append(random.random() * unit.amount / largest)
@@ -79,11 +82,18 @@ class Command(BaseCommand):
                         winner_idx = i
 
                 winning_unit = square.units.all()[winner_idx]
-                print 'On square (%d, %d), %s (%d units, %.3f) defeated ' % (square.col, square.row, unit.owner.leader_name, winning_unit.amount, battle_scores[winner_idx]),
+                print 'On square (%d, %d), ' % (square.col, square.row),
                 for i, unit in enumerate(square.units.all()):
                     if unit != winning_unit:
-                        print ' %s (%d units, %.3f) ' % (unit.owner.leader_name, unit.amount, battle_scores[i]),
-                        unit.delete()
+                        print '%s loses (%d units, %.3f) ' % (unit.owner.leader_name, unit.amount, battle_scores[i]),
+                        unit.amount -= 1
+                        if unit.amount == 0:
+                            unit.delete()
+                            print
+                        else:
+                            unit.save()
+                    else:
+                        print '%s wins (%d units, %.3f) ' % (winning_unit.owner.leader_name, winning_unit.amount, battle_scores[winner_idx]),
                 print
 
 
