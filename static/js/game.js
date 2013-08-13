@@ -279,8 +279,11 @@ GAME = {
                 alert('You can not settle on a square with a wall.');
                 return;
               }
-              square.resourceAmount(square.resourceAmount() + unit.amount() * 4);
-              square.units.splice(i, 1);
+              square.resourceAmount(square.resourceAmount() + 4);
+              square.units()[i].amount(square.units()[i].amount() - 1);
+              if (square.units()[i].amount() === 0) {
+                square.units.splice(i, 1);
+              }
               break;
             }
           }
@@ -289,9 +292,12 @@ GAME = {
           for (i = _n = 0, _ref3 = square.units().length; 0 <= _ref3 ? _n < _ref3 : _n > _ref3; i = 0 <= _ref3 ? ++_n : --_n) {
             unit = square.units()[i];
             if (unit.owner === vm.accountID) {
-              square.wallHealth(square.wallHealth() + unit.amount() * 2);
+              square.wallHealth(square.wallHealth() + 2);
               square.resourceAmount(0);
-              square.units.splice(i, 1);
+              square.units()[i].amount(square.units()[i].amount() - 1);
+              if (square.units()[i].amount() === 0) {
+                square.units.splice(i, 1);
+              }
               break;
             } else {
               _results1.push(void 0);

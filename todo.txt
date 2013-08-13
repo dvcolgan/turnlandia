@@ -1,13 +1,14 @@
 autogenerate a color, or don't let you past without a color
 usernames noncase sensitive
-style login page
 
 add twitch tv dev schedule on the site
 
 outline peoples territory with a red line or something
 Signs to trash talk people with
 Prevent walls built on settlements and vice versa
+
 Save an image of the entire viewable board at the end of every day
+
 Scale down the images of the board and implement a google maps style zoom feature
 you can zoom whenever you want, but you can only do actions at the lowest zoom level
 make a bug tracker

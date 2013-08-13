@@ -300,8 +300,10 @@ GAME =
                             if square.wallHealth() > 0
                                 alert('You can not settle on a square with a wall.')
                                 return
-                            square.resourceAmount(square.resourceAmount()+unit.amount()*4)
-                            square.units.splice(i, 1)
+                            square.resourceAmount(square.resourceAmount()+4)
+                            square.units()[i].amount(square.units()[i].amount()-1)
+                            if square.units()[i].amount() == 0
+                                square.units.splice(i, 1)
                             break
 
                 else if vm.unitAction() == 'wall'
@@ -309,9 +311,11 @@ GAME =
                     for i in [0...square.units().length]
                         unit = square.units()[i]
                         if unit.owner == vm.accountID
-                            square.wallHealth(square.wallHealth()+unit.amount()*2)
+                            square.wallHealth(square.wallHealth()+2)
                             square.resourceAmount(0)
-                            square.units.splice(i, 1)
+                            square.units()[i].amount(square.units()[i].amount()-1)
+                            if square.units()[i].amount() == 0
+                                square.units.splice(i, 1)
                             break
 
 

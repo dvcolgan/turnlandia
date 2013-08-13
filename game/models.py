@@ -225,17 +225,25 @@ class Square(models.Model):
     def settle_units(self, account):
         unit = get_object_or_None(Unit, square=self, owner=account)
         if unit and self.wall_health == 0:
-            self.resource_amount += unit.amount * 4
+            self.resource_amount += 4
             self.save()
-            unit.delete()
+            unit.amount -= 1
+            if unit.amount == 0:
+                unit.delete()
+            else:
+                unit.save()
 
     def build_wall(self, account):
         unit = get_object_or_None(Unit, square=self, owner=account)
         if unit != None:
             self.resource_amount = 0
-            self.wall_health += unit.amount * 2
+            self.wall_health += 2
             self.save()
-            unit.delete()
+            unit.amount -= 1
+            if unit.amount == 0:
+                unit.delete()
+            else:
+                unit.save()
 
     def initial_placement(self, account):
         if Unit.objects.filter(owner=account).count() == 0 and Square.objects.filter(owner=account).count() == 0:
