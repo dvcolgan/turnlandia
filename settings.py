@@ -35,7 +35,13 @@ SERVER = 'local'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
-#POSTMARK_API_KEY = '16666bca-f5be-4bd9-8bde-6b3dd27b9f7a'
+MIN_COL = -40
+MAX_COL = 20
+MIN_ROW = -30
+MAX_ROW = 20
+GRID_SIZE = 48
+
+
 #
 #SERVER_EMAIL = 'update@conferam.com'
 #EMAIL_HOST = 'smtp.postmarkapp.com'

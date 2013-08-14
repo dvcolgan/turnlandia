@@ -17,6 +17,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from settings import MIN_COL, MAX_COL, MIN_ROW, MAX_ROW
 
 from django.utils import simplejson
 import random
@@ -137,7 +138,7 @@ def api_sector(request, col, row, width, height):
 
     # TODO a lot of this function can be computed on the turn change and then cached, do this if we get a bunch of traffic
     # TODO make this instead limit it to a few screens beyond where the furthest person is
-    if col > 20 or col < -40 or row > 20 or row < -30:
+    if col > MAX_COL or col < MIN_COL or row > MAX_ROW or row < MIN_ROW:
         return Response({
             'error': 'I really don\'t feel like fetching the map that far out.'
         }, status=status.HTTP_400_BAD_REQUEST)
