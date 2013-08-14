@@ -30,24 +30,28 @@ class Command(BaseCommand):
     def generate_units_from_resources(self):
         for square in Square.objects.all():
 
-            # If you are the only one claiming this square, you get it
+            # If the square is owned and has a resource, we will be generating a unit
             if square.resource_amount > 0 and square.owner != None:
                 found = False
                 for unit in square.units.all():
                     if unit.owner == square.owner:
-                        unit.amount += 1
                         square.resource_amount -= 1
-                        unit.save()
+                        # If there's a battle going on, place the unit on the square
+                        if square.units.count() > 1:
+                            unit.amount += 1
+                            unit.save()
+                        # Otherwise just put the unit into the unplaced units
+                        else:
+                            square.owner.unplaced_units += 1
+                            square.owner.save()
+
                         square.save()
                         found = True
                         break
                 if not found:
                     # There are no units on the square, so add a new one
-                    square.units.add(Unit(
-                        owner=square.owner,
-                        square=square,
-                        amount = 1
-                    ))
+                    square.owner.unplaced_units += 1
+                    square.owner.save()
                     square.resource_amount -= 1
                     square.save()
 

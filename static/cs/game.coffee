@@ -115,11 +115,7 @@ GAME =
         lastViewY = 0
         dragging = false
 
-        resizeBoard = ->
-            $('#board').width(getViewWidth() * GRID_SIZE).height(getViewHeight() * GRID_SIZE)
-            # TODO Force update to coordinatse on the side, make them computed observables 
-        $(window).resize(resizeBoard)
-        resizeBoard()
+        $('#board').width(getViewWidth() * GRID_SIZE).height(getViewHeight() * GRID_SIZE)
 
         gameViewModel = ->
             vm = @
@@ -143,9 +139,8 @@ GAME =
 
             #gridPos = getColRowFromHash()
             #xyPos = getXYFromColRow(gridPos)
-            vm.viewX = ko.observable(0 + $('#board').width()/2)
-            vm.viewY = ko.observable(0 + $('#board').height()/2)
-
+            vm.viewX = ko.observable(-$('#board').width()/2)
+            vm.viewY = ko.observable(-$('#board').height()/2)
 
             vm.topCoords = ko.observableArray(getCoordsHalfOffset(0, getViewWidth()))
             vm.sideCoords = ko.observableArray(getCoordsHalfOffset(0, getViewHeight()))
@@ -321,14 +316,31 @@ GAME =
                             break
 
 
-            sectorsLoaded = {}
 
+            vm.loadSectorsOnScreen = () ->
+                #for x in [-20...20] by 10
+                #    for y in [-10...10] by 10
+                #        vm.loadSector(x, y)
+
+                sectorPixelSize = SECTOR_SIZE * GRID_SIZE
+                sectorsWide  = Math.ceil(getViewWidth() / SECTOR_SIZE)
+                sectorsHigh = Math.ceil(getViewHeight() / SECTOR_SIZE)
+
+                for sectorX in [0..sectorsWide]
+                    for sectorY in [0..sectorsHigh]
+                        x = (Math.floor(vm.viewX() / sectorPixelSize) * SECTOR_SIZE) + sectorX * SECTOR_SIZE
+                        y = (Math.floor(vm.viewY() / sectorPixelSize) * SECTOR_SIZE) + sectorY * SECTOR_SIZE
+                        vm.loadSector(x, y)
+
+
+            sectorsLoaded = {}
             vm.loadSector = (col, row) ->
 
                 lookup = col+ ' ' + row
-                if lookup in sectorsLoaded
-                    console.log 'already loaded'
+                if lookup of sectorsLoaded
                     return
+                else
+                    sectorsLoaded[lookup] = true
 
                 $.getJSON '/api/sector/'+col+'/'+row+'/'+SECTOR_SIZE+'/'+SECTOR_SIZE+'/', (data, status) ->
                     if status == 'success'
@@ -380,10 +392,7 @@ GAME =
                     else
                         alert(JSON.stringify(data))
 
-            for x in [-30..30] by 10
-                for y in [-30..30] by 10
-                    vm.loadSector(x, y)
-
+            vm.loadSectorsOnScreen()
 
 
             $('#board').mousedown (event) ->
@@ -398,26 +407,10 @@ GAME =
             $('#board').mousemove (event) ->
                 if dragging
                     event.preventDefault()
-                    vm.viewX(lastViewX + (event.clientX - lastMouseX))
-                    vm.viewY(lastViewY + (event.clientY - lastMouseY))
+                    vm.viewX(lastViewX - (event.clientX - lastMouseX))
+                    vm.viewY(lastViewY - (event.clientY - lastMouseY))
 
-                    #size = SECTOR_SIZE * GRID_SIZE
-
-                    #roundedX = Math.floor(vm.viewX() / size)
-                    #roundedY = Math.floor(vm.viewY() / size)
-
-                    #vm.loadSector(roundedX, roundedY)
-
-                    #vm.loadSector(roundedX, roundedY-size)
-                    #vm.loadSector(roundedX-size, roundedY)
-                    #vm.loadSector(roundedX-size, roundedY-size)
-
-                    #vm.loadSector(roundedX, roundedY+size)
-                    #vm.loadSector(roundedX+size, roundedY)
-                    #vm.loadSector(roundedX+size, roundedY+size)
-
-                    #vm.loadSector(roundedX+size, roundedY-size)
-                    #vm.loadSector(roundedX-size, roundedY+size)
+                    vm.loadSectorsOnScreen()
 
             $(document).mouseup (event) ->
                 dragging = false
@@ -428,6 +421,14 @@ GAME =
                     when 50 then vm.unitAction('remove')
                     when 51 then vm.unitAction('settle')
                     when 52 then vm.unitAction('wall')
+
+            resizeBoard = ->
+                $('#board').width(getViewWidth() * GRID_SIZE).height(getViewHeight() * GRID_SIZE)
+                # TODO Force update to coordinatse on the side, make them computed observables 
+                vm.loadSectorsOnScreen()
+            $(window).resize(resizeBoard)
+            resizeBoard()
+
 
 
             null # return null or the view model will break because coffeescript

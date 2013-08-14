@@ -48,6 +48,8 @@
     <label class="btn btn-success" data-bind="css: { active: unitAction() === 'give'    }"><button type="button" data-bind="checked: unitAction" value="give"   ><img src="{{ STATIC_URL }}images/give-icon.png"  /> Give Units</label>
     -->
 </div>
+<button class="btn" data-bind="text: viewX"></button>
+<button class="btn" data-bind="text: viewY"></button>
 {% endblock %}
 
 
@@ -90,8 +92,8 @@
     <!-- ko foreach: sectors -->
         <div class="sector disable-select" data-bind="
             style: {
-                left: (col * GRID_SIZE + $parent.viewX()) + 'px',
-                top: (row * GRID_SIZE + $parent.viewY()) + 'px'
+                left: (col * GRID_SIZE - $parent.viewX()) + 'px',
+                top: (row * GRID_SIZE - $parent.viewY()) + 'px'
             }">
             <!-- ko foreach: squares -->
                 <div class="grid-square" data-bind="
