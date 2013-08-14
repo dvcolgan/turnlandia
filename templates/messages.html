@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load custom_tags %}
+{% block title %}{{ request.user.username }}'s messages{% endblock %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block body_class %}messages{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2">
+            <div class="well">
+                <h2>Private Messages</h2>
+                <p>A messenger hastily rushes up to you, handing you a large pile of scrolls. "Messages for you, Oh Great {{ request.user.leader_name }}!" he cries, promptly passing out due to exhaustion immediately after.</p>
+                <ul class="nav nav-tabs" id="message-tabs">
+                    <li class="active"><a href="#received" data-toggle="tab">Received</a></li>
+                    <li><a href="#sent" data-toggle="tab">Sent</a></li>
+                </ul>
+                <div class="tab-content">
+
+                    <div class="tab-pane active" id="received">
+                        <div class="accordion" id="accordion-received">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <td>From</td>
+                                        <td>Subject</td>
+                                        <td>Time Sent</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for message in received_messages %}
+                                    <tr>
+                                        <td><strong>{{ message.sender.username }}</strong></td>
+                                        <td>{{ message.subject }}</td>
+                                        <td>{{ message.time_sent }}</td>
+                                        <td>
+                                            <div class="accordion-group">
+                                                <div class="accordion-heading">
+                                                    <a class="btn btn-primary accordion-toggle"
+                                                            data-toggle="collapse"
+                                                            data-parent="#accordion-received"
+                                                            href="#collapse-received-{{ forloop.counter }}">
+                                                        Show Message
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="4">
+                                            <div id="collapse-received-{{ forloop.counter }}" class="accordion-body collapse">
+                                            <div class="well accordion-inner no-bottom-margin">
+                                                {{ message.body }}
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {% comment %} Maybe remove this duplication at some point {% endcomment %}
+                    <div class="tab-pane" id="sent">
+                        <div class="accordion" id="accordion-sent">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <td>To</td>
+                                        <td>Subject</td>
+                                        <td>Time Sent</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for message in sent_messages %}
+                                    <tr>
+                                        <td><strong>{{ message.receiver.username }}</strong></td>
+                                        <td>{{ message.subject }}</td>
+                                        <td>{{ message.time_sent }}</td>
+                                        <td>
+                                            <div class="accordion-group">
+                                                <div class="accordion-heading">
+                                                    <a class="btn btn-primary accordion-toggle"
+                                                            data-toggle="collapse"
+                                                            data-parent="#accordion-sent"
+                                                            href="#collapse-sent-{{ forloop.counter }}">
+                                                        Show Message
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="4">
+                                            <div id="collapse-sent-{{ forloop.counter }}" class="accordion-body collapse">
+                                            <div class="well accordion-inner no-bottom-margin">
+                                                {{ message.body }}
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <p><a class="btn btn-success" href="{% url 'compose' %}">Compose New Message</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

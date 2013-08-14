@@ -80,6 +80,8 @@ GAME =
 
     create_accout: ->
 
+    messages: ->
+
     settings: ->
         settingsViewModel = ->
             vm = @
@@ -378,44 +380,9 @@ GAME =
                     else
                         alert(JSON.stringify(data))
 
-
-            # Initialize the board with empty squares
-            #for row in [0...getViewWidth()]
-            #    for col in [0...getViewHeight()]
-            #        console.log 'setting square'
-            #        vm.squares.push({
-            #            left: ko.observable(0)
-            #            top: ko.observable(0)
-            #            units: ko.observableArray([])
-            #            owner: ko.observable(0)
-            #            id: ko.observable(0)
-            #            ownerColor: ko.observable('')
-            #            x: ko.observable(0)
-            #            y: ko.observable(0)
-            #            wallHealth: ko.observable(0)
-            #            resourceAmount: ko.observable(0)
-            #        })
-
-            vm.loadSector(0, 0)
-            vm.loadSector(0, -10)
-            vm.loadSector(-10, 0)
-            vm.loadSector(-10, -10)
-            vm.loadSector(10, 0)
-            vm.loadSector(10, -10)
-            vm.loadSector(-20, -10)
-            vm.loadSector(-20, 0)
-
-            vm.loadSector(0, 10)
-            vm.loadSector(10, 10)
-            vm.loadSector(-10, 10)
-            vm.loadSector(-20, 10)
-            vm.loadSector(-10, -20)
-            vm.loadSector(10, -20)
-            vm.loadSector(0, -20)
-            vm.loadSector(-20, -20)
-
-            vm.loadSector(-30, 10)
-            vm.loadSector(-30, 0)
+            for x in [-30..30] by 10
+                for y in [-30..30] by 10
+                    vm.loadSector(x, y)
 
 
             $('#board').mousedown (event) ->

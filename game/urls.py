@@ -9,6 +9,7 @@ urlpatterns = patterns('game.views',
     url(r'^settings/$', 'settings', name='settings'),
 
     url(r'^game/$', 'game', name='game'),
+    url(r'^messages/$', 'messages', name='messages'),
 
     url(r'^how-to-play/$', 'how_to_play', name='how-to-play'),
 
@@ -17,7 +18,7 @@ urlpatterns = patterns('game.views',
     #url(r'^api/account/exists/username/(?P<username>.+)/$', 'api_username_existence', name='api-username-existence'),
     #url(r'^api/account/exists/email/(?P<email>.+)/$', 'api_email_existence', name='api-email-existence'),
 
-    url(r'^create-account/$', 'create_account', name='create-account'),
+    url(r'^messages/compose/$', 'compose', name='compose'),
     
     #url(r'^api/game/$',
     #    ListCreateAPIView.as_view(

@@ -32,3 +32,9 @@ class SettingsForm(forms.ModelForm):
     class Meta:
         model = Account
         fields = ('email', 'color', 'leader_name', 'people_name')
+
+
+class SendMessageForm(forms.ModelForm):
+    class Meta:
+        model = Message
+        fields = ('recipient', 'subject', 'body')

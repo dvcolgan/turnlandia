@@ -80,6 +80,31 @@ def game(request):
     player_count = Account.objects.count()
     return render(request, 'game.html', locals())
 
+
+@login_required
+def messages(request):
+    day_counter = Setting.objects.get_current_day()
+    player_count = Account.objects.count()
+    sent_messages = Message.objects.filter(sender=request.user)
+    received_messages = Message.objects.filter(recipient=request.user)
+    return render(request, 'messages.html', locals())
+
+@login_required
+def compose(request):
+    day_counter = Setting.objects.get_current_day()
+    player_count = Account.objects.count()
+
+    if request.method == 'POST':
+        form = SendMessageForm(request.POST)
+        form.instance.sender = request.user
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('messages'))
+    else:
+        form = SendMessageForm()
+    return render(request, 'compose.html', locals())
+
+
 class AccountAPIView(RetrieveAPIView, ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = AccountSerializer

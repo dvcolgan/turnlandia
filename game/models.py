@@ -330,3 +330,11 @@ class Setting(models.Model):
 
     def __unicode__(self):
         return '%s: %s' % (self.name, self.value)
+
+
+class Message(models.Model):
+    sender = models.ForeignKey(Account, related_name='sent_messages')
+    recipient = models.ForeignKey(Account, related_name='received_messages')
+    subject = models.CharField(max_length=255)
+    body = models.TextField()
+    time_sent = models.DateTimeField(auto_now=True)

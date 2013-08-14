@@ -53,6 +53,7 @@ GAME = {
   player_names: [['Frodo Baggins', 'Shire Hobbits'], ['Elrond', 'Mirkwood Elves'], ['Durin Darkhammer', 'Moria Dwarves'], ['Ness', 'Eagleland'], ['Daphnes Nohansen Hyrule', 'Hylians'], ['Aragorn son of Arathorn', 'Gondorians'], ['Strong Bad', 'Strongbadia'], ['Captain Homestar', 'The Team'], ['T-Rex', 'Dinosaurs'], ['Refrigerator', 'Kitchen Appliances'], ['The Burger King', 'Fast Foodies'], ['Larry King Live', 'Interviewees'], ['King', 'Mimigas'], ['Luke Skywalker', 'The Rebel Alliance'], ['Darth Vader', 'The Empire'], ['Jean-Luc Picard', 'The Enterprise'], ['The Borg Queen', 'The Borg'], ['Bowser', 'Koopas']],
   home: function() {},
   create_accout: function() {},
+  messages: function() {},
   settings: function() {
     var settingsViewModel, startingColor;
     settingsViewModel = function() {
@@ -93,7 +94,7 @@ GAME = {
     $(window).resize(resizeBoard);
     resizeBoard();
     gameViewModel = function() {
-      var sectorsLoaded, vm;
+      var sectorsLoaded, vm, x, y, _i, _j;
       vm = this;
       vm.accountID = window.accountID;
       vm.accountColor = window.accountColor;
@@ -368,24 +369,11 @@ GAME = {
           }
         });
       };
-      vm.loadSector(0, 0);
-      vm.loadSector(0, -10);
-      vm.loadSector(-10, 0);
-      vm.loadSector(-10, -10);
-      vm.loadSector(10, 0);
-      vm.loadSector(10, -10);
-      vm.loadSector(-20, -10);
-      vm.loadSector(-20, 0);
-      vm.loadSector(0, 10);
-      vm.loadSector(10, 10);
-      vm.loadSector(-10, 10);
-      vm.loadSector(-20, 10);
-      vm.loadSector(-10, -20);
-      vm.loadSector(10, -20);
-      vm.loadSector(0, -20);
-      vm.loadSector(-20, -20);
-      vm.loadSector(-30, 10);
-      vm.loadSector(-30, 0);
+      for (x = _i = -30; _i <= 30; x = _i += 10) {
+        for (y = _j = -30; _j <= 30; y = _j += 10) {
+          vm.loadSector(x, y);
+        }
+      }
       $('#board').mousedown(function(event) {
         event.preventDefault();
         lastMouseX = event.clientX;
