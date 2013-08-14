@@ -26,6 +26,8 @@ import ipdb
 import datetime
 
 def home(request):
+    if request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('game'))
     day_counter = Setting.objects.get_current_day()
     player_count = Account.objects.count()
     return render(request, 'home.html', locals())

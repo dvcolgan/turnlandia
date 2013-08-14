@@ -385,6 +385,7 @@ GAME =
                     vm.loadSector(x, y)
 
 
+
             $('#board').mousedown (event) ->
                 event.preventDefault()
                 lastMouseX = event.clientX

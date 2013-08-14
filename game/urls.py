@@ -11,6 +11,8 @@ urlpatterns = patterns('game.views',
     url(r'^game/$', 'game', name='game'),
     url(r'^messages/$', 'messages', name='messages'),
 
+    url(r'^create-account/$', 'create_account', name='create-account'),
+
     url(r'^how-to-play/$', 'how_to_play', name='how-to-play'),
 
     #url(r'^api/account/$', ListCreateAPIView.as_view(serializer_class=AccountSerializer, model=Account), name='api-account'),
