@@ -200,9 +200,9 @@ def api_square_unit_action(request, col, row, action):
         square.settle_units(request.user)
         return Response({})
 
-    elif action == 'wall':
-        square.build_wall(request.user)
-        return Response({})
+    #elif action == 'wall':
+    #    square.build_wall(request.user)
+    #    return Response({})
 
     elif action == 'initial':
         try:

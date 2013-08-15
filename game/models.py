@@ -224,7 +224,7 @@ class Square(models.Model):
 
     def settle_units(self, account):
         unit = get_object_or_None(Unit, square=self, owner=account)
-        if unit and self.wall_health == 0:
+        if unit and self.owner == account:
             self.resource_amount += 4
             self.save()
             unit.amount -= 1
@@ -233,17 +233,17 @@ class Square(models.Model):
             else:
                 unit.save()
 
-    def build_wall(self, account):
-        unit = get_object_or_None(Unit, square=self, owner=account)
-        if unit != None:
-            self.resource_amount = 0
-            self.wall_health += 2
-            self.save()
-            unit.amount -= 1
-            if unit.amount == 0:
-                unit.delete()
-            else:
-                unit.save()
+    #def build_wall(self, account):
+    #    unit = get_object_or_None(Unit, square=self, owner=account)
+    #    if unit != None:
+    #        self.resource_amount = 0
+    #        self.wall_health += 2
+    #        self.save()
+    #        unit.amount -= 1
+    #        if unit.amount == 0:
+    #            unit.delete()
+    #        else:
+    #            unit.save()
 
     def initial_placement(self, account):
         if Unit.objects.filter(owner=account).count() == 0 and Square.objects.filter(owner=account).count() == 0:
@@ -272,7 +272,7 @@ class Square(models.Model):
             }
             for count, squares in placement.iteritems():
                 for square in squares:
-                    if square.units.count() != 0 or square.wall_health != 0 or square.owner != None:
+                    if square.units.count() != 0 or square.owner != None:
                         raise SquareOccupiedException()
             # If there are no problems, create the units
             for count, squares in placement.iteritems():

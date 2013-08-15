@@ -48,7 +48,7 @@ urlpatterns = patterns('game.views',
 
     url(r'^api/sector/(?P<col>[0-9-]+)/(?P<row>[0-9-]+)/(?P<width>[0-9]+)/(?P<height>[0-9]+)/$', 'api_sector', name='api-sector'),
 
-    url(r'^api/square/(?P<col>[0-9-]+)/(?P<row>[0-9-]+)/(?P<action>initial|place|remove|settle|give|wall)/$', 'api_square_unit_action', name='api-square-unit-action'),
+    url(r'^api/square/(?P<col>[0-9-]+)/(?P<row>[0-9-]+)/(?P<action>initial|place|remove|settle|give)/$', 'api_square_unit_action', name='api-square-unit-action'),
 
     #url(r'^api/player/$',
     #    ListCreateAPIView.as_view(

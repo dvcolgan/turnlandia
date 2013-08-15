@@ -297,6 +297,9 @@ GAME =
                             if square.wallHealth() > 0
                                 alert('You can not settle on a square with a wall.')
                                 return
+                            if square.owner() != vm.accountID
+                                alert('You can not settle on a square you do not own.')
+                                return
                             square.resourceAmount(square.resourceAmount()+4)
                             square.units()[i].amount(square.units()[i].amount()-1)
                             if square.units()[i].amount() == 0
@@ -318,10 +321,6 @@ GAME =
 
 
             vm.loadSectorsOnScreen = () ->
-                #for x in [-20...20] by 10
-                #    for y in [-10...10] by 10
-                #        vm.loadSector(x, y)
-
                 sectorPixelSize = SECTOR_SIZE * GRID_SIZE
                 sectorsWide  = Math.ceil(getViewWidth() / SECTOR_SIZE)
                 sectorsHigh = Math.ceil(getViewHeight() / SECTOR_SIZE)
@@ -337,7 +336,7 @@ GAME =
             vm.loadSector = (col, row) ->
 
                 lookup = col+ ' ' + row
-                if lookup of sectorsLoaded
+                if lookup of sectorsLoaded or col > MAX_COL or col < MIN_COL or row > MAX_ROW or row < MIN_ROW
                     return
                 else
                     sectorsLoaded[lookup] = true
@@ -384,8 +383,6 @@ GAME =
 
                         if data.is_initial
                             vm.unitAction('initial')
-                        else
-                            vm.unitAction('place')
 
                         sectorsLoaded[lookup] = true
 

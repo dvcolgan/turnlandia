@@ -275,6 +275,10 @@ GAME = {
                 alert('You can not settle on a square with a wall.');
                 return;
               }
+              if (square.owner() !== vm.accountID) {
+                alert('You can not settle on a square you do not own.');
+                return;
+              }
               square.resourceAmount(square.resourceAmount() + 4);
               square.units()[i].amount(square.units()[i].amount() - 1);
               if (square.units()[i].amount() === 0) {
@@ -326,7 +330,7 @@ GAME = {
       vm.loadSector = function(col, row) {
         var lookup;
         lookup = col + ' ' + row;
-        if (lookup in sectorsLoaded) {
+        if (lookup in sectorsLoaded || col > MAX_COL || col < MIN_COL || row > MAX_ROW || row < MIN_ROW) {
           return;
         } else {
           sectorsLoaded[lookup] = true;
@@ -376,8 +380,6 @@ GAME = {
             }
             if (data.is_initial) {
               vm.unitAction('initial');
-            } else {
-              vm.unitAction('place');
             }
             return sectorsLoaded[lookup] = true;
           } else {

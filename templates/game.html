@@ -6,6 +6,11 @@
 <script>
     window.accountID = {{ request.user.id }};
     window.accountColor = '{{ request.user.color }}';
+
+    window.MAX_ROW = {% setting 'MAX_ROW' %};
+    window.MAX_COL = {% setting 'MAX_COL' %};
+    window.MIN_ROW = {% setting 'MIN_ROW' %};
+    window.MIN_COL = {% setting 'MIN_COL' %};
 </script>
 <style type="text/css">
     #canvas {
@@ -40,7 +45,6 @@
     <button class="btn btn-success" type="button" data-bind="css: {active: unitAction() == 'place'}" data-value="place"><img src="{{ STATIC_URL }}images/place-icon.png" /> Place Unit <span data-bind="text: '(' + unplacedUnits() + ')'"></span></button>
     <button class="btn btn-success" type="button" data-bind="css: {active: unitAction() == 'remove'}" data-value="remove"><img src="{{ STATIC_URL }}images/remove-icon.png"/> Remove Unit</button>
     <button class="btn btn-success" type="button" data-bind="css: {active: unitAction() == 'settle'}" data-value="settle"><img src="{{ STATIC_URL }}images/settle-icon.png"/> Settle Units</button>
-    <button class="btn btn-success" type="button" data-bind="css: {active: unitAction() == 'wall'}" data-value="wall"><img src="{{ STATIC_URL }}images/wall-icon.png"  /> Build Wall</button>
     <!-- /ko -->
 
     <!--
@@ -116,10 +120,6 @@
                             text: amount">
                         </div>
                     <!-- /ko -->
-                    <div class="wall" data-bind="
-                        visible: wallHealth() > 0,
-                        text: wallHealth">
-                    </div>
                     <div class="resource" data-bind="
                         visible: resourceAmount() > 0,
                         text: resourceAmount">

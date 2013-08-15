@@ -14,8 +14,8 @@ class Command(BaseCommand):
         print 'Generating new units'
         self.generate_units_from_resources()
 
-        print 'Attacking walls'
-        self.attack_walls()
+        #print 'Attacking walls'
+        #self.attack_walls()
 
         print 'Resolving battles'
         self.resolve_battles()
@@ -55,12 +55,14 @@ class Command(BaseCommand):
                     square.resource_amount -= 1
                     square.save()
 
-    def attack_walls(self):
-        for square in Square.objects.all():
-            if square.wall_health > 0 and square.units.count() > 0:
-                for unit in square.units.all():
-                    square.wall_health -= unit.amount
-            square.save()
+    #def attack_walls(self):
+    #    for square in Square.objects.all():
+    #        if square.wall_health > 0 and square.units.count() > 0:
+    #            for unit in square.units.all():
+    #                square.wall_health -= unit.amount
+    #                if square.wall_health < 0:
+    #                    square.wall_health = 0;
+    #        square.save()
 
 
     def resolve_battles(self):

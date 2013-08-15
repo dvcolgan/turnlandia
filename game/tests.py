@@ -31,21 +31,21 @@ class TestSquare(object):
         with assert_raises(SquareOccupiedException):
             center_square.initial_placement(self.account2)
 
-    def test_build_wall(self):
-        # Place 4 resources
-        center_square = Square.objects.get(col=0, row=0)
-        center_square.resource_amount = 4
-        center_square.owner = self.account1
-        center_square.save()
+    #def test_build_wall(self):
+    #    # Place 4 resources
+    #    center_square = Square.objects.get(col=0, row=0)
+    #    center_square.resource_amount = 4
+    #    center_square.owner = self.account1
+    #    center_square.save()
 
-        # Place 4 units
-        self.account1.unplaced_units = 4
-        self.account1.save()
-        for i in range(4):
-            center_square.place_unit(self.account1)
+    #    # Place 4 units
+    #    self.account1.unplaced_units = 4
+    #    self.account1.save()
+    #    for i in range(4):
+    #        center_square.place_unit(self.account1)
 
-        center_square.build_wall(self.account1)
-        assert_equals(center_square.wall_health, 0, 'A wall cannot be built on a resource.')
+    #    center_square.build_wall(self.account1)
+    #    assert_equals(center_square.wall_health, 0, 'A wall cannot be built on a resource.')
 
 
 
