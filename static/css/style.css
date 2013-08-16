@@ -202,3 +202,11 @@ body.messages .accordion {
 .no-bottom-margin {
   margin-bottom: 0 !important;
 }
+.trophy-case .trophy img {
+  width: 100%;
+  height: 100%;
+}
+.home-minimap {
+  text-align: center;
+  padding: 20px 0;
+}

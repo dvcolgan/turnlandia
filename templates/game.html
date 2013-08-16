@@ -42,6 +42,39 @@
     <!-- /ko -->
 
     <!-- ko ifnot: unitAction() === 'initial' -->
+    {% comment %}
+    <div class="btn-group">
+        <button type="button"
+                data-bind="css: {active: unitAction() == 'place'}"
+                data-value="place" 
+                class="btn btn-success">
+            <img src="{{ STATIC_URL }}images/place-icon.png" />
+            Place <span data-bind="">1</span> Unit
+            <span data-bind="text: '(' + unplacedUnits() + ')'"></span>
+        </button>
+        <button style="height: 38px" type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a href="#">1 at a time</a></li>
+            <li><a href="#">10 at a time</a></li>
+            <li><a href="#">20 at a time</a></li>
+        </ul>
+    </div>
+
+    <div class="btn-group">
+        <button type="button" data-bind="css: {active: unitAction() == 'remove'}" data-value="remove" class="btn btn-danger"><img src="{{ STATIC_URL }}images/remove-icon.png"/> Remove <span data-bind="">1</span> Unit</button>
+        <button style="height: 38px" type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown">
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a href="#">1 at a time</a></li>
+            <li><a href="#">10 at a time</a></li>
+            <li><a href="#">20 at a time</a></li>
+        </ul>
+    </div>
+    {% endcomment %}
+    
     <button class="btn btn-success" type="button" data-bind="css: {active: unitAction() == 'place'}" data-value="place"><img src="{{ STATIC_URL }}images/place-icon.png" /> Place Unit <span data-bind="text: '(' + unplacedUnits() + ')'"></span></button>
     <button class="btn btn-success" type="button" data-bind="css: {active: unitAction() == 'remove'}" data-value="remove"><img src="{{ STATIC_URL }}images/remove-icon.png"/> Remove Unit</button>
     <button class="btn btn-success" type="button" data-bind="css: {active: unitAction() == 'settle'}" data-value="settle"><img src="{{ STATIC_URL }}images/settle-icon.png"/> Settle Units</button>

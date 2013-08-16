@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load custom_tags %}
+{% block title %}{{ this_account.username }}'s profile{% endblock %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block body_class %}messages{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2">
+            <div class="well">
+                <h2>All hail {{ this_account.leader_name }},<br/>ruler of the {{ this_account.people_name }}</h2>
+                <h3>User {{ this_account.username }}</h3>
+
+                <div class="trophy-case well">
+                    <h3>{{ this_account.username }}'s Trophy Case</h3>
+                    <div class="row">
+                        {% for awarding in awardings %}
+                        <div class="col-lg-3">
+                            <div class="trophy">
+                                <img src="{{ awarding.trophy.image_path }}" alt="{{ awarding.trophy.name }}" />
+                                <span>{{ awarding.reasoning }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+

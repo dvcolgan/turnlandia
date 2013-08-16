@@ -36,9 +36,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 MIN_COL = -40
-MAX_COL = 20
-MIN_ROW = -30
-MAX_ROW = 20
+MAX_COL = 30
+MIN_ROW = -40
+MAX_ROW = 30
 GRID_SIZE = 48
 
 

@@ -231,6 +231,7 @@ GAME =
 
                 else if vm.unitAction() == 'place'
                     if vm.unplacedUnits() > 0
+
                         canPlace = false
                         if square.owner() == vm.accountID
                             canPlace = true
@@ -263,6 +264,9 @@ GAME =
                         found = false
                         for unit in square.units()
                             if unit.owner == vm.accountID
+                                if unit.amount() >= 20
+                                    alert('A square can only hold 20 of your units at a time.')
+                                    return
                                 unit.amount(unit.amount()+1)
                                 vm.unplacedUnits(vm.unplacedUnits()-1)
                                 found = true

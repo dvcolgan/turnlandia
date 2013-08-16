@@ -22,8 +22,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         squares = Square.objects.order_by('row', 'col')
 
-        width = (MAX_COL - MIN_COL) * GRID_SIZE
-        height = (MAX_ROW - MIN_ROW) * GRID_SIZE
+        width = (20 + MAX_COL - MIN_COL) * GRID_SIZE
+        height = (20 + MAX_ROW - MIN_ROW) * GRID_SIZE
 
         im = Image.new('RGB', (width, height), 'black')
 
@@ -31,7 +31,6 @@ class Command(BaseCommand):
         draw = ImageDraw.Draw(im)
 
         for square in squares:
-            print square.col, square.row
             if square.owner != None:
                 fill_color = square.owner.color
             else:

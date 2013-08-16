@@ -38,6 +38,15 @@ def how_to_play(request):
     player_count = Account.objects.count()
     return render(request, 'how-to-play.html', locals())
 
+def profile(request, account_id=None):
+    if account_id == None:
+        this_account = request.user
+    else:
+        this_account = get_object_or_404(Account, pk=account_id)
+
+    awardings = this_account.awardings.all()
+    return render(request, 'profile.html', locals())
+
 def create_account(request):
     day_counter = Setting.objects.get_current_day()
     player_count = Account.objects.count()

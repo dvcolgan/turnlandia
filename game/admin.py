@@ -77,8 +77,14 @@ class SquareAdmin(admin.ModelAdmin):
     # Could do a custom callable sort that ads the two together
     ordering = ('col', 'row')
 
+
+class TrophyAwardingAdmin(admin.ModelAdmin):
+    list_display = ('trophy', 'recipient', 'date_awarded', 'reasoning')
+
 admin.site.register(Account, AccountAdmin)
 admin.site.register(Unit)
 admin.site.register(Square, SquareAdmin)
 admin.site.register(Setting)
 admin.site.register(Message)
+admin.site.register(Trophy)
+admin.site.register(TrophyAwarding, TrophyAwardingAdmin)

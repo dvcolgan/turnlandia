@@ -67,9 +67,15 @@ WORLD_NAMES = [
 ]
 
 
+class Trophy(models.Model):
+    name = models.CharField(max_length=255)
+    image_path = models.CharField(max_length=255)
+    description = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return self.name
 
 class Account(AbstractBaseUser, PermissionsMixin):
-
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField(blank=True)
     color = models.CharField(max_length=10, blank=True)
@@ -105,6 +111,16 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     def email_user(self, subject, message, from_email=None):
         send_mail(subject, message, from_email, [self.email])
+
+
+class TrophyAwarding(models.Model):
+    trophy = models.ForeignKey(Trophy, related_name='awardings')
+    recipient = models.ForeignKey(Account, related_name='awardings')
+    date_awarded = models.DateField(auto_now_add=True)
+    reasoning = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return self.trophy.name
 
 
 class SquareManager(models.Manager):
@@ -202,10 +218,12 @@ class Square(models.Model):
             if can_place:
                 unit = get_object_or_None(Unit, square=self, owner=account)
                 if unit:
-                    unit.amount += 1
+                    if unit.amount < 20:
+                        unit.amount += 1
+                        unit.save()
                 else:
                     unit = Unit(square=self, owner=account, amount=1)
-                unit.save()
+                    unit.save()
                 account.unplaced_units -= 1
                 account.save()
             else:
@@ -338,3 +356,4 @@ class Message(models.Model):
     subject = models.CharField(max_length=255)
     body = models.TextField()
     time_sent = models.DateTimeField(auto_now=True)
+

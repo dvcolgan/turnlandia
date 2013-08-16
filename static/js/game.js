@@ -233,6 +233,10 @@ GAME = {
             for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {
               unit = _ref[_k];
               if (unit.owner === vm.accountID) {
+                if (unit.amount() >= 20) {
+                  alert('A square can only hold 20 of your units at a time.');
+                  return;
+                }
                 unit.amount(unit.amount() + 1);
                 vm.unplacedUnits(vm.unplacedUnits() - 1);
                 found = true;
