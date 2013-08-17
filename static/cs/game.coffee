@@ -127,6 +127,7 @@ GAME =
             vm.totalUnits = ko.observable(0)
 
             vm.unitAction = ko.observable('place')
+            vm.currentSquareOwner = ko.observable('')
 
             vm.unplacedUnits = ko.observable(0)
             vm.currentCursor = ko.computed = ->
@@ -166,6 +167,9 @@ GAME =
                     three: square.resourceAmount() == 0 and square.wallHealth() == 0 and square.units().length == 3
                     four: square.resourceAmount() > 0 or square.wallHealth() > 0 or square.units().length == 4
                 }
+
+            vm.handleSquareHover = (square, event) ->
+                #TODO add me
 
 
             vm.modifyUnit = (square, event) ->

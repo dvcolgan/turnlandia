@@ -97,6 +97,7 @@ GAME = {
       vm.currentColor = ko.observable('blue');
       vm.totalUnits = ko.observable(0);
       vm.unitAction = ko.observable('place');
+      vm.currentSquareOwner = ko.observable('');
       vm.unplacedUnits = ko.observable(0);
       vm.currentCursor = ko.computed = function() {
         switch (vm.unitAction()) {
@@ -145,6 +146,7 @@ GAME = {
           four: square.resourceAmount() > 0 || square.wallHealth() > 0 || square.units().length === 4
         };
       };
+      vm.handleSquareHover = function(square, event) {};
       vm.modifyUnit = function(square, event) {
         var canPlace, count, found, i, other, placement, squares, unit, _i, _j, _k, _l, _len, _len1, _len2, _m, _n, _ref, _ref1, _ref2, _ref3, _results, _results1;
         if (!(Math.abs(lastViewX - vm.viewX()) < 5 && Math.abs(lastViewY - vm.viewY()) < 5)) {

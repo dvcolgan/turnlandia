@@ -80,6 +80,10 @@
     <button class="btn btn-success" type="button" data-bind="css: {active: unitAction() == 'settle'}" data-value="settle"><img src="{{ STATIC_URL }}images/settle-icon.png"/> Settle Units</button>
     <!-- /ko -->
 
+    <!-- TODO
+    <span data-bind="text: currentSquareOwner"></span>
+    -->
+
     <!--
     TODO implement me
     <label class="btn btn-success" data-bind="css: { active: unitAction() === 'give'    }"><button type="button" data-bind="checked: unitAction" value="give"   ><img src="{{ STATIC_URL }}images/give-icon.png"  /> Give Units</label>
@@ -132,6 +136,7 @@
             }">
             <!-- ko foreach: squares -->
                 <div class="grid-square" data-bind="
+                    event: { mouseover: $root.handleSquareHover },
                     click: $root.modifyUnit,
                     style: {
                         backgroundColor: ownerColor,

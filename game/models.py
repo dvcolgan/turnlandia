@@ -357,3 +357,17 @@ class Message(models.Model):
     body = models.TextField()
     time_sent = models.DateTimeField(auto_now=True)
 
+
+class Move(models.Model):
+    MOVE_KINDS = (
+        ('mu', 'Move Units'),
+        ('at', 'Attack Square'),
+        ('bc', 'Build City'),
+    )
+    player = models.ForeignKey(Account, related_name='moves')
+    turn = models.IntegerField()
+    kind = models.CharField(max_length=30, choices=MOVE_KINDS)
+    src_col = models.IntegerField()
+    src_row = models.IntegerField()
+    dest_col = models.IntegerField()
+    dest_row = models.IntegerField()
