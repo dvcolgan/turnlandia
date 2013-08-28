@@ -55,52 +55,34 @@ class Command(BaseCommand):
                     square.resource_amount -= 1
                     square.save()
 
-    #def attack_walls(self):
-    #    for square in Square.objects.all():
-    #        if square.wall_health > 0 and square.units.count() > 0:
-    #            for unit in square.units.all():
-    #                square.wall_health -= unit.amount
-    #                if square.wall_health < 0:
-    #                    square.wall_health = 0;
-    #        square.save()
-
-
     def resolve_battles(self):
         for square in Square.objects.all():
+            units_list = list(square.units.all())
             while square.units.count() > 1:
 
-                # Find the unit with the highest amount
-                largest = 0
-                for unit in square.units.all():
-                    if largest < unit.amount:
-                        largest = unit.amount
+                loser = random.choice(units_list)
+                loser.amount -= 1
+                if loser.amount == 0:
+                    loser.delete()
 
-                # Calculate the score for each unit based on their amount
-                battle_scores = []
-                for unit in square.units.all():
-                    battle_scores.append(random.random() * unit.amount / largest)
+            for unit in units_list:
+                unit.save()
 
-                winner_idx = 0
-                highest_score = 0
-                for i, score in enumerate(battle_scores):
-                    if score > highest_score:
-                        highest_score = score
-                        winner_idx = i
+            # TODO make it so you can tell how many units each player lost
 
-                winning_unit = square.units.all()[winner_idx]
-                print 'On square (%d, %d), ' % (square.col, square.row),
-                for i, unit in enumerate(square.units.all()):
-                    if unit != winning_unit:
-                        print '%s loses (%d units, %.3f) ' % (unit.owner.leader_name, unit.amount, battle_scores[i]),
-                        unit.amount -= 1
-                        if unit.amount == 0:
-                            unit.delete()
-                            print
-                        else:
-                            unit.save()
-                    else:
-                        print '%s wins (%d units, %.3f) ' % (winning_unit.owner.leader_name, winning_unit.amount, battle_scores[winner_idx]),
-                print
+            #print 'On square (%d, %d), ' % (square.col, square.row),
+            #for i, unit in enumerate(square.units.all()):
+            #    if unit != winning_unit:
+            #        print '%s loses (%d units, %.3f) ' % (unit.owner.leader_name, unit.amount, battle_scores[i]),
+            #        unit.amount -= 1
+            #        if unit.amount == 0:
+            #            unit.delete()
+            #            print
+            #        else:
+            #            unit.save()
+            #    else:
+            #        print '%s wins (%d units, %.3f) ' % (winning_unit.owner.leader_name, winning_unit.amount, battle_scores[winner_idx]),
+            #print
 
 
     def assign_squares_ownership(self):

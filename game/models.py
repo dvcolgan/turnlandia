@@ -2,7 +2,9 @@ from django.db import models
 from django.db.models import Sum
 from django.contrib.auth.models import *
 from game.models import *
+from settings import SECTOR_SIZE
 from util.functions import *
+import PIL
 import math
 import ipdb
 
@@ -124,10 +126,10 @@ class TrophyAwarding(models.Model):
 
 
 class SquareManager(models.Manager):
+
     # get the squares that encompass the coordinates given
     def get_region(self, col, row, width, height):
 
-        # derived by black magic on a note card
         upper_col = int(col + width)
         lower_col = int(col)
         upper_row = int(row + height)
@@ -137,7 +139,6 @@ class SquareManager(models.Manager):
                                      .filter(col__gte=lower_col)
                                      .filter(row__lt=upper_row)
                                      .filter(row__gte=lower_row))
-
 
         # If we have a duplication of squares, that is kind of a problem, but shouldn't happen.
         if squares.count() > width * height:
@@ -173,13 +174,75 @@ class SquareManager(models.Manager):
         return squares
 
 
+    def generate_square(x, y):
+        im = Image.new('RGB', (SECTOR_SIZE, SECTOR_SIZE), (0, 200, 0))
+
+        # Generate forests
+        frequency = 1.0/5
+        forest_pixels = [[noise.pnoise2(x*frequency, y*frequency, 20) for x in range(-size/2, size/2)] for y in range(-size/2, size/2)]
+        for y, row in enumerate(forest_pixels):
+            for x, noise_value in enumerate(row):
+                if noise_value < -0.05:
+                    im.putpixel((x, y), (0, 110, 0))
+
+        # Generate mountains
+        frequency = 1.0/5
+        mountain_pixels = [[noise.pnoise2(x*frequency, y*frequency, 1) for x in range(-size/2, size/2)] for y in range(-size/2, size/2)]
+        for y, row in enumerate(mountain_pixels):
+            for x, noise_value in enumerate(row):
+                if noise_value > 0.2:
+                    value = int((noise_value + 0.5) * 255) - 30
+                    im.putpixel((x, y), (value, value, value))
+
+        # Generate rivers
+        frequency_x = 1.0/45
+        frequency_y = 1.0/30
+        river_pixels = [[noise.pnoise2(x*frequency_x, y*frequency_y, 10, -0.3) for x in range(-size/2, size/2)] for y in range(-size/2, size/2)]
+        temp_im = Image.new('RGB', (size, size), 'black')
+        for y, row in enumerate(river_pixels):
+            for x, noise_value in enumerate(row):
+                if noise_value < -0.0:
+                    value = 128
+                    temp_im.putpixel((x, y), (value, value, value))
+
+                #value = int((noise_value + 0.5) * 255)
+
+        river_im = temp_im.filter(ImageFilter.FIND_EDGES)
+        for y, row in enumerate(river_pixels):
+            for x, noise_value in enumerate(row):
+                r,g,b = river_im.getpixel((x, y))
+                if r != 0:
+                    im.putpixel((x, y), (0, 0, 255))
+
+        # Generate lakes
+        frequency = 1.0/20
+        lake_pixels = [[noise.pnoise2(x*frequency, y*frequency, 6) for x in range(-size/2, size/2)] for y in range(-size/2, size/2)]
+        for y, row in enumerate(lake_pixels):
+            for x, noise_value in enumerate(row):
+                if noise_value < -0.2:
+                    value = int((noise_value + 0.5) * 3.3333 * 255)
+                    im.putpixel((x, y), (0, 0, value))
+
+        im.save('static/images/noise.png', 'PNG')
+
+
+
 class SquareOccupiedException(Exception):
     pass
 class InvalidPlacementException(Exception):
     pass
+class SquareDoesNotExistException(Exception):
+    pass
 
 
 class Square(models.Model):
+    TERRAIN_TYPES = (
+        ('plains', 'Plains'),
+        ('water', 'Water'),
+        ('mountains', 'Mountains'),
+        ('forest', 'Forest'),
+        ('city', 'City'),
+    )
     col = models.IntegerField()
     row = models.IntegerField()
     owner = models.ForeignKey(Account, related_name='squares_owned', null=True, blank=True)
@@ -336,7 +399,7 @@ class Unit(models.Model):
 
 class SettingManager(models.Manager):
     def get_current_day(self):
-        return Setting.objects.get(name='Current Day').value
+        return int(Setting.objects.get(name='Current Day').value)
         
 
 
@@ -358,16 +421,50 @@ class Message(models.Model):
     time_sent = models.DateTimeField(auto_now=True)
 
 
+# Squares are more or less read only until the turn resolves, before that we deal with moves
 class Move(models.Model):
     MOVE_KINDS = (
-        ('mu', 'Move Units'),
-        ('at', 'Attack Square'),
-        ('bc', 'Build City'),
+        ('move', 'Move Units'),
+        ('attack', 'Attack Square'),
+        ('city', 'Build City'),
     )
+    next = models.ForeignKey('self', null=True, blank=True, related_name='previous')
     player = models.ForeignKey(Account, related_name='moves')
     turn = models.IntegerField()
     kind = models.CharField(max_length=30, choices=MOVE_KINDS)
+    amount = models.IntegerField()
     src_col = models.IntegerField()
     src_row = models.IntegerField()
     dest_col = models.IntegerField()
     dest_row = models.IntegerField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def is_valid(self):
+        if any(self.kind in kind for kind in MOVE_KINDS):
+            self.errors = 'Invalid action.'
+
+        src_square = get_object_or_None(Square, col=src_col, row=src_row)
+        dest_square = get_object_or_None(Square, col=dest_col, row=dest_row)
+        if src_square == None or dest_square == None:
+            self.errors = 'Square does not exist.'
+            return False
+
+        if action == 'move':
+            if src_square.units.filter(owner=player).amount < self.amount:
+                return False
+            
+        elif action == 'attack':
+            pass
+
+        elif action == 'city':
+            pass
+
+        return True
+
+    def save(self):
+        if self.pk is None:
+            last_move = get_object_or_None(Move, player=self.player, turn=self.turn, next=None)
+            if last_move != None:
+                last_move.next = self
+                last_move.save()
+        super(Move, self).save()

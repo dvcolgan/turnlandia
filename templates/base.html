@@ -22,11 +22,11 @@
     -->
     <div class="navbar navbar-inverse">
         {% if request.user.is_authenticated %}
-        <a class="navbar-brand" href="{% url 'game' %}">Turn Based: The Game</a>
-        <a href="{% url 'game' %}">{{ player_count }} players on turn {{ day_counter }}</a>
+        <a class="navbar-brand" href="{% url 'game' %}">Turn Based: The Game&nbsp;</a>
+        <a href="{% url 'game' %}">&nbsp;{{ player_count }} players on turn {{ day_counter }}</a>
         {% else %}
-        <a class="navbar-brand" href="{% url 'home' %}">Turn Based: The Game</a>
-        <a href="{% url 'create-account' %}">Join {{ player_count }} players on turn {{ day_counter }}</a>
+        <a class="navbar-brand" href="{% url 'home' %}">Turn Based: The Game&nbsp;</a>
+        <a href="{% url 'create-account' %}">&nbsp;Join {{ player_count }} players on turn {{ day_counter }}</a>
         {% endif %}
         {% block game_toolbar %}{% endblock %}
         <ul class="nav navbar-nav pull-right">
@@ -45,13 +45,17 @@
     {% block content %}{% endblock %}
 
     <script src='{{ STATIC_URL }}js/jquery-2.0.1.min.js'></script>
+    <script src='{{ STATIC_URL }}js/lodash.js'></script>
     <script src='{{ STATIC_URL }}bootstrap/js/bootstrap.js'></script>
     <script src="{{ STATIC_URL }}js/colorpicker/colorpicker.min.js"></script>
     <script src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
     <script src="{{ STATIC_URL }}js/knockout-2.3.0.js"></script>
     <script src="{{ STATIC_URL }}js/custom-knockout-bindings.js"></script>
     <script src="{{ STATIC_URL }}js/spin.min.js"></script>
-    <script src="{{ STATIC_URL }}js/game.js"></script>
+    <script src="{{ STATIC_URL }}js/util.js"></script>
+    <script src="{{ STATIC_URL }}js/board.js"></script>
+    <script src="{{ STATIC_URL }}js/move.js"></script>
+    <script src="{{ STATIC_URL }}js/all-pages.js"></script>
     {% block foot %}{% endblock %}
 </body>
 </html>

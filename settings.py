@@ -35,10 +35,13 @@ SERVER = 'local'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
-MIN_COL = -40
-MAX_COL = 30
-MIN_ROW = -40
-MAX_ROW = 30
+# The backend doesn't think in terms of sectors, and sector size and grid size are client side concepts
+# FIX ME TO BE MORE SEMANTIC someday
+MIN_SECTOR_X = -5
+MAX_SECTOR_X = 3
+MIN_SECTOR_Y = -4
+MAX_SECTOR_Y = 3
+SECTOR_SIZE = 10
 GRID_SIZE = 48
 
 

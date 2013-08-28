@@ -17,7 +17,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from settings import MIN_COL, MAX_COL, MIN_ROW, MAX_ROW
+from settings import MIN_SECTOR_X, MAX_SECTOR_X, MIN_SECTOR_Y, MAX_SECTOR_Y, SECTOR_SIZE, GRID_SIZE
 
 from django.utils import simplejson
 import random
@@ -36,6 +36,11 @@ def home(request):
 def how_to_play(request):
     day_counter = Setting.objects.get_current_day()
     player_count = Account.objects.count()
+
+    if request.user.color == '' or request.user.leader_name == '' or request.user.people_name == '':
+        next_link = reverse('settings')
+    else:
+        next_link = reverse('game')
     return render(request, 'how-to-play.html', locals())
 
 def profile(request, account_id=None):
@@ -66,7 +71,7 @@ def create_account(request):
             #        'domain': settings.SITE_DOMAIN,
             #        'account': account,
             #    })
-            return HttpResponseRedirect(reverse('settings'))
+            return HttpResponseRedirect(reverse('how-to-play'))
 
     else:
         form = CreateAccountForm()
@@ -90,7 +95,20 @@ def settings(request):
 def game(request):
     day_counter = Setting.objects.get_current_day()
     player_count = Account.objects.count()
+
+    needs = []
+    if request.user.color == '':
+        needs.append('color=1')
+    if request.user.leader_name == '':
+        needs.append('leader_name=1')
+    if request.user.people_name == '':
+        needs.append('people_name=1')
+
+    if len(needs) > 0:
+        return HttpResponseRedirect(reverse('settings') + '?' + '&'.join(needs))
+
     return render(request, 'game.html', locals())
+
 
 
 @login_required
@@ -147,7 +165,10 @@ def api_sector(request, col, row, width, height):
 
     # TODO a lot of this function can be computed on the turn change and then cached, do this if we get a bunch of traffic
     # TODO make this instead limit it to a few screens beyond where the furthest person is
-    if col > MAX_COL or col < MIN_COL or row > MAX_ROW or row < MIN_ROW:
+    if (col > MAX_SECTOR_X * SECTOR_SIZE or
+       col < MIN_SECTOR_X * SECTOR_SIZE or
+       row > MAX_SECTOR_Y * SECTOR_SIZE or
+       row < MIN_SECTOR_Y * SECTOR_SIZE):
         return Response({
             'error': 'I really don\'t feel like fetching the map that far out.'
         }, status=status.HTTP_400_BAD_REQUEST)
@@ -169,59 +190,83 @@ def api_sector(request, col, row, width, height):
         Square.objects.filter(owner=request.user).count() == 0
     )
 
+    return Response(SquareSerializer(squares, many=True).data)
+
+@login_required
+@api_view(['GET'])
+def api_initial_load(request):
+    current_turn = Setting.objects.get_current_day()
+
+    moves = Move.objects.filter(player=request.user).filter(turn=current_turn)
+
     return Response({
-        # TODO This will get more and more ineffecient as the number of players increases, not actually players visible, just all players
-        'players_visible': AccountSerializer(Account.objects.all(), many=True).data,
-        'unplaced_units': request.user.unplaced_units,
-        #TODO this appears once elsewhere.  make it a function
-        'is_initial': is_initial,
-        'units_placed': Unit.objects.total_placed_units(request.user),
-        'squares': SquareSerializer(squares, many=True).data,
+        'board_consts': {
+            'min_sector_x': MIN_SECTOR_X,
+            'max_sector_x': MAX_SECTOR_X,
+            'min_sector_y': MIN_SECTOR_Y,
+            'max_sector_y': MAX_SECTOR_Y,
+            'sector_size': SECTOR_SIZE,
+            'grid_size': GRID_SIZE,
+        },
+        'moves': MoveSerializer(moves, many=True).data,
+        'account': AccountSerializer(request.user).data,
     })
     
 @login_required
 @api_view(['POST'])
-def api_square_unit_action(request, col, row, action):
+def api_square_unit_action(request, src_col, src_row, dest_col, dest_row, kind, amount):
     try:
-        col = int(col)
-        row = int(row)
+        src_col = int(src_col)
+        src_row = int(src_row)
+        dest_col = int(dest_col)
+        dest_row = int(dest_row)
     except:
         raise Http404
 
-    square = get_object_or_None(Square, col=col, row=row)
-    if square == None:
-        return Response({
-            'error': 'Square does not exist.',
-        }, status=status.HTTP_400_BAD_REQUEST)
+    new_move = Move(
+        player=request.user,
+        turn=int(Setting.objects.get(name='Current Day')),
+        src_col=src_col,
+        src_row=src_row,
+        dest_col=dest_col,
+        dest_row=dest_row,
+        kind=kind,
+        amount=amount
+    )
 
-    if action == 'place':
-        try:
-            square.place_unit(request.user)
-            return Response({})
-        except InvalidPlacementException:
-            return Response({'error': 'You can only place units on a square you own or adjacent to a square you own.'}, status=status.HTTP_400_BAD_REQUEST)
+    if new_move.is_valid():
+        new_move.save()
+    else:
+        return Response({'error': new_move.error}, status=status.HTTP_400_BAD_REQUEST)
 
-    elif action == 'remove':
-        square.remove_unit(request.user)
-        return Response({})
+        
 
-    elif action == 'settle':
-        square.settle_units(request.user)
-        return Response({})
 
-    #elif action == 'wall':
-    #    square.build_wall(request.user)
+    #if action == 'place':
+    #    try:
+    #        square.place_unit(request.user)
+    #        return Response({})
+    #    except InvalidPlacementException:
+    #        return Response({'error': 'You can only place units on a square you own or adjacent to a square you own.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    #elif action == 'remove':
+    #    square.remove_unit(request.user)
     #    return Response({})
 
-    elif action == 'initial':
-        try:
-            square.initial_placement(request.user)
-            return Response({})
-        except SquareOccupiedException:
-            return Response({'error': 'Your placement is too close to another player.'}, status=status.HTTP_400_BAD_REQUEST)
+    #elif action == 'settle':
+    #    square.settle_units(request.user)
+    #    return Response({})
 
-    else:
-        return Response({'error': 'Invalid action.'}, status=status.HTTP_400_BAD_REQUEST)
+    ##elif action == 'wall':
+    ##    square.build_wall(request.user)
+    ##    return Response({})
+
+    #elif action == 'initial':
+    #    try:
+    #        square.initial_placement(request.user)
+    #        return Response({})
+    #    except SquareOccupiedException:
+    #        return Response({'error': 'Your placement is too close to another player.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
         
