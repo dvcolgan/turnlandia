@@ -1,0 +1,12 @@
+{
+    "name": "turnbased",
+    "preferGlobal": false,
+    "version": "0.1.0",
+    "author": "David Colgan <dvcolgan@gmail.com>",
+    "description": "A Massively Multiplayer Online Board Game written in Django and NodeJS",
+    "dependencies": {
+        "request": "*",
+        "jasmine-node": "*",
+        "lodash": "*"
+    }
+}

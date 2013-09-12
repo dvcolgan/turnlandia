@@ -14,48 +14,54 @@
     {% block head %}{% endblock %}
 
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/style.css">
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css">
 </head>
 <body class="{% block body_class %}{% endblock %}">
-    <!--
-    <div class="project-wonderful-box" id="pw_adbox_67850_5_0"><table cellpadding="0" cellspacing="0" style="margin-bottom: 0;border-style:none;width:728px;background-color:#ffffff;"><tbody><tr style="background-color:#ffffff;"><td style="width:728px;background-color:#ffffff;vertical-align:top;text-align:center;"><a href="" target="_blank"><img src="{{ STATIC_URL }}images/ad.png" width="728" height="90" border="0"></a></td></tr><tr><td style="background-color:#ffffff;" colspan="1"><center><a style="font-size:10px;color:#0000ff;line-height:1.2;text-decoration:none;font-weight:bold;background-color:#ffffff;font-family:tahoma,verdana,arial,helvetica,sans-serif;text-transform: none;letter-spacing:normal;text-shadow:none;white-space:normal;word-spacing:normal;" href="" target="_blank">Ads by Project Wonderful!  Your ad here, right now: $0</a></center></td></tr></tbody></table></div>
-    -->
-    <div class="navbar navbar-inverse">
-        {% if request.user.is_authenticated %}
-        <a class="navbar-brand" href="{% url 'game' %}">Turn Based: The Game&nbsp;</a>
-        <a href="{% url 'game' %}">&nbsp;{{ player_count }} players on turn {{ day_counter }}</a>
-        {% else %}
-        <a class="navbar-brand" href="{% url 'home' %}">Turn Based: The Game&nbsp;</a>
-        <a href="{% url 'create-account' %}">&nbsp;Join {{ player_count }} players on turn {{ day_counter }}</a>
-        {% endif %}
-        {% block game_toolbar %}{% endblock %}
-        <ul class="nav navbar-nav pull-right">
-            {% if request.user.is_authenticated %}
-            <li><a href="{% url 'how-to-play' %}">How to Play</a></li>
-            <li><a href="{% url 'messages' %}">Messages</a></li>
-            <li><a href="{% url 'settings' %}">Account Settings</a></li>
-            <li><a href="{% url 'logout' %}">Log Out</a></li>
-            {% else %}
-            <li><a href="{% url 'how-to-play' %}">How to Play</a></li>
-            <li><a href="{% url 'login' %}">Log In</a></li>
-            {% endif %}
-        </ul>
+    <div class="content">
+        <div class="header">
+            <h1><a href="{% url 'game' %}">Turn. Based. Game.</a></h1>
+
+            <ul class="left-menu pull-left">
+                {% if request.user.is_authenticated %}
+                <li><a href="{% url 'game' %}">&nbsp;Join {{ player_count }} Players on Turn {{ day_counter }}</a></li>
+                {% else %}
+                <li><a href="{% url 'create-account' %}">&nbsp;Join {{ player_count }} Players on Turn {{ day_counter }}</a></li>
+                {% endif %}
+            </ul>
+            <ul class="right-menu pull-right">
+                {% if request.user.is_authenticated %}
+                <li><a href="{% url 'how-to-play' %}">How to Play</a></li> |
+                <li><a href="{% url 'messages' %}">Messages</a></li> |
+                <li><a href="{% url 'settings' %}">Account Settings</a></li> |
+                <li><a href="{% url 'logout' %}">Log Out</a></li>
+                {% else %}
+                <li><a href="{% url 'how-to-play' %}">How to Play</a></li>
+                <li><a href="{% url 'login' %}">Log In</a></li>
+                {% endif %}
+            </ul>
+        </div>
+
+        {% block content %}{% endblock %}
     </div>
 
-    {% block content %}{% endblock %}
+    <div class="ad-pane">
+        <div id="pw_adbox_50454_3_0"><table cellpadding="0" cellspacing="0" style="border-style:none;width:160px;"><tbody><tr><td style="width:160px;vertical-align:top;text-align:center;"><a href="" target="_blank"><img src="images/61744-1358390808.jpg" width="160" height="600" border="0" title="" alt=""></a></td></tr><tr><td colspan="1"><center><a style="font-size:10px;color:#ffffff;line-height:1.2;text-decoration:none;font-weight:bold;font-family:tahoma,verdana,arial,helvetica,sans-serif;text-transform: none;letter-spacing:normal;text-shadow:none;white-space:normal;word-spacing:normal;" href="" target="_blank">Ads by Project Wonderful!  Your ad could be here, right now.</a></center></td></tr><tr><td colspan="1" style="vertical-align:top;width:160px;background-color:#000000;height:3px;font-size:1px;padding:0px;max-height:3px;"></td></tr></tbody></table></div>
+    </div>
 
-    <script src='{{ STATIC_URL }}js/jquery-2.0.1.min.js'></script>
-    <script src='{{ STATIC_URL }}js/lodash.js'></script>
-    <script src='{{ STATIC_URL }}bootstrap/js/bootstrap.js'></script>
-    <script src="{{ STATIC_URL }}js/colorpicker/colorpicker.min.js"></script>
-    <script src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
-    <script src="{{ STATIC_URL }}js/knockout-2.3.0.js"></script>
-    <script src="{{ STATIC_URL }}js/custom-knockout-bindings.js"></script>
-    <script src="{{ STATIC_URL }}js/spin.min.js"></script>
-    <script src="{{ STATIC_URL }}js/util.js"></script>
-    <script src="{{ STATIC_URL }}js/board.js"></script>
-    <script src="{{ STATIC_URL }}js/move.js"></script>
-    <script src="{{ STATIC_URL }}js/all-pages.js"></script>
+    {% if 'game' not in request.get_full_path %}
+    <script src='{{ STATIC_URL }}js/lib/jquery-2.0.1.min.js'></script>
+    <script src='{{ STATIC_URL }}js/lib/lodash.js'></script>
+    <script src="{{ STATIC_URL }}js/lib/astar/graph.js"></script>
+    <script src="{{ STATIC_URL }}js/lib/astar/astar.js"></script>
+    <script src="{{ STATIC_URL }}js/lib/colorpicker/colorpicker.min.js"></script>
+    <script src="{{ STATIC_URL }}js/lib/jquery.cookie.js"></script>
+    <script src="{{ STATIC_URL }}js/lib/knockout-2.3.0.js"></script>
+    <script src="{{ STATIC_URL }}js/lib/spin.min.js"></script>
+    <script src="{{ STATIC_URL }}js/src/util.js"></script>
+    <script src="{{ STATIC_URL }}js/src/board.js"></script>
+    <script src="{{ STATIC_URL }}js/src/action.js"></script>
+    <script src="{{ STATIC_URL }}js/src/system.js"></script>
+    <script src="{{ STATIC_URL }}js/src/all-pages.js"></script>
+    {% endif %}
     {% block foot %}{% endblock %}
 </body>
 </html>

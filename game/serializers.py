@@ -38,13 +38,14 @@ class SquareSerializer(serializers.ModelSerializer):
     owner_username = serializers.Field(source='owner.username')
     owner_leader_name = serializers.Field(source='owner.leader_name')
     owner_people_name = serializers.Field(source='owner.people_name')
+    traversal_cost = serializers.Field(source='get_traversal_cost')
     units = UnitSerializer()
     class Meta:
         model = Square
 
-class MoveSerializer(serializers.ModelSerializer):
+class ActionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Move
+        model = Action
 
 
 

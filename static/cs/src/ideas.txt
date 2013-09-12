@@ -1,0 +1,4 @@
+BoardLoader - loading the board
+SquareModel - pure data about a square
+ActionModel - pure data about an action
+

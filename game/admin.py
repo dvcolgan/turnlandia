@@ -28,6 +28,9 @@ class AccountCreationForm(forms.ModelForm):
             account.save()
         return account
 
+class ActionInline(admin.StackedInline):
+    model = Action
+    extra = 0
 
 class AccountChangeForm(forms.ModelForm):
     """A form for updating users. Includes all the fields on
@@ -53,10 +56,12 @@ class AccountAdmin(UserAdmin):
     filter_horizontal = ()
     list_filter = []
 
+    inlines = [ActionInline]
+
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
-    list_display = ('username', 'email', 'color', 'leader_name', 'people_name', 'unplaced_units', 'is_superuser', 'last_login', 'date_joined')
+    list_display = ('username', 'color', 'leader_name', 'people_name', 'unplaced_units', 'is_superuser', 'last_login', 'date_joined')
     fieldsets = (
         (None, {'fields': ('username', 'email', 'color', 'leader_name', 'people_name', 'unplaced_units', 'password')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),

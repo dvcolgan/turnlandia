@@ -29,12 +29,12 @@ import datetime
 def home(request):
     if request.user.is_authenticated():
         return HttpResponseRedirect(reverse('game'))
-    day_counter = Setting.objects.get_current_day()
+    day_counter = Setting.objects.get_integer('turn')
     player_count = Account.objects.count()
     return render(request, 'home.html', locals())
 
 def how_to_play(request):
-    day_counter = Setting.objects.get_current_day()
+    day_counter = Setting.objects.get_integer('turn')
     player_count = Account.objects.count()
 
     if request.user.color == '' or request.user.leader_name == '' or request.user.people_name == '':
@@ -53,7 +53,7 @@ def profile(request, account_id=None):
     return render(request, 'profile.html', locals())
 
 def create_account(request):
-    day_counter = Setting.objects.get_current_day()
+    day_counter = Setting.objects.get_integer('turn')
     player_count = Account.objects.count()
     if request.method == 'POST':
         form = CreateAccountForm(request.POST)
@@ -79,7 +79,7 @@ def create_account(request):
 
 @login_required
 def settings(request):
-    day_counter = Setting.objects.get_current_day()
+    day_counter = Setting.objects.get_integer('turn')
     player_count = Account.objects.count()
     if request.method == 'POST':
         form = SettingsForm(request.POST, instance=request.user)
@@ -93,7 +93,7 @@ def settings(request):
 
 @login_required
 def game(request):
-    day_counter = Setting.objects.get_current_day()
+    day_counter = Setting.objects.get_integer('turn')
     player_count = Account.objects.count()
 
     needs = []
@@ -113,7 +113,7 @@ def game(request):
 
 @login_required
 def messages(request):
-    day_counter = Setting.objects.get_current_day()
+    day_counter = Setting.objects.get_integer('turn')
     player_count = Account.objects.count()
     sent_messages = Message.objects.filter(sender=request.user)
     received_messages = Message.objects.filter(recipient=request.user)
@@ -121,7 +121,7 @@ def messages(request):
 
 @login_required
 def compose(request):
-    day_counter = Setting.objects.get_current_day()
+    day_counter = Setting.objects.get_integer('turn')
     player_count = Account.objects.count()
 
     if request.method == 'POST':
@@ -165,13 +165,13 @@ def api_sector(request, col, row, width, height):
 
     # TODO a lot of this function can be computed on the turn change and then cached, do this if we get a bunch of traffic
     # TODO make this instead limit it to a few screens beyond where the furthest person is
-    if (col > MAX_SECTOR_X * SECTOR_SIZE or
-       col < MIN_SECTOR_X * SECTOR_SIZE or
-       row > MAX_SECTOR_Y * SECTOR_SIZE or
-       row < MIN_SECTOR_Y * SECTOR_SIZE):
-        return Response({
-            'error': 'I really don\'t feel like fetching the map that far out.'
-        }, status=status.HTTP_400_BAD_REQUEST)
+    #if (col > MAX_SECTOR_X * SECTOR_SIZE or
+    #   col < MIN_SECTOR_X * SECTOR_SIZE or
+    #   row > MAX_SECTOR_Y * SECTOR_SIZE or
+    #   row < MIN_SECTOR_Y * SECTOR_SIZE):
+    #    return Response({
+    #        'error': 'I really don\'t feel like fetching the map that far out.'
+    #    }, status=status.HTTP_400_BAD_REQUEST)
 
     if width > 200 or height > 200:
         return Response({
@@ -195,9 +195,9 @@ def api_sector(request, col, row, width, height):
 @login_required
 @api_view(['GET'])
 def api_initial_load(request):
-    current_turn = Setting.objects.get_current_day()
+    current_turn = Setting.objects.get_integer('turn')
 
-    moves = Move.objects.filter(player=request.user).filter(turn=current_turn)
+    actions = Action.objects.filter(player=request.user).filter(turn=current_turn)
 
     return Response({
         'board_consts': {
@@ -208,13 +208,17 @@ def api_initial_load(request):
             'sector_size': SECTOR_SIZE,
             'grid_size': GRID_SIZE,
         },
-        'moves': MoveSerializer(moves, many=True).data,
+        'actions': ActionSerializer(actions, many=True).data,
         'account': AccountSerializer(request.user).data,
     })
     
 @login_required
 @api_view(['POST'])
-def api_square_unit_action(request, src_col, src_row, dest_col, dest_row, kind, amount):
+def api_action(request, kind, src_col, src_row, dest_col=None, dest_row=None):
+    if dest_col == None or dest_row == None:
+        dest_col = src_col
+        dest_row = src_row
+
     try:
         src_col = int(src_col)
         src_row = int(src_row)
@@ -223,23 +227,35 @@ def api_square_unit_action(request, src_col, src_row, dest_col, dest_row, kind, 
     except:
         raise Http404
 
-    new_move = Move(
+    new_action = Action(
         player=request.user,
-        turn=int(Setting.objects.get(name='Current Day')),
+        turn=Setting.objects.get_integer('turn'),
         src_col=src_col,
         src_row=src_row,
         dest_col=dest_col,
         dest_row=dest_row,
-        kind=kind,
-        amount=amount
+        kind=kind
     )
 
-    if new_move.is_valid():
-        new_move.save()
+    if new_action.is_valid():
+        new_action.save()
+        return Response('{}')
     else:
         return Response({'error': new_move.error}, status=status.HTTP_400_BAD_REQUEST)
 
-        
+@login_required
+@api_view(['POST'])
+def api_undo(request, action_id):
+    current_turn = Setting.objects.get_integer('turn')
+    action = get_object_or_None(Action, pk=action_id)
+    if action != None:
+        action.delete()
+    print "YO DOG I'M TOTALLY HERE"
+    return Response('{}')
+
+
+
+
 
 
     #if action == 'place':
