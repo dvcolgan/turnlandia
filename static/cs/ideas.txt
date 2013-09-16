@@ -1,0 +1,62 @@
+BoardLoader - loading the board
+SquareModel - pure data about a square
+ActionModel - pure data about an action
+
+
+3 layers:
+couchdb which gives back data
+server logic layer
+---
+browser logic layer that is exactly the same
+
+browser rendering layer that calls methods on the logic layer?
+
+
+
+json documents that contain:
+player objects that contain the actions for the turn
+square objects that contain the data for that square
+
+
+
+
+
+// Player
+{
+    'id': 1,
+    'username': 'davidscolgan',
+    'email': 'dvcolgan@gmail.com'
+    'color': '#88cc88',
+    'leaderName': 'Larry King Live',
+    'peopleName': 'CNN Journalists',
+    'dateJoined': '2013-07-13',
+    'actions': [
+        'turn': 1,
+        'kind': 'move',
+        'srcCol': 4,
+        'srcRow': 5,
+        'destCol': 2,
+        'destRow': 2,
+        'timestamp': '2013-09-12T23:46:52.117Z'
+    ]
+}
+
+// Square
+{
+    'col': 0,
+    'row': 0,
+    'terrainType': 'plains',
+    'units': []
+}
+
+// units
+'units': [
+    {
+        'owner': 1,
+        'amount': 10,
+    },
+    {
+        'owner': 2,
+        'amount': 10,
+    }
+]

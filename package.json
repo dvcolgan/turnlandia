@@ -7,6 +7,7 @@
     "dependencies": {
         "request": "*",
         "jasmine-node": "*",
-        "lodash": "*"
+        "lodash": "*",
+        "express": "3.x"
     }
 }

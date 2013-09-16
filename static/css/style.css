@@ -220,7 +220,13 @@ h6 {
   box-shadow: 0 0 8px black;
   overflow: hidden;
 }
+.board .scroll-pane {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
 .board .sector {
+  background: #133777;
   position: absolute;
   width: 480px;
   height: 480px;

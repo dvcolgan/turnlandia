@@ -3,12 +3,6 @@
 {% block title %}Play that Game{% endblock %}
 
 {% block head %}
-<script>
-var require = {
-    baseUrl: '{{ STATIC_URL }}js'
-};
-</script>
-<script data-main="src/system" src="{{ STATIC_URL }}js/jquery-and-require.js"></script>
 <style type="text/css">
     #canvas {
         display: block;
@@ -42,6 +36,8 @@ var require = {
 </div>
 
 <div class="action-log"><h2>This Turn's Actions</h2></div>
-<div class="board"></div>
+<div class="board">
+    <div class="scroll-pane"></div>
+</div>
 
 {% endblock %}
