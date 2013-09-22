@@ -2,39 +2,29 @@
 var Board;
 
 Board = (function() {
-  Board.prototype.scroll = {
-    x: 0,
-    y: 0
-  };
-
-  Board.prototype.lastMouse = {
-    x: 0,
-    y: 0
-  };
-
-  Board.prototype.lastScroll = {
-    x: 0,
-    y: 0
-  };
-
-  Board.prototype.dragging = false;
-
-  Board.prototype.gridSize = 48;
-
-  Board.prototype.sectorSize = 10;
-
-  Board.prototype.squareData = new Hash2D();
-
-  Board.prototype.squareDomNodes = new Hash2D();
-
-  Board.prototype.sectorData = new Hash2D();
-
-  Board.prototype.sectorDomNodes = new Hash2D();
-
   function Board(selector) {
     var resizeBoard,
       _this = this;
     this.selector = selector;
+    this.scroll = {
+      x: 0,
+      y: 0
+    };
+    this.lastMouse = {
+      x: 0,
+      y: 0
+    };
+    this.lastScroll = {
+      x: 0,
+      y: 0
+    };
+    this.dragging = false;
+    this.gridSize = 48;
+    this.sectorSize = 10;
+    this.squareData = new Hash2D();
+    this.squareDomNodes = new Hash2D();
+    this.sectorData = new Hash2D();
+    this.sectorDomNodes = new Hash2D();
     $(this.selector).mousedown(function(event) {
       event.preventDefault();
       _this.lastMouse = {
@@ -73,7 +63,7 @@ Board = (function() {
 
   Board.prototype.receiveSectorData = function(sectorX, sectorY, squares) {
     this.sectorData.set(sectorX, sectorY, squares);
-    this.showSector(sectorX, sectorY);
+    this.makeSectorDomNode(sectorX, sectorY);
     return this.scrollSector(sectorX, sectorY);
   };
 
@@ -124,7 +114,7 @@ Board = (function() {
               this.sectorData.set(sectorX, sectorY, 'loading');
               _results1.push($(this.selector).trigger('needsector', [sectorX, sectorY]));
             } else if (this.sectorData.get(sectorX, sectorY) !== 'loading') {
-              this.showSector(sectorX, sectorY);
+              this.makeSectorDomNode(sectorX, sectorY);
               _results1.push(this.scrollSector(sectorX, sectorY));
             } else {
               _results1.push(void 0);
@@ -143,13 +133,45 @@ Board = (function() {
     return _results;
   };
 
-  Board.prototype.showSector = function(sectorX, sectorY) {
-    var $sectorDomNode;
+  Board.prototype.makeSectorDomNode = function(sectorX, sectorY) {
+    var $sectorDomNode, $squareDomNode, col, row, thisSectorData, thisSquare, _i, _ref, _results;
     $sectorDomNode = $('<div class="sector disable-select"></div>');
     $sectorDomNode.data('x', sectorX);
     $sectorDomNode.data('y', sectorY);
     $(this.selector).append($sectorDomNode);
-    return this.sectorDomNodes.set(sectorX, sectorY, $sectorDomNode);
+    this.sectorDomNodes.set(sectorX, sectorY, $sectorDomNode);
+    thisSectorData = this.sectorData.get(sectorX, sectorY);
+    _results = [];
+    for (row = _i = 0, _ref = this.sectorSize; 0 <= _ref ? _i < _ref : _i > _ref; row = 0 <= _ref ? ++_i : --_i) {
+      _results.push((function() {
+        var _j, _ref1, _results1;
+        _results1 = [];
+        for (col = _j = 0, _ref1 = this.sectorSize; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; col = 0 <= _ref1 ? ++_j : --_j) {
+          thisSquare = thisSectorData[sectorX * this.sectorSize + col][sectorY * this.sectorSize + row];
+          $squareDomNode = $('<div class="grid-square">\
+                                        <div class="subtile north-west"></div>\
+                                        <div class="subtile north-east"></div>\
+                                        <div class="subtile south-west"></div>\
+                                        <div class="subtile south-east"></div>\
+                                    </div>');
+          $squareDomNode.css('left', (col * this.gridSize) + 'px').css('top', (row * this.gridSize) + 'px');
+          if (thisSquare.terrainType === 'water' || thisSquare.terrainType === 'mountains' || thisSquare.terrainType === 'forest') {
+            $squareDomNode.find('.subtile').css('background-image', 'url(/static/images/' + thisSquare.terrainType + '-tiles.png)');
+            $squareDomNode.find('.north-west').css('background-position', this.getTile24CSSOffset(thisSquare.northWestTile24));
+            $squareDomNode.find('.north-east').css('background-position', this.getTile24CSSOffset(thisSquare.northEastTile24));
+            $squareDomNode.find('.south-west').css('background-position', this.getTile24CSSOffset(thisSquare.southWestTile24));
+            $squareDomNode.find('.south-east').css('background-position', this.getTile24CSSOffset(thisSquare.southEastTile24));
+          }
+          $squareDomNode.css({
+            'background-color': '#00aa44'
+          });
+          $squareDomNode.data('col', this.col).data('row', this.row);
+          _results1.push($sectorDomNode.append($squareDomNode));
+        }
+        return _results1;
+      }).call(this));
+    }
+    return _results;
   };
 
   Board.prototype.scrollSector = function(sectorX, sectorY) {

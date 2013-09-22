@@ -9,7 +9,7 @@ browserMain = {
     $(document).on('needsector', '.board', function(event, x, y) {
       console.log('needsector handler ' + x + ' ' + y);
       return $.ajax({
-        url: '/api/squares/' + (x * 10) + '/' + (y * 10) + '/' + ((x + 1) * 10) + '/' + ((y + 1) * 10) + '/',
+        url: '/api/squares/' + (x * 10) + '/' + (y * 10) + '/' + ((x + 1) * 10 - 1) + '/' + ((y + 1) * 10 - 1) + '/',
         method: 'GET',
         dataType: 'json',
         success: function(data) {
@@ -26,48 +26,5 @@ browserMain = {
         return _this.players = data;
       }
     });
-  },
-  createBoard: function() {
-    var $domNode, col, row, rows, square, _ref, _results;
-    _ref = this.squares;
-    _results = [];
-    for (col in _ref) {
-      rows = _ref[col];
-      _results.push((function() {
-        var _results1;
-        _results1 = [];
-        for (row in rows) {
-          square = rows[row];
-          $domNode = $('<div class="grid-square">\
-                                  <div class="subtile north-west"></div>\
-                                  <div class="subtile north-east"></div>\
-                                  <div class="subtile south-west"></div>\
-                                  <div class="subtile south-east"></div>\
-                              </div>');
-          $domNode.css('left', parseInt(col * this.gridSize) + 'px').css('top', parseInt(row * this.gridSize) + 'px');
-          $('.scroll-pane').append($domNode);
-          if (square.terrainType === 'water' || square.terrainType === 'mountains' || square.terrainType === 'forest') {
-            $domNode.find('.subtile').css('background-image', 'url(/static/images/' + square.terrainType + '-tiles.png)');
-            $domNode.find('.north-west').css('background-position', this.getTile24CSSOffset(square.northWestTile24));
-            $domNode.find('.north-east').css('background-position', this.getTile24CSSOffset(square.northEastTile24));
-            $domNode.find('.south-west').css('background-position', this.getTile24CSSOffset(square.southWestTile24));
-            $domNode.find('.south-east').css('background-position', this.getTile24CSSOffset(square.southEastTile24));
-          }
-          $domNode.css({
-            'background-color': '#00aa44'
-          });
-          $domNode.data('col', col).data('row', row);
-          if (!(col in this.squareDomNodes)) {
-            this.squareDomNodes[col] = {};
-          }
-          if (!(row in this.squareDomNodes[col])) {
-            this.squareDomNodes[col][row] = {};
-          }
-          _results1.push(this.squareDomNodes[col][row] = $domNode);
-        }
-        return _results1;
-      }).call(this));
-    }
-    return _results;
   }
 };

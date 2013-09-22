@@ -7,56 +7,55 @@ util = {
   },
   random_choice: function(collection) {
     return collection[Math.floor(Math.random() * collection.length)];
-  }
-};
-
-Hash2D = (function() {
-  function Hash2D() {}
-
-  Hash2D.prototype.hash = {};
-
-  Hash2D.prototype.get = function(x, y) {
-    if (x in this.hash && y in this.hash[x]) {
-      return this.hash[x][y];
-    } else {
-      return null;
+  },
+  Hash2D: Hash2D = (function() {
+    function Hash2D() {
+      this.hash = {};
     }
-  };
 
-  Hash2D.prototype.set = function(x, y, val) {
-    if (!(x in this.hash)) {
-      this.hash[x] = {};
-    }
-    if (!(y in this.hash[x])) {
-      this.hash[x][y] = {};
-    }
-    return this.hash[x][y] = val;
-  };
-
-  Hash2D.prototype["delete"] = function(x, y) {
-    var val;
-    val = this.get(x, y);
-    this.set(x, y, null);
-    return val;
-  };
-
-  Hash2D.prototype.values = function() {
-    var result, val, x, y, yData, _i, _j, _len, _len1, _ref;
-    result = [];
-    _ref = this.hash;
-    for (yData = _i = 0, _len = _ref.length; _i < _len; yData = ++_i) {
-      x = _ref[yData];
-      for (val = _j = 0, _len1 = yData.length; _j < _len1; val = ++_j) {
-        y = yData[val];
-        result.push(val);
+    Hash2D.prototype.get = function(x, y) {
+      if (x in this.hash && y in this.hash[x]) {
+        return this.hash[x][y];
+      } else {
+        return null;
       }
-    }
-    return result;
-  };
+    };
 
-  return Hash2D;
+    Hash2D.prototype.set = function(x, y, val) {
+      if (!(x in this.hash)) {
+        this.hash[x] = {};
+      }
+      if (!(y in this.hash[x])) {
+        this.hash[x][y] = {};
+      }
+      return this.hash[x][y] = val;
+    };
 
-})();
+    Hash2D.prototype["delete"] = function(x, y) {
+      var val;
+      val = this.get(x, y);
+      this.set(x, y, null);
+      return val;
+    };
+
+    Hash2D.prototype.values = function() {
+      var result, val, x, y, yData, _i, _j, _len, _len1, _ref;
+      result = [];
+      _ref = this.hash;
+      for (yData = _i = 0, _len = _ref.length; _i < _len; yData = ++_i) {
+        x = _ref[yData];
+        for (val = _j = 0, _len1 = yData.length; _j < _len1; val = ++_j) {
+          y = yData[val];
+          result.push(val);
+        }
+      }
+      return result;
+    };
+
+    return Hash2D;
+
+  })()
+};
 
 if (typeof module !== 'undefined') {
   module.exports = util;

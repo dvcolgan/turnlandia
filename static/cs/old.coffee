@@ -61,7 +61,7 @@
 #                                    ownerColor: vm.accountColor
 #                                    square: square.id
 #                                    amount: ko.observable(parseInt(count))
-#                                    last_turn_amount: 0
+#                                    lastTurnAmount: 0
 #                                square.owner(vm.accountID)
 #                                square.ownerColor(vm.accountColor)
 #                    vm.unplacedUnits(0)
@@ -117,7 +117,7 @@
 #                                ownerColor: vm.accountColor
 #                                square: square.id
 #                                amount: ko.observable(1)
-#                                last_turn_amount: 0 # This may take some work to get working
+#                                lastTurnAmount: 0 # This may take some work to get working
 #                            })
 #
 #
@@ -168,49 +168,49 @@
 
 # Modified Djykstra's algorithm to show all possible moves
 #distances = {}
-#reachable_squares = {}
-#unreachable_squares = {}
-#unchecked_squares = {}
-#edge_squares = {}
-#current_square = @move_start_square
+#reachableSquares = {}
+#unreachableSquares = {}
+#uncheckedSquares = {}
+#edgeSquares = {}
+#currentSquare = @moveStartSquare
 ## A unit should never be able to travel more than 6 squares
-#for row in [@active_square.row-max_depth..@active_square.row+max_depth]
-#    for col in [@active_square.col-max_depth..@active_square.col+max_depth]
+#for row in [@activeSquare.row-maxDepth..@activeSquare.row+maxDepth]
+#    for col in [@activeSquare.col-maxDepth..@activeSquare.col+maxDepth]
 #        distances[col + '|' + row] = 1000000
-#        unchecked_squares[col + '|' + row] = @squares[col][row]
+#        uncheckedSquares[col + '|' + row] = @squares[col][row]
 
-#distances[current_square.col + '|' + current_square.row] = 0
+#distances[currentSquare.col + '|' + currentSquare.row] = 0
 
 ## this == current square, other == the neighbor in question
 ##while yes # yes yes yes yes yes yes
-#for i in [0...max_depth]
+#for i in [0...maxDepth]
 
-#    for reachable_square of reachable_squares
-#        this_square_key = (reachable_square.col) + '|' + (reachable_square.row)
+#    for reachableSquare of reachableSquares
+#        thisSquareKey = (reachableSquare.col) + '|' + (reachableSquare.row)
 
-#        left_square_key = (reachable_square.col-1) + '|' + (reachable_square.row)
-#        right_square_key = (reachable_square.col+1) + '|' + (reachable_square.row)
-#        top_square_key = (reachable_square.col) + '|' + (reachable_square.row-1)
-#        bottom_square_key = (reachable_square.col) + '|' + (reachable_square.row+1)
+#        leftSquareKey = (reachableSquare.col-1) + '|' + (reachableSquare.row)
+#        rightSquareKey = (reachableSquare.col+1) + '|' + (reachableSquare.row)
+#        topSquareKey = (reachableSquare.col) + '|' + (reachableSquare.row-1)
+#        bottomSquareKey = (reachableSquare.col) + '|' + (reachableSquare.row+1)
 
-#        for other_square_key in [left_square_key, right_square_key, top_square_key, bottom_square_key]
+#        for otherSquareKey in [leftSquareKey, rightSquareKey, topSquareKey, bottomSquareKey]
 
-#            if other_square_key of unchecked_squares
-#                other_square = unchecked_squares[other_square_key]
-#                other_distance = other_square.traversal_cost + distances[this_square_key]
+#            if otherSquareKey of uncheckedSquares
+#                otherSquare = uncheckedSquares[otherSquareKey]
+#                otherDistance = otherSquare.traversalCost + distances[thisSquareKey]
 #                # If this square is outside of the traveling distance, mark it as such
-#                if other_distance > max_depth
-#                    unreachable_squares[other_square_key] = other_square
-#                else if other_square_key not of distances or other_distance < distances[other_square_key]
-#                    distances[other_square_key] = other_distance
-#                    other_square.$dom_node.addClass('traversable-square')
+#                if otherDistance > maxDepth
+#                    unreachableSquares[otherSquareKey] = otherSquare
+#                else if otherSquareKey not of distances or otherDistance < distances[otherSquareKey]
+#                    distances[otherSquareKey] = otherDistance
+#                    otherSquare.$domNode.addClass('traversable-square')
 
-#        current_square_key = current_square.col + '|' + current_square.row
-#        reachable_squares[current_square_key] = unchecked_squares[current_square_key]
-#        delete unchecked_squares[reachable_square]
+#        currentSquareKey = currentSquare.col + '|' + currentSquare.row
+#        reachableSquares[currentSquareKey] = uncheckedSquares[currentSquareKey]
+#        delete uncheckedSquares[reachableSquare]
 
 
-#            this_square_distance = distances[visited_square_key]
+#            thisSquareDistance = distances[visitedSquareKey]
 
 
 #console.log('finished')
@@ -255,61 +255,61 @@
 
 class Sector
     # Sector size is in number of squares, square size is in pixels
-    constructor: (@board, @$dom_node, @x, @y) ->
+    constructor: (@board, @$domNode, @x, @y) ->
 
         @squares = {}
 
-        @$dom_node
-            .css('left',(@x * TB.sector_size * TB.grid_size - @board.scroll.x) + 'px')
-            .css('top', (@y * TB.sector_size * TB.grid_size - @board.scroll.y) + 'px')
+        @$domNode
+            .css('left',(@x * TB.sectorSize * TB.gridSize - @board.scroll.x) + 'px')
+            .css('top', (@y * TB.sectorSize * TB.gridSize - @board.scroll.y) + 'px')
 
-        first_square_x = @x * TB.sector_size
-        first_square_y = @y * TB.sector_size
+        firstSquareX = @x * TB.sectorSize
+        firstSquareY = @y * TB.sectorSize
 
-        $.getJSON '/api/sector/'+first_square_x+'/'+first_square_y+'/'+TB.sector_size+'/'+TB.sector_size+'/', (data, status) =>
+        $.getJSON '/api/sector/'+firstSquareX+'/'+firstSquareY+'/'+TB.sectorSize+'/'+TB.sectorSize+'/', (data, status) =>
             if status == 'success'
-                for square_data, i in data
+                for squareData, i in data
 
                     #units = []
                     #for unit in square.units
                     #    units.push({
                     #        owner: unit.owner
-                    #        ownerColor: unit.owner_color
+                    #        ownerColor: unit.ownerColor
                     #        square: square.id
                     #        amount: ko.observable(unit.amount)
-                    #        last_turn_amount: unit.last_turn_amount
+                    #        lastTurnAmount: unit.lastTurnAmount
                     #    })
 
 
-                    $square_dom_node = $('<div class="grid-square">
+                    $squareDomNode = $('<div class="grid-square">
                                             <div class="subtile north-west"></div>
                                             <div class="subtile north-east"></div>
                                             <div class="subtile south-west"></div>
                                             <div class="subtile south-east"></div>
                                         </div>')
-                    $square_dom_node
-                        .css('left', parseInt((i % TB.sector_size) * TB.grid_size) + 'px')
-                        .css('top', parseInt(Math.floor(i / TB.sector_size) * TB.grid_size) + 'px')
-                    @$dom_node.append($square_dom_node)
+                    $squareDomNode
+                        .css('left', parseInt((i % TB.sectorSize) * TB.gridSize) + 'px')
+                        .css('top', parseInt(Math.floor(i / TB.sectorSize) * TB.gridSize) + 'px')
+                    @$domNode.append($squareDomNode)
 
-                    if square_data.col not of @squares
-                        @squares[square_data.col] = {}
-                    if square_data.col not of @board.squares
-                        @board.squares[square_data.col] = {}
+                    if squareData.col not of @squares
+                        @squares[squareData.col] = {}
+                    if squareData.col not of @board.squares
+                        @board.squares[squareData.col] = {}
 
-                    new_square = new Square(@, $square_dom_node, square_data)
-                    @board.squares[square_data.col][square_data.row] = new_square
+                    newSquare = new Square(@, $squareDomNode, squareData)
+                    @board.squares[squareData.col][squareData.row] = newSquare
 
-                    @squares[square_data.col][square_data.row] = new_square
+                    @squares[squareData.col][squareData.row] = newSquare
 
                 for action in TB.actions
-                    src_in = @contains_square(action.src_col, action.src_row)
-                    dest_in = @contains_square(action.dest_col, action.dest_row)
+                    srcIn = @containsSquare(action.srcCol, action.srcRow)
+                    destIn = @containsSquare(action.destCol, action.destRow)
 
                     # Easiest case, the whole action is inside this sector, and we can just apply the arrow
-                    if src_in and dest_in
-                        @board.draw_arrow(@board.squares[action.src_col][action.src_row], @board.squares[action.dest_col][action.dest_row])
-                        #else if src_in and not dest_in
+                    if srcIn and destIn
+                        @board.drawArrow(@board.squares[action.srcCol][action.srcRow], @board.squares[action.destCol][action.destRow])
+                        #else if srcIn and not destIn
 
 
 
@@ -319,55 +319,55 @@ class Sector
     show: ->
     hide: ->
 
-    contains_square: (col, row) ->
-        return (col >= @x * TB.sector_size and row >= @y * TB.sector_size and col < @x * TB.sector_size + TB.sector_size and row < @y * TB.sector_size + TB.sector_size)
+    containsSquare: (col, row) ->
+        return (col >= @x * TB.sectorSize and row >= @y * TB.sectorSize and col < @x * TB.sectorSize + TB.sectorSize and row < @y * TB.sectorSize + TB.sectorSize)
 
 
 class Board
-    constructor: (@$dom_node, board_consts) ->
-        _.extend(@, board_consts)
+    constructor: (@$domNode, boardConsts) ->
+        _.extend(@, boardConsts)
         @scroll = { x: 0, y: 0 }
-        @max_depth = 6 # How many moves a unit can move
+        @maxDepth = 6 # How many moves a unit can move
 
         # TODO center the board over your HQ, for now center it at 0, 0
-        @scroll.x = -@get_view_width()/2
-        @scroll.y = -@get_view_height()/2
+        @scroll.x = -@getViewWidth()/2
+        @scroll.y = -@getViewHeight()/2
 
         @sectors = {}
         @squares = {}
 
 
         #for action in TB.actions
-        #    @load_sector_of_point(action.src_col, action.src_row)
-        #    @load_sector_of_point(action.dest_col, action.dest_row)
+        #    @loadSectorOfPoint(action.srcCol, action.srcRow)
+        #    @loadSectorOfPoint(action.destCol, action.destRow)
 
 
 
         # For movement
-        @active_square = null
-        @is_moving = null
-        @move_start_square = null
+        @activeSquare = null
+        @isMoving = null
+        @moveStartSquare = null
 
-        @$dom_node.on 'click', '.grid-square', (event) =>
+        @$domNode.on 'click', '.grid-square', (event) =>
             # If the user was dragging, ignore this click
-            if not (Math.abs(@last_scroll.x - @scroll.x) < 5 and Math.abs(@last_scroll.y - @scroll.y) < 5)
+            if not (Math.abs(@lastScroll.x - @scroll.x) < 5 and Math.abs(@lastScroll.y - @scroll.y) < 5)
                 console.log 'ignoring click'
                 return
 
-            console.log TB.current_action
-            if TB.current_action == 'road'
+            console.log TB.currentAction
+            if TB.currentAction == 'road'
                 $.ajax({
-                    url: '/api/action/road/' + 1 + '/' + @active_square.col + '/' + @active_square.row + '/'
+                    url: '/api/action/road/' + 1 + '/' + @activeSquare.col + '/' + @activeSquare.row + '/'
                     method: 'POST'
                     dataType: 'json'
                     success: (data) ->
                         true
                 })
 
-            else if TB.current_action == 'move'
-                if not @is_moving
-                    @move_start_square = @active_square
-                    @is_moving = yes
+            else if TB.currentAction == 'move'
+                if not @isMoving
+                    @moveStartSquare = @activeSquare
+                    @isMoving = yes
 
 
                     # Maybe inefficient way of finding all the possible moves: find the shortest paths for all the squares
@@ -375,39 +375,39 @@ class Board
                     #
                     # SOMEDAY MAKE THIS BETTER AND NOT COPYPASTED CODE
                     # SOMEDAY MAKE ALL OF THIS BETTER
-                    square_traversal_costs = @get_square_traversal_costs(@move_start_square.col, @move_start_square.row, @max_depth)
+                    squareTraversalCosts = @getSquareTraversalCosts(@moveStartSquare.col, @moveStartSquare.row, @maxDepth)
                     $('.reachable-square').removeClass('reachable-square')
 
-                    graph = new astar.Graph(square_traversal_costs)
+                    graph = new astar.Graph(squareTraversalCosts)
 
-                    for col in [0..@max_depth*2]
-                        for row in [0..@max_depth*2]
-                            start = graph.nodes[@max_depth][@max_depth]
+                    for col in [0..@maxDepth*2]
+                        for row in [0..@maxDepth*2]
+                            start = graph.nodes[@maxDepth][@maxDepth]
                             end = graph.nodes[col][row]
                             console.log('start ' + start.x + ' ' + start.y + ', end ' + end.x + ' ' + end.y)
                             result = astar.astar.search(graph.nodes, start, end)
 
-                            total_cost = 0
+                            totalCost = 0
                             skip = false
                             for node in result
                                 # Can't move into a solid square
                                 if node.cost == 0
                                     skip = true
-                                total_cost += node.cost
-                                if total_cost > @max_depth
+                                totalCost += node.cost
+                                if totalCost > @maxDepth
                                     skip = true
                             if skip then continue
 
                             for node in result
-                                $square_dom_node = @squares[(@move_start_square.col-@max_depth)+col][(@move_start_square.row-@max_depth)+row].$dom_node
-                                $square_dom_node.addClass('reachable-square')
+                                $squareDomNode = @squares[(@moveStartSquare.col-@maxDepth)+col][(@moveStartSquare.row-@maxDepth)+row].$domNode
+                                $squareDomNode.addClass('reachable-square')
                 else
                     console.log 'move done'
-                    @is_moving = false
+                    @isMoving = false
                     $('.reachable-square').removeClass('reachable-square')
 
                     $.ajax({
-                        url: '/api/action/move/' + @move_start_square.col + '/' + @move_start_square.row + '/' + @active_square.col + '/' + @active_square.row + '/'
+                        url: '/api/action/move/' + @moveStartSquare.col + '/' + @moveStartSquare.row + '/' + @activeSquare.col + '/' + @activeSquare.row + '/'
                         method: 'POST'
                         dataType: 'json'
                         success: (data) ->
@@ -420,101 +420,101 @@ class Board
             return
 
         $(document).keydown (event) =>
-            @is_moving = no
+            @isMoving = no
             return true
 
 
-        @$dom_node.on 'mouseenter', '.grid-square', (event) =>
+        @$domNode.on 'mouseenter', '.grid-square', (event) =>
 
             if not $(event.target).hasClass('grid-square')
-                $square_dom_node = $(event.target).parents('.grid-square')
+                $squareDomNode = $(event.target).parents('.grid-square')
             else
-                $square_dom_node = $(event.target)
+                $squareDomNode = $(event.target)
 
-            previous_active_square = @active_square
+            previousActiveSquare = @activeSquare
 
-            @active_square = @squares[$square_dom_node.data('col')][$square_dom_node.data('row')]
+            @activeSquare = @squares[$squareDomNode.data('col')][$squareDomNode.data('row')]
 
-            if @is_moving and previous_active_square != @active_square
-                @draw_arrow(@move_start_square, @active_square)
+            if @isMoving and previousActiveSquare != @activeSquare
+                @drawArrow(@moveStartSquare, @activeSquare)
 
 
-    draw_arrow: (start_square, end_square) ->
+    drawArrow: (startSquare, endSquare) ->
 
-        square_traversal_costs = @get_square_traversal_costs(start_square.col, start_square.row, @max_depth)
+        squareTraversalCosts = @getSquareTraversalCosts(startSquare.col, startSquare.row, @maxDepth)
 
-        graph = new astar.Graph(square_traversal_costs)
+        graph = new astar.Graph(squareTraversalCosts)
 
-        start = graph.nodes[@max_depth][@max_depth]
-        end = graph.nodes[(end_square.col - start_square.col) + @max_depth][(end_square.row - start_square.row) + @max_depth]
+        start = graph.nodes[@maxDepth][@maxDepth]
+        end = graph.nodes[(endSquare.col - startSquare.col) + @maxDepth][(endSquare.row - startSquare.row) + @maxDepth]
         result = astar.astar.search(graph.nodes, start, end)
 
-        $('.arrow.unit-' + start_square.units[0].id).remove()
+        $('.arrow.unit-' + startSquare.units[0].id).remove()
 
         # Find the orientation of the starting square
-        if result[0].x == @max_depth
-            if result[0].y > @max_depth
-                next_direction = 'south'
-            if result[0].y < @max_depth
-                next_direction = 'north'
-        if result[0].y == @max_depth
+        if result[0].x == @maxDepth
+            if result[0].y > @maxDepth
+                nextDirection = 'south'
+            if result[0].y < @maxDepth
+                nextDirection = 'north'
+        if result[0].y == @maxDepth
             if result[0].x > 0
-                next_direction = 'west'
+                nextDirection = 'west'
             if result[0].x < 0
-                next_direction = 'east'
-        last_direction = 'start'
+                nextDirection = 'east'
+        lastDirection = 'start'
 
-        last_node = {x:@max_depth, y:@max_depth}
+        lastNode = {x:@maxDepth, y:@maxDepth}
 
-        total_cost = 0
+        totalCost = 0
         for node in result
             # Can't move into a solid square
             if node.cost == 0
                 return
-            total_cost += node.cost
-            if total_cost > @max_depth
+            totalCost += node.cost
+            if totalCost > @maxDepth
                 return
 
         for node in result
-            dx = node.x - last_node.x
-            dy = node.y - last_node.y
+            dx = node.x - lastNode.x
+            dy = node.y - lastNode.y
 
-            if node.x == last_node.x
+            if node.x == lastNode.x
                 if dy > 0
-                    next_direction = 'south'
+                    nextDirection = 'south'
                 if dy < 0
-                    next_direction = 'north'
-            if node.y == last_node.y
+                    nextDirection = 'north'
+            if node.y == lastNode.y
                 if dx > 0
-                    next_direction = 'east'
+                    nextDirection = 'east'
                 if dx < 0
-                    next_direction = 'west'
+                    nextDirection = 'west'
 
-            $square_dom_node = @squares[start_square.col+(last_node.x-@max_depth)][start_square.row+(last_node.y-@max_depth)].$dom_node
-            $square_dom_node.prepend($('<div class="arrow ' + last_direction + '-' + next_direction + ' unit-' + start_square.units[0].id + '"></div>'))
+            $squareDomNode = @squares[startSquare.col+(lastNode.x-@maxDepth)][startSquare.row+(lastNode.y-@maxDepth)].$domNode
+            $squareDomNode.prepend($('<div class="arrow ' + lastDirection + '-' + nextDirection + ' unit-' + startSquare.units[0].id + '"></div>'))
 
-            last_node = node
+            lastNode = node
 
-            if next_direction == 'north'
-                last_direction = 'south'
-            if next_direction == 'south'
-                last_direction = 'north'
-            if next_direction == 'east'
-                last_direction = 'west'
-            if next_direction == 'west'
-                last_direction = 'east'
+            if nextDirection == 'north'
+                lastDirection = 'south'
+            if nextDirection == 'south'
+                lastDirection = 'north'
+            if nextDirection == 'east'
+                lastDirection = 'west'
+            if nextDirection == 'west'
+                lastDirection = 'east'
 
-        $square_dom_node = @squares[start_square.col+(last_node.x-@max_depth)][start_square.row+(last_node.y-@max_depth)].$dom_node
-        $square_dom_node.prepend($('<div class="arrow ' + last_direction + '-end unit-' + start_square.units[0].id + '"></div>'))
+        $squareDomNode = @squares[startSquare.col+(lastNode.x-@maxDepth)][startSquare.row+(lastNode.y-@maxDepth)].$domNode
+        $squareDomNode.prepend($('<div class="arrow ' + lastDirection + '-end unit-' + startSquare.units[0].id + '"></div>'))
 
         console.log('done')
 
                     
-    get_square_traversal_costs: (x, y, radius) ->
-        square_traversal_costs = []
+    getSquareTraversalCosts: (x, y, radius) ->
+        squareTraversalCosts = []
         for col in [x-radius..x+radius]
-            traversal_row = []
+            traversalRow = []
             for row in [y-radius..y+radius]
-                traversal_row.push(@squares[col][row].traversal_cost)
-            square_traversal_costs.push(traversal_row)
-        return square_traversal_costs
+                traversalRow.push(@squares[col][row].traversalCost)
+            squareTraversalCosts.push(traversalRow)
+        return squareTraversalCosts
