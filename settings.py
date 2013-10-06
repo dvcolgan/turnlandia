@@ -139,6 +139,16 @@ INSTALLED_APPS = (
     'south',
 )
 
+REST_FRAMEWORK = {
+    'DEFAULT_PARSER_CLASSES': (
+        'game.parsers.JSONParser',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'game.parsers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    )
+}
+
 SOUTH_TESTS_MIGRATE = False
 SKIP_SOUTH_TESTS = True
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'

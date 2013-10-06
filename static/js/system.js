@@ -50,8 +50,8 @@ window.TB = {
     };
     TB.ctx = $(TB.selector).get(0).getContext('2d');
     TB.fetcher = new DataFetcher();
-    return TB.fetcher.loadInitialData(function(actions) {
-      TB.actions = actions;
+    return TB.fetcher.loadInitialData(function(data) {
+      TB.actions = data.actions;
       TB.actionManager = new ActionManager();
       TB.registerEventHandlers();
       TB.startMainLoop();
@@ -86,8 +86,13 @@ window.TB = {
       }
     }
     return TB.fetcher.loadSectors(startSectorX, startSectorY, endSectorX, endSectorY, function(squares) {
-      console.log(squares);
-      return TB.squareData.concatRaw(squares);
+      var square, _k, _len, _results;
+      _results = [];
+      for (_k = 0, _len = squares.length; _k < _len; _k++) {
+        square = squares[_k];
+        _results.push(TB.squareData.set(square.col, square.row, square));
+      }
+      return _results;
     });
   },
   registerEventHandlers: function() {
@@ -122,6 +127,7 @@ window.TB = {
         row = TB.mouseYToRow(event.offsetY);
         TB.board.placeUnit(col, row, 3);
       }
+      console.log(TB.dragging);
       return TB.dragging = false;
     });
     $(TB.selector).mousewheel(function(event, delta, deltaX, deltaY) {

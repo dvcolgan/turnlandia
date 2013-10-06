@@ -36,6 +36,7 @@ class UnitSerializer(serializers.ModelSerializer):
 class SquareSerializer(serializers.ModelSerializer):
     owner_color = serializers.Field(source='owner.color')
     owner_username = serializers.Field(source='owner.username')
+    # This should be not here later someday
     owner_leader_name = serializers.Field(source='owner.leader_name')
     owner_people_name = serializers.Field(source='owner.people_name')
     traversal_cost = serializers.Field(source='get_traversal_cost')

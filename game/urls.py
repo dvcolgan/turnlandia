@@ -51,14 +51,11 @@ urlpatterns = patterns('game.views',
     #    name='api-game'
     #),
 
-    url(r'^api/sector/(?P<col>[0-9-]+)/(?P<row>[0-9-]+)/(?P<width>[0-9]+)/(?P<height>[0-9]+)/$', 'api_sector', name='api-sector'),
+    url(r'^api/squares/(?P<col>[0-9-]+)/(?P<row>[0-9-]+)/(?P<width>[0-9]+)/(?P<height>[0-9]+)/$', 'api_squares', name='api-squares'),
 
     url(r'^api/undo/(?P<action_id>\d+)/$', 'api_undo', name='api-undo'),
 
-    url(r'^api/action/(?P<kind>move|attack|city|road)/(?P<src_col>[0-9-]+)/(?P<src_row>[0-9-]+)/$', 'api_action', name='api-action'),
-    url(r'^api/action/(?P<kind>move|attack|city|road)/(?P<src_col>[0-9-]+)/(?P<src_row>[0-9-]+)/(?P<dest_col>[0-9-]+)/(?P<dest_row>[0-9-]+)/$', 'api_action', name='api-action'),
-
-    #url(r'^api/move-unit/(?P<unit_id>\d+)/(?P<dest_col>[0-9-]+)/(?P<dest_row>[0-9-]+)/$', 'api_move_unit', name='api-move-unit'),
+    url(r'^api/action/$', 'api_action', name='api-action'),
 
     url(r'^api/initial-load/$', 'api_initial_load', name='api-initial-load'),
 

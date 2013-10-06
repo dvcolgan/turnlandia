@@ -9,7 +9,7 @@ DataFetcher = (function() {
   DataFetcher.prototype.loadInitialData = function(callback) {
     var _this = this;
     return $.ajax({
-      url: '/api/actions/',
+      url: '/api/initial-load/',
       method: 'GET',
       dataType: 'json',
       success: function(data) {
@@ -81,7 +81,7 @@ Board = (function() {
   Board.prototype.draw = function() {
     var col, endCol, endRow, owner, row, screenX, screenY, startCol, startRow, subGridSize, textX, textY, thisSquare, unit, unitRadius, unitX, unitY, zoomedGridSize, _i, _results;
     TB.ctx.textAlign = 'center';
-    TB.ctx.fillStyle = '#148753';
+    TB.ctx.fillStyle = '#148743';
     TB.ctx.fillRect(0, 0, TB.boardWidth, TB.boardHeight);
     TB.ctx.lineWidth = 1;
     zoomedGridSize = TB.gridSize * TB.zoomFactor;

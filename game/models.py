@@ -499,6 +499,7 @@ class Message(models.Model):
 
 
 ACTION_KINDS = (
+    ('initial', 'Initial Placement'),
     ('move', 'Move Units'),
     ('attack', 'Attack'),
     ('city', 'Build City'),

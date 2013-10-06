@@ -4,11 +4,11 @@ class ActionManager
 
     handleInitialPlacement: (event) =>
         $.ajax({
-            url: '/api/actions/'
+            url: '/api/action/'
             method: 'POST'
             dataType: 'json'
             data:
-                type: 'initialPlacement'
+                type: 'initial'
                 col: event.col
                 row: event.row
 

@@ -50,8 +50,8 @@ window.TB =
         TB.ctx = $(TB.selector).get(0).getContext('2d')
 
         TB.fetcher = new DataFetcher()
-        TB.fetcher.loadInitialData (actions) ->
-            TB.actions = actions
+        TB.fetcher.loadInitialData (data) ->
+            TB.actions = data.actions
             TB.actionManager = new ActionManager()
             TB.registerEventHandlers()
             TB.startMainLoop()
@@ -79,8 +79,8 @@ window.TB =
                 if endSectorY == null or y > endSectorY then endSectorY = x
 
         TB.fetcher.loadSectors startSectorX, startSectorY, endSectorX, endSectorY, (squares) ->
-            console.log squares
-            TB.squareData.concatRaw(squares)
+            for square in squares
+                TB.squareData.set(square.col, square.row, square)
 
 
 
@@ -114,6 +114,7 @@ window.TB =
 
                 TB.board.placeUnit(col, row, 3)
 
+            console.log TB.dragging
             TB.dragging = false
 
         $(TB.selector).mousewheel (event, delta, deltaX, deltaY) =>

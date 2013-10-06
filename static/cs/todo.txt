@@ -1,5 +1,11 @@
+Cache all of the json objects locally and have those in a global data store thingy
+When a user scrolls to a part of the map offscreen, you first check to see if the store has it in it, if so don't send a request
+
+
+
 PLAN
 
+switch sqlite to postgres for improved performance
 Update schedule on twitch
 Read through the lodash documentation
 

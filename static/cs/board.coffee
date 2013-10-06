@@ -5,7 +5,7 @@ class DataFetcher
 
     loadInitialData: (callback) ->
         $.ajax
-            url: '/api/actions/'
+            url: '/api/initial-load/'
             method: 'GET'
             dataType: 'json'
             success: (data) =>
@@ -48,7 +48,7 @@ class Board
 
     draw: ->
         TB.ctx.textAlign = 'center'
-        TB.ctx.fillStyle = '#148753'
+        TB.ctx.fillStyle = '#148743'
         TB.ctx.fillRect(0, 0, TB.boardWidth, TB.boardHeight)
         TB.ctx.lineWidth = 1
 
@@ -69,6 +69,7 @@ class Board
                 screenY = (row * zoomedGridSize) - TB.scroll.y
 
                 if thisSquare
+
                     if thisSquare.terrainType == 'water' or thisSquare.terrainType == 'mountains' or thisSquare.terrainType == 'forest'
                         @drawSubTile(TB.images[thisSquare.terrainType+'Tiles'], thisSquare.northWestTile24, screenX, screenY, subGridSize, 0, 0)
                         @drawSubTile(TB.images[thisSquare.terrainType+'Tiles'], thisSquare.northEastTile24, screenX, screenY, subGridSize, subGridSize, 0)

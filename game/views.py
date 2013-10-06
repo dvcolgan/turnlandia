@@ -154,7 +154,7 @@ def api_email_existence(request, email):
 
 @login_required
 @api_view(['GET'])
-def api_sector(request, col, row, width, height):
+def api_squares(request, col, row, width, height):
     try:
         col = int(col)
         row = int(row)
@@ -214,34 +214,21 @@ def api_initial_load(request):
     
 @login_required
 @api_view(['POST'])
-def api_action(request, kind, src_col, src_row, dest_col=None, dest_row=None):
+def api_action(request):
+
+    serializer = ActionSerializer(data=request.DATA)
+    ipdb.set_trace()
+
     if dest_col == None or dest_row == None:
         dest_col = src_col
         dest_row = src_row
 
-    try:
-        src_col = int(src_col)
-        src_row = int(src_row)
-        dest_col = int(dest_col)
-        dest_row = int(dest_row)
-    except:
-        raise Http404
-
-    new_action = Action(
-        player=request.user,
-        turn=Setting.objects.get_integer('turn'),
-        src_col=src_col,
-        src_row=src_row,
-        dest_col=dest_col,
-        dest_row=dest_row,
-        kind=kind
-    )
-
-    if new_action.is_valid():
-        new_action.save()
-        return Response('{}')
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     else:
-        return Response({'error': new_move.error}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
 @login_required
 @api_view(['POST'])

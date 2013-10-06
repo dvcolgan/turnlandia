@@ -10,11 +10,11 @@ ActionManager = (function() {
 
   ActionManager.prototype.handleInitialPlacement = function(event) {
     return $.ajax({
-      url: '/api/actions/',
+      url: '/api/action/',
       method: 'POST',
       dataType: 'json',
       data: {
-        type: 'initialPlacement',
+        type: 'initial',
         col: event.col,
         row: event.row
       },
