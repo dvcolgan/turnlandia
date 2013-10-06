@@ -1,26 +1,56 @@
 request = require('request')
+async = require('async')
+
+db = 'http://127.0.0.1:5984'
 
 
 manage =
     clearSquares: ->
-        console.log 'deleting old database'
-        url = 'http://127.0.0.1:5984/turnbased_dev'
-        request {url: url, method: 'DELETE'}, (error, response, body) =>
+        async.series([
+            (callback) ->
+                console.log 'deleting old actions database'
+                request {url: db + '/turnbased_dev_actions', method: 'DELETE'}, ->
+                    callback()
 
-            console.log 'creating new database'
-            url = 'http://127.0.0.1:5984/turnbased_dev'
-            request {url: url, method: 'PUT'}, (error, response, body) =>
+            (callback) ->
+                console.log 'deleting old squares database'
+                request {url: db + '/turnbased_dev_squares', method: 'DELETE'}, ->
+                    callback()
 
-                console.log 'adding design document'
+            (callback) ->
+                console.log 'creating new actions database'
+                request {url: db + '/turnbased_dev_actions', method: 'PUT'}, ->
+                    callback()
+
+            (callback) ->
+                console.log 'creating new squares database'
+                request {url: db + '/turnbased_dev_squares', method: 'PUT'}, ->
+                    callback()
+
+            (callback) ->
+                console.log 'adding actions design document'
+                designDoc =
+                    _id: '_design/actions'
+                    'language': 'coffeescript',
+                    'views':
+                        'get':
+                            'map': '(doc) -> emit(doc.userID, doc)'
+
+                request {url: db + '/turnbased_dev_actions/_design/actions', method: 'PUT', json:true, body: designDoc }, ->
+                    callback()
+
+            (callback) ->
+                console.log 'adding squares design document'
                 designDoc =
                     _id: '_design/squares'
                     'language': 'coffeescript',
                     'views':
                         'get':
                             'map': '(doc) -> emit([doc.col, doc.row], doc)'
-                url = 'http://127.0.0.1:5984/turnbased_dev/_design/squares'
-                request {url: url, method: 'PUT', json:true, body: designDoc }, (error, response, body) =>
+
+                request {url: db + '/turnbased_dev_squares/_design/squares', method: 'PUT', json:true, body: designDoc }, ->
                     console.log 'done'
+        ])
 
 
 

@@ -4,7 +4,6 @@ Update schedule on twitch
 Read through the lodash documentation
 
 Board stuff
-    make it so that drags don't register as clicks
     finalize the noise generator
     fix the board loader being off for higher zoom levels
     make zooming zoom where your cursor is
@@ -16,6 +15,7 @@ Architecture for other pages (popup/modal)
     your messages
     store
     add twitch tv dev schedule on the site
+    error handling in general
     
 Initial placement
 
@@ -26,6 +26,7 @@ Roads
 
 Flags/Player customization
     make a page for flag stuff
+    Trophy case
 
 
 
@@ -36,46 +37,86 @@ Archeticturing
 Monetization things (hats, maybe ads)
 Resource management
 
-autogenerate a color, or don't let you past without a color
-usernames noncase sensitive
+new players are given 20 units and some resources
+you place your units anywhere you want, a certain distance away from all existing cities, but not necessarily existing players
 
 
-outline peoples territory with a red line or something
-Signs to trash talk people with
-Prevent walls built on settlements and vice versa
-
-Save an image of the entire viewable board at the end of every day
-
-Scale down the images of the board and implement a google maps style zoom feature
-you can zoom whenever you want, but you can only do actions at the lowest zoom level
-make a bug tracker
-chat functionality
-private messaging
-feedback thingy
-    suggest new leader and people names
-    report bugs
-    vote for new features
-leaderboard
-    number of squares controlled
-    number of units
 
 
-add a credits page
 
-donations link
-ad-free, some sort of premium hat for payers of $5 a month
 
-add an undo feature, if for nothing else, the last action
 
-scroll the coordinates when you scroll the map
 
-make exceptions and throw them at people on stream
+{
+    col: 4,
+    row: 5,
+    tile: 'city-center'
+    owner: 32,
+}
 
-take down the game while it is resolving
+{
+    col: 5,
+    row: 5,
+    tile: 'city'
+    owner: 32,
+}
 
-take down the site from 12 - 12:30
 
-add bases that if you lose them you die or something
+
+
+Cities:
+    you build cities on plains
+    cities must be x squares from another city
+    the city starts out as a 2x2 square?
+    initial placement must be within a certain distance from another city
+    Cities require wood
+    Cities are surrounded by walls, only build buildings inside cities
+    build farms around a city
+    to trade with someone, you'd have to build a road between your cities
+    cities have influence
+    city roles
+    you have to have more cities to support more units
+    cities that span multiple squares
+    the outer part of the cities have walls around them
+
+
+Units:
+    a single unit type
+    tell units which square to go to and they will move there over the course of several turns
+    for the initial settlement, you place down several units 20
+
+    a unit carrying resources has a symbol on it showing the type of resource,
+    if you hover over your unit, it tells you the quantities, if an enemy hovers it doesn't
+    units can carry resources - if you die to another player's unit, that unit gets the resources of your unit
+    New units require  food
+    roads make it easier to move units
+    units can carry resources - if you kill a unit you get its resources
+    each unit can carry so many resources
+    the speed at which you build something depends on the number of units building it
+    units have to carry food with them , and it costs one food per turn and then one food per square moved
+    units can carry money/resources and when units go to another city, they can either attack it or trade with it, and that generates money/resources?
+
+    Rectangulartim: Moving units might make it very difficult to attack an enemy. If attacking happens before or after moving only, enemy units could just move through your lines of defense. If units automatically attack everything in their path, moving though an ally's territory would be quite annoying. Idea: Players could toggle their units states between aggressive and defensive. Aggressive units attack every unit within range, which doesn't belong to the same player. Defensive units don't attack anything. This way units of allied players can move through each other without problems, but you cannot sprint though a line of guards easily.
+
+
+[
+{
+    type: 'initial'
+    name: 'Initial Placement'
+    col: 0
+    row: 0
+},
+{
+    type: 'move'
+    name: 'Initial Placement'
+    col: 0
+    row: 0
+},
+
+
+    
+
+
 
 Pathfinding works!  Now making arrows work.
 
@@ -90,7 +131,6 @@ IDEAS SET IN STONE
 infinite players
 infinite board
 make new players spawn near other players
-a single unit type
 water, mountains, forests, plains as terrain
 
 use arrows to move the map around
@@ -102,7 +142,6 @@ plains = 2 points
 forests = 3 points
 mountains = 6 points?
 
-the speed at which you build something depends on the number of units building it
 
 all actions:
 move unit
@@ -117,10 +156,6 @@ https://dl.dropboxusercontent.com/u/14643262/NGCCFlagGUI.png
 
 
 
-units can carry resources - if you kill a unit you get its resources
-each unit can carry so many resources
-
-
 
 Allow users to specify their country of origin, 
 add an admin gui so i can do stuff
@@ -129,21 +164,18 @@ do advance wars style arrow tracing the path of unit movement
 water, bridges, attacking bridges
 roads to build
 
-you can build roads on mountains or plains, you can cut down trees, you can build bridges over water, you build cities on plains
+you can build roads on mountains or plains, you can cut down trees, you can build bridges over water, 
 
 own water squares? maybe
 currency and resources - make colgans the cu
 jools64 has best coin
 
 
-cities must be x squares from another city
 
 
-roads make it easier to move units
 
-the city starts out as a 2x2 square?
 
-initial placement must be within a certain distance from another city
+
 
 Atmospherium - you can only tunnel so much of a mountain before it collapses, kills all troops inside the tunnel, removes the tunnel
 tunnels cost 
@@ -151,22 +183,14 @@ tunnels cost
 
 Moving requires food
 Roads require wood
-Cities require wood
-New units require 
 
 Spies and sabatoging could be interesting
 
 market building - you have to 
 
-units can carry resources - if you die to another player's unit, that unit gets the resources of your unit
 
-
-Cities are surrounded by walls, only build buildings inside cities
-build farms around a city
-to trade with someone, you'd have to build a road between your cities
 vehicles (trade carts)
-a unit carrying resources has a symbol on it showing the type of resource,
-if you hover over your unit, it tells you the quantities, if an enemy hovers it doesn't
+
 
 
 at the end of a turn it should give you a report of what happened
@@ -175,7 +199,6 @@ at the end of a turn it should give you a report of what happened
 
 
 
-tell units which square to go to and they will move there over the course of several turns
 
 trade with other players
 
@@ -188,7 +211,6 @@ wood
 ore
 money
 
-cities have influence
 
 I'll trade you 5 colgans for that - Rhif's idea
 
@@ -203,9 +225,7 @@ a new player doesn't increase the amount of money in the game, you have to grow 
 
 money is determined by the number of sectors in the game
 
-city roles
 
-units can carry money/resources and when units go to another city, they can either attack it or trade with it, and that generates money/resources?
 
 Have a finite amount of money in the game that goes up with each player?
 
@@ -220,13 +240,18 @@ you can trade with cities that have roads connecting them - jared314
 
 can harvest wood, have to let it regrow
 
-you have to have more cities to support more units
-
-cities that span multiple squares
-the outer part of the cities have walls around them
 
 
 
 -Make it so you get a notification when you receive a message
 -Add notes to squares
 http://pastebin.com/wXB7cNw1
+
+Texture packs
+
+add floating semitransparent clouds
+
+
+
+
+

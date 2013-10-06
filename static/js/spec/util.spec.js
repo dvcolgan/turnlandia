@@ -4,12 +4,21 @@ var util;
 util = require('../util');
 
 describe("the exciting and glorious 2D hash table", function() {
-  return it("should not use the same hash table for every instance", function() {
+  it("should not use the same hash table for every instance", function() {
     var hash1, hash2;
     hash1 = new util.Hash2D();
     hash2 = new util.Hash2D();
     hash1.set('one', 'two', 'first');
     hash2.set('one', 'two', 'second');
     return expect(hash1.get('one', 'two')).toBe('first');
+  });
+  return it("should add the key/value pairs of the second to the first, overwriting the first in case of a collision", function() {
+    var hash1, hash2;
+    hash1 = new util.Hash2D();
+    hash2 = new util.Hash2D();
+    hash1.set('one', 'two', 'first');
+    hash2.set('two', 'three', 'second');
+    hash1.concat(hash2);
+    return expect(hash1.get('two', 'three')).toBe('second');
   });
 });

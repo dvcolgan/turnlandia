@@ -10,7 +10,7 @@ getParameterByName = (name) ->
         return decodeURIComponent(results[1].replace(/\+/g, " "))
 
 
-GAME =
+ALL_PAGES =
     world_names: [
         'Atlantis',
         'Azeroth',
@@ -96,7 +96,7 @@ GAME =
             
 
     game: ->
-        browserMain.init()
+        TB.init('.board')
 
 
 
@@ -111,4 +111,4 @@ $ ->
     })
 
     cl = $('body').attr('class')
-    if cl then GAME[cl]()
+    if cl then ALL_PAGES[cl]()

@@ -8,6 +8,7 @@ square = require('./square')
  
 app = express()
 app.use(express.cookieParser())
+app.use(express.bodyParser())
 
 
 getDjangoUserID = (req, callback) ->
@@ -20,25 +21,32 @@ getDjangoUserID = (req, callback) ->
 
  
 
-app.get '/api/squares/:startCol/:startRow/:endCol/:endRow/', (req, res) ->
+app.get '/api/squares/:startCol/:startRow/:width/:height/', (req, res) ->
     startCol = parseInt(req.params.startCol)
     startRow = parseInt(req.params.startRow)
-    endCol = parseInt(req.params.endCol)
-    endRow = parseInt(req.params.endRow)
-    square.getRegion startCol, startRow, endCol, endRow, (data) ->
-        res.send(data)
+    width = parseInt(req.params.width)
+    height = parseInt(req.params.height)
+    square.getRegion startCol, startRow, width, height, (data) ->
+        res.send(data.getRaw())
 
 
-app.get '/api/user/', (req, res) ->
-    getDjangoUserID req, (id) ->
-        res.send({ "id": id })
+app.get '/api/actions/', (req, res) ->
+    getDjangoUserID req, (userID) ->
+        square.getActions userID, (actions) ->
+            res.send(actions)
 
-app.get '/api/users/', (req, res) ->
-    res.send(JSON.stringify(square.getUsers()))
+app.post '/api/actions/', (req, res) ->
+    action = req.body
+    getDjangoUserID req, (userID) ->
+        square.saveAction userID, action, ->
+            res.send({})
 
-app.get '/api/couch/', (req, res) ->
-    request {url: 'http://127.0.0.1:5984/turnbased_dev/_design/get-all-squares/_view/getAllSquares', json: true}, (error, response, body) ->
-        res.send(body)
+#app.get '/api/users/', (req, res) ->
+#    res.send(JSON.stringify(square.getUsers()))
+#
+#app.get '/api/couch/', (req, res) ->
+#    request {url: 'http://127.0.0.1:5984/turnbased_dev/_design/get-all-squares/_view/getAllSquares', json: true}, (error, response, body) ->
+#        res.send(body)
 
  
 app.listen(3000)

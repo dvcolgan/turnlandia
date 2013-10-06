@@ -39,17 +39,47 @@ util = {
     };
 
     Hash2D.prototype.values = function() {
-      var result, val, x, y, yData, _i, _j, _len, _len1, _ref;
+      var result, val, x, y, yData, _ref;
       result = [];
       _ref = this.hash;
-      for (yData = _i = 0, _len = _ref.length; _i < _len; yData = ++_i) {
-        x = _ref[yData];
-        for (val = _j = 0, _len1 = yData.length; _j < _len1; val = ++_j) {
-          y = yData[val];
+      for (x in _ref) {
+        yData = _ref[x];
+        for (y in yData) {
+          val = yData[y];
           result.push(val);
         }
       }
       return result;
+    };
+
+    Hash2D.prototype.concat = function(other) {
+      return this.concatRaw(other.hash);
+    };
+
+    Hash2D.prototype.concatRaw = function(hash) {
+      var val, x, y, yData, _results;
+      _results = [];
+      for (x in hash) {
+        yData = hash[x];
+        _results.push((function() {
+          var _results1;
+          _results1 = [];
+          for (y in yData) {
+            val = yData[y];
+            _results1.push(this.set(x, y, val));
+          }
+          return _results1;
+        }).call(this));
+      }
+      return _results;
+    };
+
+    Hash2D.prototype.size = function() {
+      return this.values().length;
+    };
+
+    Hash2D.prototype.getRaw = function() {
+      return this.hash;
     };
 
     return Hash2D;

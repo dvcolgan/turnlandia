@@ -35,9 +35,13 @@
 
 </div>
 
-<div class="action-log"><h2>This Turn's Actions</h2></div>
-<div class="board">
-    <div class="scroll-pane"></div>
+<canvas class="board"></canvas>
+
+<div id="preload">
+    <img id="grid-image" src="{{ STATIC_URL }}images/grid.png" />
+    <img id="forest-tiles" src="{{ STATIC_URL }}images/forest-tiles.png" />
+    <img id="water-tiles" src="{{ STATIC_URL }}images/water-tiles-thin.png" />
+    <img id="mountains-tiles" src="{{ STATIC_URL }}images/mountains-tiles.png" />
 </div>
 
 {% endblock %}

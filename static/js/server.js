@@ -19,6 +19,8 @@ app = express();
 
 app.use(express.cookieParser());
 
+app.use(express.bodyParser());
+
 getDjangoUserID = function(req, callback) {
   var db;
   db = new sqlite3.Database('../../turnbased.sqlite');
@@ -31,35 +33,32 @@ getDjangoUserID = function(req, callback) {
   });
 };
 
-app.get('/api/squares/:startCol/:startRow/:endCol/:endRow/', function(req, res) {
-  var endCol, endRow, startCol, startRow;
+app.get('/api/squares/:startCol/:startRow/:width/:height/', function(req, res) {
+  var height, startCol, startRow, width;
   startCol = parseInt(req.params.startCol);
   startRow = parseInt(req.params.startRow);
-  endCol = parseInt(req.params.endCol);
-  endRow = parseInt(req.params.endRow);
-  return square.getRegion(startCol, startRow, endCol, endRow, function(data) {
-    return res.send(data);
+  width = parseInt(req.params.width);
+  height = parseInt(req.params.height);
+  return square.getRegion(startCol, startRow, width, height, function(data) {
+    return res.send(data.getRaw());
   });
 });
 
-app.get('/api/user/', function(req, res) {
-  return getDjangoUserID(req, function(id) {
-    return res.send({
-      "id": id
+app.get('/api/actions/', function(req, res) {
+  return getDjangoUserID(req, function(userID) {
+    return square.getActions(userID, function(actions) {
+      return res.send(actions);
     });
   });
 });
 
-app.get('/api/users/', function(req, res) {
-  return res.send(JSON.stringify(square.getUsers()));
-});
-
-app.get('/api/couch/', function(req, res) {
-  return request({
-    url: 'http://127.0.0.1:5984/turnbased_dev/_design/get-all-squares/_view/getAllSquares',
-    json: true
-  }, function(error, response, body) {
-    return res.send(body);
+app.post('/api/actions/', function(req, res) {
+  var action;
+  action = req.body;
+  return getDjangoUserID(req, function(userID) {
+    return square.saveAction(userID, action, function() {
+      return res.send({});
+    });
   });
 });
 

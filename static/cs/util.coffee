@@ -29,10 +29,25 @@ util =
 
         values: ->
             result = []
-            for x, yData in @hash
-                for y, val in yData
+            for x, yData of @hash
+                for y, val of yData
                     result.push(val)
             return result
+
+        concat: (other) ->
+            @concatRaw(other.hash)
+
+        concatRaw: (hash) ->
+            for x, yData of hash
+                for y, val of yData
+                    @set(x, y, val)
+
+        size: ->
+            return @values().length
+
+        getRaw: ->
+            return @hash
+
 
 
 

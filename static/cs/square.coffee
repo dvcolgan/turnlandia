@@ -3,6 +3,9 @@ request = require('request')
 _ = require('./lib/lodash')
 perlin = require('./lib/perlin')
 
+util = require('./util')
+
+db = 'http://127.0.0.1:5984'
 
 square =
     getTraversalCost: (terrainType) ->
@@ -14,53 +17,6 @@ square =
             when 'forest' then 3
             when 'city' then 1
 
-    getUsers: ->
-        players =
-            1:
-                username: 'davidscolgan'
-                email: 'dvcolgan@woot.egg'
-                color: '#88cc88'
-                leaderName: 'Larry King Live'
-                peopleName: 'CNN Journalists'
-
-                wood: 10
-                food: 10
-                ore: 10
-                money: 10
-            2:
-                username: 'dooskington'
-                email: 'engineer@nope.egg'
-                color: '#730117'
-                leaderName: 'Grand Wizard Dooskington'
-                peopleName: 'Programmers'
-
-                wood: 10
-                food: 10
-                ore: 10
-                money: 10
-            3:
-                username: 'technocf'
-                email: 'i_love@nodejs.egg'
-                color: '#cccc88'
-                leaderName: 'Montazuma'
-                peopleName: 'TechnoChocolateLanders'
-
-                wood: 10
-                food: 10
-                ore: 10
-                money: 10
-            4:
-                username: 'tinfoilboy'
-                email: 'tin@foil.egg'
-                color: '#133777'
-                leaderName: 'TinFoilTornado'
-                peopleName: 'All the peeps'
-
-                wood: 10
-                food: 10
-                ore: 10
-                money: 10
-        return players
 
     getUsers: ->
         players =
@@ -110,8 +66,22 @@ square =
                 money: 10
         return players
 
+    getActions: (userID, callback) ->
+        url = 'http://127.0.0.1:5984/turnbased_dev_actions/_design/actions/_view/get?key=' + userID
+        request {url: url, json: true}, (error, response, body) =>
+            if body.error
+                callback([])
+            else
+                callback(body)
 
-    getRegion: (startCol, startRow, endCol, endRow, callback) ->
+    saveAction: (userID, action, callback) ->
+
+        request {url: db + '/turnbased_dev_actions/_design/actions', method: 'PUT', json:true, body: action }, ->
+            callback()
+
+
+
+    getRegion: (startCol, startRow, width, height, callback) ->
 
         # First get all of the squares that go in this region from the database
         # Check to see if they are all accounted for by checking the length
@@ -119,33 +89,34 @@ square =
         # otherwise create new squares for those that don't exist yet and save them to the database
 
         start = '[' + startCol + ',' + startRow + ']'
-        end = '[' + endCol + ',' + endRow + ']'
-        url = 'http://127.0.0.1:5984/turnbased_dev/_design/squares/_view/get?startkey=' + start + '&endkey=' + end
-        request {url: url, json: true}, (error, response, body) =>
-            squares = {}
-            for storedSquare in body.rows
-                [col, row] = storedSquare.key
-                if col not of squares
-                    squares[col] = {}
-                if row not of squares[col]
-                    squares[col][row] = {}
-                squares[col][row] = storedSquare.value
+        end = '[' + (startCol+width-1) + ',' + (startRow+height-1) + ']'
 
-            if body.rows.length != (parseInt(endCol - startCol) + 1) * (parseInt(endRow - startRow) + 1)
-                console.log 'new squares needed: ' + body.rows.length + ' is not ' + (1 + endCol - startCol) * (1 + endRow - startRow)
+        keysToGet = []
+        for col in [startCol...startCol+width]
+            for row in [startRow...startRow+height]
+                keysToGet.push([col, row])
+
+        url = 'http://127.0.0.1:5984/turnbased_dev_squares/_design/squares/_view/get?keys=' + JSON.stringify(keysToGet)
+        request {url: url, json: true}, (error, response, body) =>
+            squares = new util.Hash2D()
+            if body.rows
+                for storedSquare in body.rows
+                    [col, row] = storedSquare.key
+                    squares.set(col, row, storedSquare.value)
+            else
+                body.rows = []
+
+            if body.rows.length != width * height
+                console.log 'new squares needed: ' + body.rows.length + ' is not ' + width * height
                 newSquares = []
-                for col in [startCol..endCol]
-                    for row in [startRow..endRow]
-                        if col not of squares or row not of squares[col]
+                for col in [startCol...startCol+width]
+                    for row in [startRow...startRow+height]
+                        if not squares.get(col, row)
                             newSquare = @generateSquare(col, row)
-                            if col not of squares
-                                squares[col] = {}
-                            if row not of squares[col]
-                                squares[col][row] = {}
-                            squares[col][row] = newSquare
+                            squares.set(col, row, newSquare)
                             newSquares.push(newSquare)
 
-                url = 'http://127.0.0.1:5984/turnbased_dev/_bulk_docs'
+                url = 'http://127.0.0.1:5984/turnbased_dev_squares/_bulk_docs'
                 request {url: url, json: true, method: 'POST', body: { 'docs': newSquares }}, (error, response, body) =>
                     console.log 'done generating squares'
                     callback(squares)

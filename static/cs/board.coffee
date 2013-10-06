@@ -1,185 +1,119 @@
-# The code that creates a board object should listen for the needsector event and pass in the
-# sector data when they handle the event with receiveSectorData.
-#
-# The board class has the data of a sector as well as the dom nodes for a sector.
-# Only the dom nodes of the sectors that are on the screen persist - if they go off the screen,
-# they are removed and garbage collected.
-#
-# However, the data for that sector remains and is not discarded.
-#
-# When a sector needs to be shown, it first checks to see if it needs the data.
-# If it does, it raises the needsector event and defers until the receiveSectorData method
-# is called.  If it already has the data, or if the data is received, it creates the dom node.
+class DataFetcher
+    constructor: ->
+        @loadingStates = new util.Hash2D()
+
+
+    loadInitialData: (callback) ->
+        $.ajax
+            url: '/api/actions/'
+            method: 'GET'
+            dataType: 'json'
+            success: (data) =>
+                callback(data)
+
+    loadSectors: (startSectorX, startSectorY, endSectorX, endSectorY, callback) ->
+        for sectorX in [startSectorX..endSectorX]
+            for sectorY in [startSectorY..endSectorY]
+                if @loadingStates.get(sectorX, sectorY) == null
+                    @loadingStates.set(sectorX, sectorY, false)
+                    @loadSector(sectorX, sectorY, callback)
+
+    loadSector: (sectorX, sectorY, callback) ->
+        $.ajax({
+            url: '/api/squares/' + (sectorX*TB.sectorSize) + '/' + (sectorY*TB.sectorSize) + '/' + (TB.sectorSize) + '/' + (TB.sectorSize) + '/'
+            method: 'GET'
+            dataType: 'json'
+            success: (data) =>
+                @loadingStates.set(sectorX, sectorY, true)
+                callback(data)
+        })
+
 
 class Board
 
-    constructor: (@selector) ->
-        @scroll = { x: 0, y: 0 }
-        @lastMouse = { x: 0, y: 0 }
-        @lastScroll = { x: 0, y: 0 }
-        @dragging = false
+    placeUnit: (col, row, owner) ->
+        square = TB.squareData.get(col, row)
+        if not square.units
+            square.units = {}
+            square.units[owner] =
+                color: 'blue'
+                amount: 1
+        else
+            square.units[owner].amount++
+        $(document).trigger
+            type: 'unitPlaced'
+            col: col
+            row: row
+            
 
-        @gridSize = 48
-        @sectorSize = 10
+    draw: ->
+        TB.ctx.textAlign = 'center'
+        TB.ctx.fillStyle = '#148753'
+        TB.ctx.fillRect(0, 0, TB.boardWidth, TB.boardHeight)
+        TB.ctx.lineWidth = 1
 
-        @squareData = new Hash2D()
-        @squareDomNodes = new Hash2D()
-        @sectorData = new Hash2D()
-        @sectorDomNodes = new Hash2D()
+        zoomedGridSize = TB.gridSize*TB.zoomFactor
+        subGridSize = zoomedGridSize/2
 
-        $(@selector).mousedown (event) =>
-            event.preventDefault()
-            @lastMouse = { x: event.clientX, y: event.clientY }
-            @lastScroll.x = @scroll.x
-            @lastScroll.y = @scroll.y
-            @dragging = true
+        startCol = Math.floor(TB.scroll.x/zoomedGridSize)
+        startRow = Math.floor(TB.scroll.y/zoomedGridSize)
 
-        $(@selector).mousemove (event) =>
-            if @dragging
-                event.preventDefault()
-                @scroll.x = @lastScroll.x - (event.clientX - @lastMouse.x)
-                @scroll.y = @lastScroll.y - (event.clientY - @lastMouse.y)
+        endCol = startCol + Math.ceil(TB.boardWidth/zoomedGridSize)
+        endRow = startRow + Math.ceil(TB.boardHeight/zoomedGridSize)
 
-                @loadSectorsOnScreen()
+        for row in [startRow..endRow]
+            for col in [startCol..endCol]
+                thisSquare = TB.squareData.get(col, row)
 
-        $(document).mouseup (event) =>
-            @dragging = false
+                screenX = (col * zoomedGridSize) - TB.scroll.x
+                screenY = (row * zoomedGridSize) - TB.scroll.y
 
-        resizeBoard = =>
-            $(@selector).width(@getViewWidth()).height(@getViewHeight())
-            $(window).resize(resizeBoard)
-        resizeBoard()
-        
+                if thisSquare
+                    if thisSquare.terrainType == 'water' or thisSquare.terrainType == 'mountains' or thisSquare.terrainType == 'forest'
+                        @drawSubTile(TB.images[thisSquare.terrainType+'Tiles'], thisSquare.northWestTile24, screenX, screenY, subGridSize, 0, 0)
+                        @drawSubTile(TB.images[thisSquare.terrainType+'Tiles'], thisSquare.northEastTile24, screenX, screenY, subGridSize, subGridSize, 0)
+                        @drawSubTile(TB.images[thisSquare.terrainType+'Tiles'], thisSquare.southWestTile24, screenX, screenY, subGridSize, 0, subGridSize)
+                        @drawSubTile(TB.images[thisSquare.terrainType+'Tiles'], thisSquare.southEastTile24, screenX, screenY, subGridSize, subGridSize, subGridSize)
 
+                    unitX = screenX+ zoomedGridSize/2
+                    unitY = screenY+ zoomedGridSize/2
+                    unitRadius = (TB.unitSize * TB.zoomFactor) / 2
 
+                    textX = unitX
+                    textY = unitY + (6 * TB.zoomFactor)
 
-    getViewWidth: ->
-        $(window).width() - (48+20) - 160
-    getViewHeight: ->
-        $(window).height() - 96
+                    if thisSquare.units
+                        for owner, unit of thisSquare.units
+                            TB.ctx.fillStyle = 'blue'
+                            TB.ctx.beginPath()
+                            TB.ctx.arc(unitX, unitY, unitRadius, 0, 2*Math.PI)
+                            TB.ctx.fill()
+                            TB.ctx.stroke()
 
-    # Only call this in the handler of the needsector event
-    receiveSectorData: (sectorX, sectorY, squares) ->
-        @sectorData.set(sectorX, sectorY, squares)
-        @makeSectorDomNode(sectorX, sectorY)
-        @scrollSector(sectorX, sectorY)
-
-    loadSectorsOnScreen: ->
-        # Don't load the sector if it is beyond the current board extent
-        #if (sectorX > @maxSectorX or
-        #sectorX < @minSectorX or
-        #sectorY > @maxSectorY or
-        #sectorY < @minSectorY)
-        #    return
-
-
-        # When you move the mouse,
-        # find all the sectors that should be loaded
-        # for each sector
-        #     check to see if you have the sector data
-        #     if you do, show that sector
-        #     if you don't
-        #         if the sector is not loading, mark it as loading and load it and provide a callback to show that sector when it is done loading
-        #         else do nothing
-
-        # Find all of the sectors that should be visible
-        sectorPixelSize = @sectorSize * @gridSize
-        sectorsWide = Math.ceil(@getViewWidth() / @sectorSize / @gridSize)
-        sectorsHigh = Math.ceil(@getViewHeight() / @sectorSize / @gridSize)
-
-        startSectorX = null
-        startSectorY = null
-        endSectorX = null
-        endSectorY = null
-        for sectorSectorX in [0..sectorsWide]
-            for sectorSectorY in [0..sectorsHigh]
-                x = (Math.floor(@scroll.x / sectorPixelSize)) + sectorSectorX
-                y = (Math.floor(@scroll.y / sectorPixelSize)) + sectorSectorY
-
-                if startSectorX == null or x < startSectorX then startSectorX = x
-                if startSectorY == null or y < startSectorY then startSectorY = y
-                if endSectorX == null or x > endSectorX then endSectorX = x
-                if endSectorY == null or y > endSectorY then endSectorY = x
-
-        # Remove any dom nodes that are no longer visible
-        for $domNode in @sectorDomNodes.values()
-            sectorX = $domNode.data('y')
-            sectorY = $domNode.data('x')
-            if not ((sectorX <= endSectorX and sectorX >= startSectorX) and
-                    (sectorY <= endSectorY and sectorY >= startSectorY))
-                @sectorDomNodes.delete(sectorX, sectorY).remove()
+                            TB.ctx.fillStyle = 'black'
+                            TB.ctx.fillText(unit.amount, textX+1, textY+1)
+                            TB.ctx.fillText(unit.amount, textX+1, textY-1)
+                            TB.ctx.fillText(unit.amount, textX-1, textY+1)
+                            TB.ctx.fillText(unit.amount, textX-1, textY-1)
+                            TB.ctx.fillStyle = 'white'
+                            TB.ctx.fillText(unit.amount, textX, textY)
 
 
-        for sectorX in [startSectorX..endSectorX]
-            for sectorY in [startSectorY..endSectorY]
-                # If we don't have this sector showing
-                if @sectorDomNodes.get(sectorX, sectorY) == null
-                    # Three cases:
-                    # we do have the data -> show it
-                    # don't have the data, but it is loading -> skip
-                    # don't have the data, it is not loading -> load
-                    if @sectorData.get(sectorX, sectorY) == null
-                        @sectorData.set(sectorX, sectorY, 'loading')
-                        $(@selector).trigger('needsector', [sectorX, sectorY])
-                    else if @sectorData.get(sectorX, sectorY) != 'loading'
-                        # We have the data but it isn't showing, so show it and scroll it
-                        @makeSectorDomNode(sectorX, sectorY)
-                        @scrollSector(sectorX, sectorY)
-                else
-                    if @sectorDomNodes.get(sectorX, sectorY) != 'loading'
-                        @scrollSector(sectorX, sectorY)
+    drawSubTile: (image, subTile, screenX, screenY, subGridSize, subTileOffsetX, subTileOffsetY) ->
+        TB.ctx.drawImage(
+            image,
+            @getTile24XOffset(subTile),
+            @getTile24YOffset(subTile),
+            TB.gridSize/2, TB.gridSize/2
+            screenX + subTileOffsetX, screenY + subTileOffsetY,
+            subGridSize, subGridSize
+        )
+    getTile24XOffset: (tile) ->
+        return 24 * (tile) % 144
+    getTile24YOffset: (tile) ->
+        return parseInt(24 * tile / 144) * 24
 
 
-    # Showing a sector fully creates the dom node and everything in it
-    makeSectorDomNode: (sectorX, sectorY) ->
-        $sectorDomNode = $('<div class="sector disable-select"></div>')
-        $sectorDomNode.data('x', sectorX)
-        $sectorDomNode.data('y', sectorY)
-        $(@selector).append($sectorDomNode)
-        @sectorDomNodes.set(sectorX, sectorY, $sectorDomNode)
-
-        thisSectorData = @sectorData.get(sectorX, sectorY)
-
-        for row in [0...@sectorSize]
-            for col in [0...@sectorSize]
-                thisSquare = thisSectorData[sectorX*@sectorSize+col][sectorY*@sectorSize+row]
-                $squareDomNode = $('<div class="grid-square">
-                                        <div class="subtile north-west"></div>
-                                        <div class="subtile north-east"></div>
-                                        <div class="subtile south-west"></div>
-                                        <div class="subtile south-east"></div>
-                                    </div>')
-                $squareDomNode
-                    .css('left', (col * @gridSize) + 'px')
-                    .css('top', (row * @gridSize) + 'px')
-
-                # Determine how this square will look
-                if thisSquare.terrainType == 'water' or thisSquare.terrainType == 'mountains' or thisSquare.terrainType == 'forest'
-                    $squareDomNode.find('.subtile').css('background-image', 'url(/static/images/' + thisSquare.terrainType + '-tiles.png)')
-                    $squareDomNode.find('.north-west').css('background-position', @getTile24CSSOffset(thisSquare.northWestTile24))
-                    $squareDomNode.find('.north-east').css('background-position', @getTile24CSSOffset(thisSquare.northEastTile24))
-                    $squareDomNode.find('.south-west').css('background-position', @getTile24CSSOffset(thisSquare.southWestTile24))
-                    $squareDomNode.find('.south-east').css('background-position', @getTile24CSSOffset(thisSquare.southEastTile24))
-
-                #@$dom_node.css('background-color': @owner_color)
-                $squareDomNode.css('background-color': '#00aa44')
-
-                $squareDomNode.data('col', @col).data('row', @row)
-
-                $sectorDomNode.append($squareDomNode)
-
-        
-
-    scrollSector: (sectorX, sectorY) ->
-        $domNode = @sectorDomNodes.get(sectorX, sectorY)
-        $domNode.css('left',((sectorX * @sectorSize * @gridSize) - @scroll.x) + 'px')
-        $domNode.css('top', ((sectorY * @sectorSize * @gridSize) - @scroll.y) + 'px')
-
-
-
-
-    getTile24CSSOffset: (tile) ->
-        return (24 * (tile) % 144 * -1) + 'px ' + (parseInt(24 * tile / 144) * 24 * -1) + 'px'
 
 
 

@@ -133,6 +133,9 @@ table {
 .cf {
   zoom: 1;
 }
+#preload {
+  display: none;
+}
 body {
   background-image: url(/static/images/tweed.png);
   font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
@@ -212,6 +215,8 @@ h6 {
   margin-bottom: 5px;
 }
 .board {
+  cursor: crosshair;
+  display: block;
   float: left;
   position: relative;
   font-size: 16px;
@@ -239,7 +244,6 @@ h6 {
   width: 48px;
   height: 48px;
   position: absolute;
-  cursor: crosshair;
 }
 .board .grid-square .subtile {
   z-index: 50;
@@ -247,16 +251,6 @@ h6 {
   height: 24px;
   float: left;
   pointer-events: none;
-}
-.board .grid-square:hover {
-  border: 6px solid black;
-  box-shadow: inset 0 0 0 1px white;
-  margin-left: -6px;
-  margin-top: -6px;
-  width: 48px;
-  height: 48px;
-  border-radius: 3px;
-  z-index: 10;
 }
 .board .resource {
   background-image: url(/static/images/resource-tile.png);
