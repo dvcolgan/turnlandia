@@ -1,6 +1,10 @@
 class ActionManager
     constructor: ->
         $(document).on 'unitPlaced', @handleInitialPlacement
+        @actions = []
+
+    add: (action) ->
+        @actions.push(action)
 
     handleInitialPlacement: (event) =>
         $.ajax({
@@ -20,6 +24,6 @@ class ActionManager
 
     draw: ->
         TB.ctx.textAlign = 'right'
-        TB.fillOutlinedText("This Turn's Actions", TB.boardWidth - 16, 24)
-        for action, i in TB.actions
-            TB.fillOutlinedText(action.name, TB.boardWidth - 16, 24 + i*24 + 24)
+        TB.fillOutlinedText("This Turn's Actions", TB.board.width - 16, 24)
+        for action, i in @actions
+            TB.fillOutlinedText(action.name, TB.board.width - 16, 24 + i*24 + 24)

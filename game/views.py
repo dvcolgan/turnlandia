@@ -163,6 +163,7 @@ def api_squares(request, col, row, width, height):
     except:
         raise Http404
 
+
     # TODO a lot of this function can be computed on the turn change and then cached, do this if we get a bunch of traffic
     # TODO make this instead limit it to a few screens beyond where the furthest person is
     #if (col > MAX_SECTOR_X * SECTOR_SIZE or
@@ -208,6 +209,7 @@ def api_initial_load(request):
             'sector_size': SECTOR_SIZE,
             'grid_size': GRID_SIZE,
         },
+        'current_turn': current_turn,
         'actions': ActionSerializer(actions, many=True).data,
         'account': AccountSerializer(request.user).data,
     })

@@ -18,11 +18,11 @@ FILEPATH = os.path.abspath(__file__)
 DEBUG = True
 DATABASES = {
     'default': {
-        #'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'turnbased.sqlite',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        #'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'turnbased',
         'TEST_NAME': 'turnbased_test',
-        #'USER': 'dcolgan',
+        'USER': 'dcolgan',
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
@@ -95,6 +95,8 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'django.middleware.gzip.GZipMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -102,6 +104,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
+INTERNAL_IPS = ('127.0.0.1',)
 
 ROOT_URLCONF = 'urls'
 
@@ -133,6 +136,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'widget_tweaks',
     'rest_framework',
+    'debug_toolbar',
     'util',
     'game',
     'django_nose',

@@ -6,7 +6,12 @@ ActionManager = (function() {
   function ActionManager() {
     this.handleInitialPlacement = __bind(this.handleInitialPlacement, this);
     $(document).on('unitPlaced', this.handleInitialPlacement);
+    this.actions = [];
   }
+
+  ActionManager.prototype.add = function(action) {
+    return this.actions.push(action);
+  };
 
   ActionManager.prototype.handleInitialPlacement = function(event) {
     return $.ajax({
@@ -28,12 +33,12 @@ ActionManager = (function() {
   ActionManager.prototype.draw = function() {
     var action, i, _i, _len, _ref, _results;
     TB.ctx.textAlign = 'right';
-    TB.fillOutlinedText("This Turn's Actions", TB.boardWidth - 16, 24);
-    _ref = TB.actions;
+    TB.fillOutlinedText("This Turn's Actions", TB.board.width - 16, 24);
+    _ref = this.actions;
     _results = [];
     for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
       action = _ref[i];
-      _results.push(TB.fillOutlinedText(action.name, TB.boardWidth - 16, 24 + i * 24 + 24));
+      _results.push(TB.fillOutlinedText(action.name, TB.board.width - 16, 24 + i * 24 + 24));
     }
     return _results;
   };

@@ -77,6 +77,35 @@ class Trophy(models.Model):
     def __unicode__(self):
         return self.name
 
+
+
+class AccountManager(BaseUserManager):
+
+    def create_user(self, username, password=None, **extra_fields):
+        """
+        Creates and saves a User with the given username, email and password.
+        """
+        now = timezone.now()
+        if not username:
+            raise ValueError('The given username must be set')
+        user = self.model(username=username,
+                          is_staff=False, is_active=True, is_superuser=False,
+                          last_login=now, date_joined=now, **extra_fields)
+
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, password, **extra_fields):
+        u = self.create_user(username, password, **extra_fields)
+        u.is_staff = True
+        u.is_active = True
+        u.is_superuser = True
+        u.save(using=self._db)
+        return u
+
+
+
 class Account(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField(blank=True)
@@ -95,7 +124,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     date_joined = models.DateTimeField(default=timezone.now)
 
-    objects = UserManager()
+    objects = AccountManager()
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
@@ -326,6 +355,8 @@ class Square(models.Model):
         if self.terrain_type == 'city':
             return 1
 
+    def get_turn(self):
+        return Setting.objects.get_integer('turn')
 
     def place_unit(self, account):
         if account.unplaced_units > 0:

@@ -40,7 +40,9 @@ class SquareSerializer(serializers.ModelSerializer):
     owner_leader_name = serializers.Field(source='owner.leader_name')
     owner_people_name = serializers.Field(source='owner.people_name')
     traversal_cost = serializers.Field(source='get_traversal_cost')
-    units = UnitSerializer()
+    #turn = serializers.Field(source='get_turn')
+    # This doubles the server response time D:
+    #units = UnitSerializer()
     class Meta:
         model = Square
 

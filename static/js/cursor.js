@@ -16,7 +16,7 @@ Cursor = (function() {
 
   Cursor.prototype.draw = function() {
     var col, cursorSize, offset, row, screenX, screenY, snappedX, snappedY, textX, textY;
-    cursorSize = TB.gridSize * TB.zoomFactor;
+    cursorSize = TB.gridSize * TB.camera.zoomFactor;
     offset = cursorSize / 2;
     TB.ctx.strokeStyle = 'black';
     TB.ctx.fillStyle = 'black';
@@ -24,8 +24,8 @@ Cursor = (function() {
     row = Math.floor(this.pos.y / cursorSize);
     snappedX = col * cursorSize;
     snappedY = row * cursorSize;
-    screenX = TB.worldToScreenPosX(snappedX);
-    screenY = TB.worldToScreenPosY(snappedY);
+    screenX = TB.camera.worldToScreenPosX(snappedX);
+    screenY = TB.camera.worldToScreenPosY(snappedY);
     TB.ctx.strokeRect(screenX, screenY, cursorSize, cursorSize);
     TB.ctx.font = 'bold 16px Arial';
     TB.ctx.fillStyle = 'black';

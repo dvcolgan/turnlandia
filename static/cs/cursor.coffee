@@ -7,7 +7,7 @@ class Cursor
         @pos.y = y
 
     draw: ->
-        cursorSize = TB.gridSize * TB.zoomFactor
+        cursorSize = TB.gridSize * TB.camera.zoomFactor
         offset = cursorSize/2
         TB.ctx.strokeStyle = 'black'
         TB.ctx.fillStyle = 'black'
@@ -18,8 +18,8 @@ class Cursor
         snappedX = col * cursorSize
         snappedY = row * cursorSize
 
-        screenX = TB.worldToScreenPosX(snappedX)
-        screenY = TB.worldToScreenPosY(snappedY)
+        screenX = TB.camera.worldToScreenPosX(snappedX)
+        screenY = TB.camera.worldToScreenPosY(snappedY)
         TB.ctx.strokeRect(screenX, screenY, cursorSize, cursorSize)
 
         TB.ctx.font = 'bold 16px Arial'

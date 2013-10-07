@@ -6,21 +6,17 @@ requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimati
 window.requestAnimationFrame = requestAnimationFrame;
 
 window.TB = {
-  boardWidth: 0,
-  boardHeight: 0,
   players: {},
-  scroll: {
+  currentAction: 'initial',
+  dragging: false,
+  lastMouse: {
     x: 0,
     y: 0
   },
-  activeSquare: {
-    col: 0,
-    row: 0
+  lastScroll: {
+    x: 0,
+    y: 0
   },
-  currentAction: 'initial',
-  zoomLevel: 1,
-  zoomFactor: 1,
-  maxZoomLevel: 3,
   unitSize: 32,
   gridSize: 48,
   sectorSize: 10,
@@ -32,171 +28,77 @@ window.TB = {
   },
   init: function(selector) {
     TB.selector = selector;
-    TB.lastMouse = {
-      x: 0,
-      y: 0
-    };
-    TB.lastScroll = {
-      x: 0,
-      y: 0
-    };
-    TB.dragging = false;
-    TB.squareData = new util.Hash2D();
+    TB.ctx = $(TB.selector).get(0).getContext('2d');
+    TB.camera = new Camera();
     TB.board = new Board();
     TB.cursor = new Cursor();
-    TB.scroll = {
-      x: 0,
-      y: 0
-    };
-    TB.ctx = $(TB.selector).get(0).getContext('2d');
+    TB.actions = new ActionManager();
     TB.fetcher = new DataFetcher();
     return TB.fetcher.loadInitialData(function(data) {
-      TB.actions = data.actions;
-      TB.actionManager = new ActionManager();
+      var action, _i, _len, _ref;
+      _ref = data.actions;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        action = _ref[_i];
+        TB.actions.add(action);
+      }
       TB.registerEventHandlers();
       TB.startMainLoop();
-      return TB.loadSectorsOnScreen();
-    });
-  },
-  loadSectorsOnScreen: function() {
-    var endSectorX, endSectorY, sectorPixelSize, sectorSectorX, sectorSectorY, sectorsHigh, sectorsWide, startSectorX, startSectorY, x, y, _i, _j;
-    sectorPixelSize = TB.sectorSize * TB.gridSize * TB.zoomFactor;
-    sectorsWide = Math.ceil((TB.boardWidth / TB.sectorSize / TB.gridSize) * TB.zoomFactor);
-    sectorsHigh = Math.ceil((TB.boardHeight / TB.sectorSize / TB.gridSize) * TB.zoomFactor);
-    startSectorX = null;
-    startSectorY = null;
-    endSectorX = null;
-    endSectorY = null;
-    for (sectorSectorX = _i = 0; 0 <= sectorsWide ? _i <= sectorsWide : _i >= sectorsWide; sectorSectorX = 0 <= sectorsWide ? ++_i : --_i) {
-      for (sectorSectorY = _j = 0; 0 <= sectorsHigh ? _j <= sectorsHigh : _j >= sectorsHigh; sectorSectorY = 0 <= sectorsHigh ? ++_j : --_j) {
-        x = (Math.floor(TB.scroll.x / sectorPixelSize)) + sectorSectorX;
-        y = (Math.floor(TB.scroll.y / sectorPixelSize)) + sectorSectorY;
-        if (startSectorX === null || x < startSectorX) {
-          startSectorX = x;
-        }
-        if (startSectorY === null || y < startSectorY) {
-          startSectorY = y;
-        }
-        if (endSectorX === null || x > endSectorX) {
-          endSectorX = x;
-        }
-        if (endSectorY === null || y > endSectorY) {
-          endSectorY = x;
-        }
-      }
-    }
-    return TB.fetcher.loadSectors(startSectorX, startSectorY, endSectorX, endSectorY, function(squares) {
-      var square, _k, _len, _results;
-      _results = [];
-      for (_k = 0, _len = squares.length; _k < _len; _k++) {
-        square = squares[_k];
-        _results.push(TB.squareData.set(square.col, square.row, square));
-      }
-      return _results;
+      return TB.fetcher.loadSectorsOnScreen();
     });
   },
   registerEventHandlers: function() {
-    var resizeBoard,
-      _this = this;
+    var _this = this;
     $(TB.selector).mousedown(function(event) {
       event.preventDefault();
       TB.lastMouse = {
         x: event.offsetX,
         y: event.offsetY
       };
-      TB.lastScroll.x = TB.scroll.x;
-      TB.lastScroll.y = TB.scroll.y;
+      TB.lastScroll.x = TB.camera.x;
+      TB.lastScroll.y = TB.camera.y;
       return TB.dragging = true;
     });
     $(TB.selector).mousemove(function(event) {
-      TB.cursor.move(event.offsetX + TB.scroll.x, event.offsetY + TB.scroll.y);
-      TB.activeSquare.col = TB.pixelToSectorCoord(event.offsetX + TB.scroll.x);
-      TB.activeSquare.row = TB.pixelToSectorCoord(event.offsetY + TB.scroll.y);
-      TB.cursor.move(event.offsetX + TB.scroll.x, event.offsetY + TB.scroll.y);
+      TB.cursor.move(event.offsetX + TB.camera.x, event.offsetY + TB.camera.y);
       if (TB.dragging) {
         event.preventDefault();
-        TB.scroll.x = TB.lastScroll.x - (event.offsetX - TB.lastMouse.x);
-        TB.scroll.y = TB.lastScroll.y - (event.offsetY - TB.lastMouse.y);
-        return TB.loadSectorsOnScreen();
+        TB.camera.move(TB.lastScroll.x - (event.offsetX - TB.lastMouse.x), TB.lastScroll.y - (event.offsetY - TB.lastMouse.y));
+        return TB.fetcher.loadSectorsOnScreen();
       }
     });
     $(document).mouseup(function(event) {
-      var col, row;
-      if (Math.abs(TB.scroll.x - TB.lastScroll.x) < 5 && Math.abs(TB.scroll.y - TB.lastScroll.y) < 5) {
-        col = TB.mouseXToCol(event.offsetX);
-        row = TB.mouseYToRow(event.offsetY);
-        TB.board.placeUnit(col, row, 3);
-      }
-      console.log(TB.dragging);
       return TB.dragging = false;
     });
     $(TB.selector).mousewheel(function(event, delta, deltaX, deltaY) {
-      var previousCol, previousRow;
-      previousCol = TB.worldToScreenPosX(TB.pixelToSectorCoord(event.offsetX));
-      previousRow = TB.worldToScreenPosY(TB.pixelToSectorCoord(event.offsetY));
-      TB.zoomLevel -= delta;
-      if (TB.zoomLevel < 1) {
-        TB.zoomLevel = 1;
-      }
-      if (TB.zoomLevel > TB.maxZoomLevel) {
-        TB.zoomLevel = TB.maxZoomLevel;
-      }
-      if (TB.zoomLevel === 1) {
-        TB.zoomFactor = 1;
-      }
-      if (TB.zoomLevel === 2) {
-        TB.zoomFactor = 36 / 48;
-      }
-      if (TB.zoomLevel === 3) {
-        return TB.zoomFactor = 24 / 48;
-      }
+      return TB.camera.zoom(event.offsetX, event.offsetY, delta);
     });
-    resizeBoard = function() {
-      TB.boardWidth = $(window).width() - (48 + 20) - 220;
-      TB.boardHeight = $(window).height() - 96;
-      $(TB.selector).attr('width', TB.boardWidth).attr('height', TB.boardHeight);
-      TB.ctx = $(TB.selector).get(0).getContext('2d');
-      return $(window).resize(resizeBoard);
-    };
-    return resizeBoard();
+    $(window).resize(function() {
+      TB.camera.resize();
+      $(TB.selector).attr('width', TB.camera.width).attr('height', TB.camera.height);
+      return TB.ctx = $(TB.selector).get(0).getContext('2d');
+    });
+    $(window).trigger('resize');
+    return $(window).on('sectorLoaded', function(event) {
+      var square, _i, _len, _ref, _results;
+      _ref = event.squareData;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        square = _ref[_i];
+        _results.push(TB.board.addSquare(square));
+      }
+      return _results;
+    });
   },
   startMainLoop: function() {
-    var mainLoop, start,
-      _this = this;
+    var mainLoop, start;
     start = null;
     mainLoop = function(timestamp) {
-      TB.update();
-      TB.draw();
+      TB.board.draw();
+      TB.actions.draw();
+      TB.cursor.draw();
       return requestAnimationFrame(mainLoop);
     };
     return requestAnimationFrame(mainLoop);
-  },
-  update: function() {},
-  draw: function() {
-    TB.board.draw();
-    TB.actionManager.draw();
-    return TB.cursor.draw();
-  },
-  worldToScreenPosX: function(worldX) {
-    return worldX - TB.scroll.x;
-  },
-  worldToScreenPosY: function(worldY) {
-    return worldY - TB.scroll.y;
-  },
-  screenToWorldPosX: function(screenX) {
-    return screenX + TB.scroll.x;
-  },
-  screenToWorldPosY: function(screenY) {
-    return screenY + TB.scroll.y;
-  },
-  pixelToSectorCoord: function(coord) {
-    return Math.floor(coord / (TB.gridSize * TB.zoomFactor));
-  },
-  mouseXToCol: function(mouseX) {
-    return TB.pixelToSectorCoord(mouseX + TB.scroll.x);
-  },
-  mouseYToRow: function(mouseY) {
-    return TB.pixelToSectorCoord(mouseY + TB.scroll.y);
   },
   fillOutlinedText: function(text, screenX, screenY) {
     TB.ctx.fillStyle = 'black';
