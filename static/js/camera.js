@@ -13,6 +13,7 @@ Camera = (function() {
     this.zoomLevel = 1;
     this.maxZoomLevel = 3;
     this.zoomedGridSize = TB.gridSize;
+    this.zoomedUnitSize = TB.unitSize;
     this.subGridSize = TB.gridSize / 2;
   }
 
@@ -38,15 +39,15 @@ Camera = (function() {
   };
 
   Camera.prototype.pixelToSectorCoord = function(coord) {
-    return Math.floor(coord / (TB.gridSize * this.zoomFactor));
+    return Math.floor(coord / this.zoomedGridSize);
   };
 
   Camera.prototype.mouseXToCol = function(mouseX) {
-    return TB.pixelToSectorCoord(mouseX + this.x);
+    return this.pixelToSectorCoord(mouseX + this.x);
   };
 
   Camera.prototype.mouseYToRow = function(mouseY) {
-    return TB.pixelToSectorCoord(mouseY + this.y);
+    return this.pixelToSectorCoord(mouseY + this.y);
   };
 
   Camera.prototype.resize = function() {
@@ -72,6 +73,7 @@ Camera = (function() {
       this.zoomFactor = 24 / 48;
     }
     this.zoomedGridSize = TB.gridSize * this.zoomFactor;
+    this.zoomedUnitSize = TB.unitSize * this.zoomFactor;
     return this.subGridSize = this.zoomedGridSize / 2;
   };
 

@@ -12,6 +12,7 @@ class Camera
         @maxZoomLevel = 3
 
         @zoomedGridSize = TB.gridSize
+        @zoomedUnitSize = TB.unitSize
         @subGridSize = TB.gridSize/2
 
     move: (@x, @y) ->
@@ -20,9 +21,9 @@ class Camera
     worldToScreenPosY: (worldY) -> worldY - @y
     screenToWorldPosX: (screenX) -> screenX + @x
     screenToWorldPosY: (screenY) -> screenY + @y
-    pixelToSectorCoord: (coord) -> Math.floor((coord) / (TB.gridSize * @zoomFactor))
-    mouseXToCol: (mouseX) -> TB.pixelToSectorCoord(mouseX + @x)
-    mouseYToRow: (mouseY) -> TB.pixelToSectorCoord(mouseY + @y)
+    pixelToSectorCoord: (coord) -> Math.floor(coord / @zoomedGridSize)
+    mouseXToCol: (mouseX) -> @pixelToSectorCoord(mouseX + @x)
+    mouseYToRow: (mouseY) -> @pixelToSectorCoord(mouseY + @y)
 
     resize: ->
         @width = $(window).width() - (48+20) - 220
@@ -42,6 +43,7 @@ class Camera
         if @zoomLevel == 3 then @zoomFactor = 24/48
 
         @zoomedGridSize = TB.gridSize*@zoomFactor
+        @zoomedUnitSize = TB.unitSize*@zoomFactor
         @subGridSize = @zoomedGridSize/2
 
         #if TB.zoomLevel == 4 then TB.zoomFactor = 12/48

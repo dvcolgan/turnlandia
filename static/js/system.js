@@ -20,6 +20,7 @@ window.TB = {
   unitSize: 32,
   gridSize: 48,
   sectorSize: 10,
+  myAccount: null,
   images: {
     gridImage: $('#grid-image').get(0),
     forestTiles: $('#forest-tiles').get(0),
@@ -36,6 +37,7 @@ window.TB = {
     TB.fetcher = new DataFetcher();
     return TB.fetcher.loadInitialData(function(data) {
       var action, _i, _len, _ref;
+      TB.myAccount = data.account;
       _ref = data.actions;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         action = _ref[_i];
@@ -67,7 +69,10 @@ window.TB = {
       }
     });
     $(document).mouseup(function(event) {
-      return TB.dragging = false;
+      TB.dragging = false;
+      if (Math.abs(TB.camera.x - TB.lastScroll.x) < 5 && Math.abs(TB.camera.y - TB.lastScroll.y) < 5) {
+        return TB.actions.handleAction('initial', TB.camera.mouseXToCol(event.offsetX), TB.camera.mouseYToRow(event.offsetY));
+      }
     });
     $(TB.selector).mousewheel(function(event, delta, deltaX, deltaY) {
       return TB.camera.zoom(event.offsetX, event.offsetY, delta);

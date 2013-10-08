@@ -15,11 +15,17 @@ util =
             else
                 return null
 
+        increment: (x, y) ->
+            if x not of @hash
+                @hash[x] = {}
+            if typeof @hash[x][y] == 'number'
+                @hash[x][y]++
+            else
+                @hash[x][y] = 1
+
         set: (x, y, val) ->
             if x not of @hash
                 @hash[x] = {}
-            if y not of @hash[x]
-                @hash[x][y] = {}
             @hash[x][y] = val
 
         delete: (x, y) ->

@@ -325,10 +325,12 @@ class Square(models.Model):
     )
     col = models.IntegerField()
     row = models.IntegerField()
-    owner = models.ForeignKey(Account, related_name='squares_owned', null=True, blank=True)
+    #owner = models.ForeignKey(Account, related_name='squares_owned', null=True, blank=True)
     resource_amount = models.IntegerField(default=0)
-    wall_health = models.IntegerField(default=0)
+    #wall_health = models.IntegerField(default=0)
     terrain_type = models.CharField(max_length=20, choices=TERRAIN_TYPES)
+    unit_owner = models.ForeignKey(Account, related_name='squares_with_units', null=True, blank=True)
+    unit_amount = models.IntegerField(default=0)
 
     north_west_tile_24 = models.IntegerField(null=True, blank=True)
     north_east_tile_24 = models.IntegerField(null=True, blank=True)
@@ -480,28 +482,24 @@ class Square(models.Model):
         return '(%d, %d)' % (self.col, self.row)
 
 
-class UnitManager(models.Manager):
-    def total_placed_units(self, owner):
-        total = self.model.objects.filter(owner=owner).aggregate(total=Sum('amount'))['total']
-        if total == None:
-            return 0
-        else:
-            return total
-        
-
-
-
-
-class Unit(models.Model):
-    owner = models.ForeignKey(Account, related_name='units')
-    square = models.ForeignKey(Square, related_name='units')
-    amount = models.IntegerField()
-    last_turn_amount = models.IntegerField(default=0)
-
-    objects = UnitManager()
-
-    def __unicode__(self):
-        return unicode(self.square)
+#class UnitManager(models.Manager):
+#    def total_placed_units(self, owner):
+#        total = self.model.objects.filter(owner=owner).aggregate(total=Sum('amount'))['total']
+#        if total == None:
+#            return 0
+#        else:
+#            return total
+#
+#class Unit(models.Model):
+#    owner = models.ForeignKey(Account, related_name='units')
+#    square = models.ForeignKey(Square, related_name='units')
+#    amount = models.IntegerField()
+#    last_turn_amount = models.IntegerField(default=0)
+#
+#    objects = UnitManager()
+#
+#    def __unicode__(self):
+#        return unicode(self.square)
 
 
 class SettingManager(models.Manager):
@@ -538,7 +536,7 @@ ACTION_KINDS = (
 )
 # Squares are more or less read only until the turn resolves, before that we deal with actions
 class Action(models.Model):
-    player = models.ForeignKey(Account, related_name='moves')
+    player = models.ForeignKey(Account, related_name='actions')
     turn = models.IntegerField()
 
     kind = models.CharField(max_length=30, choices=ACTION_KINDS)

@@ -20,6 +20,7 @@ window.TB =
     unitSize: 32
     gridSize: 48
     sectorSize: 10
+    myAccount: null
 
     # Images that have been preloaded in the HTML
     images:
@@ -40,6 +41,7 @@ window.TB =
 
         TB.fetcher = new DataFetcher()
         TB.fetcher.loadInitialData (data) ->
+            TB.myAccount = data.account
             for action in data.actions
                 TB.actions.add(action)
             TB.registerEventHandlers()
@@ -72,13 +74,12 @@ window.TB =
 
         $(document).mouseup (event) =>
             TB.dragging = false
-            #if Math.abs(TB.camera.x - TB.lastScroll.x) < 5 and Math.abs(TB.scroll.y - TB.lastScroll.y) < 5
-            #    col = TB.mouseXToCol(x)
-            #    row = TB.mouseYToRow(y)
-
-            #    TB.board.placeUnit(col, row, 3)
-
-            #console.log TB.dragging
+            if Math.abs(TB.camera.x - TB.lastScroll.x) < 5 and Math.abs(TB.camera.y - TB.lastScroll.y) < 5
+                TB.actions.handleAction(
+                    'initial'
+                    TB.camera.mouseXToCol(event.offsetX)
+                    TB.camera.mouseYToRow(event.offsetY)
+                )
 
 
         $(TB.selector).mousewheel (event, delta, deltaX, deltaY) =>

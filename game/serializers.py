@@ -28,17 +28,12 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = ('id', 'username', 'color', 'leader_name', 'people_name', 'unplaced_units', 'password')
 
-class UnitSerializer(serializers.ModelSerializer):
-    owner_color = serializers.Field(source='owner.color')
-    class Meta:
-        model = Unit
+#class UnitSerializer(serializers.ModelSerializer):
+#    owner_color = serializers.Field(source='owner.color')
+#    class Meta:
+#        model = Unit
 
 class SquareSerializer(serializers.ModelSerializer):
-    owner_color = serializers.Field(source='owner.color')
-    owner_username = serializers.Field(source='owner.username')
-    # This should be not here later someday
-    owner_leader_name = serializers.Field(source='owner.leader_name')
-    owner_people_name = serializers.Field(source='owner.people_name')
     traversal_cost = serializers.Field(source='get_traversal_cost')
     #turn = serializers.Field(source='get_turn')
     # This doubles the server response time D:

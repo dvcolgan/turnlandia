@@ -186,10 +186,10 @@ def api_squares(request, col, row, width, height):
 
     squares = Square.objects.get_region(col, row, width, height)
 
-    is_initial = (
-        Unit.objects.filter(owner=request.user).count() == 0 and
-        Square.objects.filter(owner=request.user).count() == 0
-    )
+    #is_initial = (
+    #    Unit.objects.filter(owner=request.user).count() == 0 and
+    #    Square.objects.filter(owner=request.user).count() == 0
+    #)
 
     return Response(SquareSerializer(squares, many=True).data)
 
@@ -218,12 +218,8 @@ def api_initial_load(request):
 @api_view(['POST'])
 def api_action(request):
 
-    serializer = ActionSerializer(data=request.DATA)
     ipdb.set_trace()
-
-    if dest_col == None or dest_row == None:
-        dest_col = src_col
-        dest_row = src_row
+    serializer = ActionSerializer(data=request.DATA)
 
     if serializer.is_valid():
         serializer.save()

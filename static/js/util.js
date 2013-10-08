@@ -21,12 +21,20 @@ util = {
       }
     };
 
-    Hash2D.prototype.set = function(x, y, val) {
+    Hash2D.prototype.increment = function(x, y) {
       if (!(x in this.hash)) {
         this.hash[x] = {};
       }
-      if (!(y in this.hash[x])) {
-        this.hash[x][y] = {};
+      if (typeof this.hash[x][y] === 'number') {
+        return this.hash[x][y]++;
+      } else {
+        return this.hash[x][y] = 1;
+      }
+    };
+
+    Hash2D.prototype.set = function(x, y, val) {
+      if (!(x in this.hash)) {
+        this.hash[x] = {};
       }
       return this.hash[x][y] = val;
     };

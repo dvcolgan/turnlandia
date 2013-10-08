@@ -6,12 +6,16 @@ Board = (function() {
     this.squares = new util.Hash2D();
   }
 
+  Board.prototype.placeUnitOnSquare = function(col, row, ownerID) {
+    return this.squares.get(col, row).placeUnit(ownerID);
+  };
+
   Board.prototype.addSquare = function(square) {
     return this.squares.set(square.col, square.row, new Square(square));
   };
 
   Board.prototype.draw = function() {
-    var col, endCol, endRow, row, screenX, screenY, startCol, startRow, thisSquare, _i, _results;
+    var col, endCol, endRow, row, startCol, startRow, thisSquare, _i, _results;
     TB.ctx.textAlign = 'center';
     TB.ctx.fillStyle = '#148743';
     TB.ctx.fillRect(0, 0, TB.camera.width, TB.camera.height);
@@ -27,10 +31,8 @@ Board = (function() {
         _results1 = [];
         for (col = _j = startCol; startCol <= endCol ? _j <= endCol : _j >= endCol; col = startCol <= endCol ? ++_j : --_j) {
           thisSquare = this.squares.get(col, row);
-          screenX = (col * TB.camera.zoomedGridSize) - TB.camera.x;
-          screenY = (row * TB.camera.zoomedGridSize) - TB.camera.y;
           if (thisSquare) {
-            _results1.push(thisSquare.draw(screenX, screenY));
+            _results1.push(thisSquare.draw());
           } else {
             _results1.push(void 0);
           }
