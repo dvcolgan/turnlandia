@@ -18,7 +18,7 @@ ALL_PAGES = {
   world_names: ['Atlantis', 'Azeroth', 'Camelot', 'Narnia', 'Hyrule', 'Middle-earth', 'The Neverhood', 'Rapture', 'Terabithia', 'Kanto', 'The Grand Line', 'Tatooine', 'Naboo', 'Pandora', 'Corneria', 'Termina', 'Xen', 'City 17', 'Tokyo', 'Ithica', 'Peru'],
   player_names: [['Frodo Baggins', 'Shire Hobbits'], ['Elrond', 'Mirkwood Elves'], ['Durin Darkhammer', 'Moria Dwarves'], ['Ness', 'Eagleland'], ['Daphnes Nohansen Hyrule', 'Hylians'], ['Aragorn son of Arathorn', 'Gondorians'], ['Strong Bad', 'Strongbadia'], ['Captain Homestar', 'The Team'], ['T-Rex', 'Dinosaurs'], ['Refrigerator', 'Kitchen Appliances'], ['The Burger King', 'Fast Foodies'], ['Larry King Live', 'Interviewees'], ['King', 'Mimigas'], ['Luke Skywalker', 'The Rebel Alliance'], ['Darth Vader', 'The Empire'], ['Jean-Luc Picard', 'The Enterprise'], ['The Borg Queen', 'The Borg'], ['Bowser', 'Koopas']],
   home: function() {},
-  create_accout: function() {},
+  create_account: function() {},
   messages: function() {},
   settings: function() {
     var settingsViewModel, startingColor;

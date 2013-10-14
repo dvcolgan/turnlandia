@@ -4,18 +4,242 @@ var Board;
 Board = (function() {
   function Board() {
     this.squares = new util.Hash2D();
+    this.units = new util.Hash2D();
+    this.trees = new util.Hash2D();
+    this.unfinalizedSquares = new util.Hash2D();
   }
 
   Board.prototype.placeUnitOnSquare = function(col, row, ownerID) {
     return this.squares.get(col, row).placeUnit(ownerID);
   };
 
-  Board.prototype.addSquare = function(square) {
-    return this.squares.set(square.col, square.row, new Square(square));
+  Board.prototype.getSubtiles = function(col, row) {
+    var east, eastTerrain, north, northEast, northEastTerrain, northEastTile, northTerrain, northWest, northWestTerrain, northWestTile, otherCol, otherRow, otherUnfinalized, s, south, southEast, southEastTerrain, southEastTile, southTerrain, southWest, southWestTerrain, southWestTile, square, thisTerrain, tree, west, westTerrain, _i, _len, _ref;
+    thisTerrain = this.getTerrainType(col, row);
+    northTerrain = this.getTerrainType(col, row - 1);
+    southTerrain = this.getTerrainType(col, row + 1);
+    eastTerrain = this.getTerrainType(col + 1, row);
+    westTerrain = this.getTerrainType(col - 1, row);
+    northEastTerrain = this.getTerrainType(col + 1, row - 1);
+    northWestTerrain = this.getTerrainType(col - 1, row - 1);
+    southEastTerrain = this.getTerrainType(col + 1, row + 1);
+    southWestTerrain = this.getTerrainType(col - 1, row + 1);
+    if (northTerrain === null) {
+      this.unfinalizedSquares.push(col, row - 1, [col, row]);
+    }
+    if (southTerrain === null) {
+      this.unfinalizedSquares.push(col, row + 1, [col, row]);
+    }
+    if (eastTerrain === null) {
+      this.unfinalizedSquares.push(col + 1, row, [col, row]);
+    }
+    if (westTerrain === null) {
+      this.unfinalizedSquares.push(col - 1, row, [col, row]);
+    }
+    if (northEastTerrain === null) {
+      this.unfinalizedSquares.push(col + 1, row - 1, [col, row]);
+    }
+    if (northWestTerrain === null) {
+      this.unfinalizedSquares.push(col - 1, row - 1, [col, row]);
+    }
+    if (southEastTerrain === null) {
+      this.unfinalizedSquares.push(col + 1, row + 1, [col, row]);
+    }
+    if (southWestTerrain === null) {
+      this.unfinalizedSquares.push(col - 1, row + 1, [col, row]);
+    }
+    north = northTerrain === thisTerrain;
+    south = southTerrain === thisTerrain;
+    east = eastTerrain === thisTerrain;
+    west = westTerrain === thisTerrain;
+    northEast = northEastTerrain === thisTerrain;
+    northWest = northWestTerrain === thisTerrain;
+    southEast = southEastTerrain === thisTerrain;
+    southWest = southWestTerrain === thisTerrain;
+    s = TB.gridSize / 2;
+    if (west && northWest && north) {
+      northWestTile = [s * 4, s * 0];
+    }
+    if (west && !northWest && north) {
+      northWestTile = [s * 2, s * 2];
+    }
+    if (west && northWest && !north) {
+      northWestTile = [s * 2, s * 0];
+    }
+    if (west && !northWest && !north) {
+      northWestTile = [s * 2, s * 0];
+    }
+    if (!west && northWest && north) {
+      northWestTile = [s * 0, s * 2];
+    }
+    if (!west && !northWest && north) {
+      northWestTile = [s * 0, s * 2];
+    }
+    if (!west && northWest && !north) {
+      northWestTile = [s * 0, s * 0];
+    }
+    if (!west && !northWest && !north) {
+      northWestTile = [s * 0, s * 0];
+    }
+    if (east && northEast && north) {
+      northEastTile = [s * 5, s * 0];
+    }
+    if (east && !northEast && north) {
+      northEastTile = [s * 1, s * 2];
+    }
+    if (east && northEast && !north) {
+      northEastTile = [s * 1, s * 0];
+    }
+    if (east && !northEast && !north) {
+      northEastTile = [s * 1, s * 0];
+    }
+    if (!east && northEast && north) {
+      northEastTile = [s * 3, s * 2];
+    }
+    if (!east && !northEast && north) {
+      northEastTile = [s * 3, s * 2];
+    }
+    if (!east && northEast && !north) {
+      northEastTile = [s * 3, s * 0];
+    }
+    if (!east && !northEast && !north) {
+      northEastTile = [s * 3, s * 0];
+    }
+    if (west && southWest && south) {
+      southWestTile = [s * 4, s * 1];
+    }
+    if (west && !southWest && south) {
+      southWestTile = [s * 2, s * 1];
+    }
+    if (west && southWest && !south) {
+      southWestTile = [s * 2, s * 3];
+    }
+    if (west && !southWest && !south) {
+      southWestTile = [s * 2, s * 3];
+    }
+    if (!west && southWest && south) {
+      southWestTile = [s * 0, s * 1];
+    }
+    if (!west && !southWest && south) {
+      southWestTile = [s * 0, s * 1];
+    }
+    if (!west && southWest && !south) {
+      southWestTile = [s * 0, s * 3];
+    }
+    if (!west && !southWest && !south) {
+      southWestTile = [s * 0, s * 3];
+    }
+    if (east && southEast && south) {
+      southEastTile = [s * 5, s * 1];
+    }
+    if (east && !southEast && south) {
+      southEastTile = [s * 1, s * 1];
+    }
+    if (east && southEast && !south) {
+      southEastTile = [s * 1, s * 3];
+    }
+    if (east && !southEast && !south) {
+      southEastTile = [s * 1, s * 3];
+    }
+    if (!east && southEast && south) {
+      southEastTile = [s * 3, s * 1];
+    }
+    if (!east && !southEast && south) {
+      southEastTile = [s * 3, s * 1];
+    }
+    if (!east && southEast && !south) {
+      southEastTile = [s * 3, s * 3];
+    }
+    if (!east && !southEast && !south) {
+      southEastTile = [s * 3, s * 3];
+    }
+    otherUnfinalized = this.unfinalizedSquares.get(col, row);
+    if (otherUnfinalized) {
+      for (_i = 0, _len = otherUnfinalized.length; _i < _len; _i++) {
+        _ref = otherUnfinalized[_i], otherCol = _ref[0], otherRow = _ref[1];
+        if (this.getTerrainType(otherCol, otherRow) === 'forest') {
+          tree = this.trees.get(otherCol, otherRow);
+          tree.subTiles = this.getSubtiles(otherCol, otherRow);
+        } else {
+          square = this.squares.get(otherCol, otherRow);
+          square.subTiles = this.getSubtiles(otherCol, otherRow);
+        }
+      }
+    }
+    return [[northWestTile, northEastTile], [southWestTile, southEastTile]];
+  };
+
+  Board.prototype.addSquare = function(squareData) {
+    return this.squares.set(squareData.col, squareData.row, new Square(squareData));
+  };
+
+  Board.prototype.addUnit = function(unitData) {
+    return this.units.set(unitData.col, unitData.row, new Unit(unitData));
+  };
+
+  Board.prototype.addTree = function(treeData) {
+    return this.trees.set(treeData.col, treeData.row, new Tree(treeData));
+  };
+
+  Board.prototype.isPassable = function(col, row) {
+    var square;
+    square = this.squares.get(col, row);
+    if (square !== null) {
+      return square.terrainType !== 'water' && square.terrainType !== 'mountains';
+    } else {
+      return null;
+    }
+  };
+
+  Board.prototype.getTerrainType = function(col, row) {
+    var square, tree;
+    square = this.squares.get(col, row);
+    if (square !== null) {
+      if (square.terrainType === 'plains') {
+        tree = this.trees.get(col, row);
+        if (tree) {
+          return 'forest';
+        } else {
+          return 'plains';
+        }
+      } else {
+        return square.terrainType;
+      }
+    } else {
+      return null;
+    }
+  };
+
+  Board.prototype.getUnitCount = function(col, row) {
+    var unit;
+    unit = this.units.get(col, row);
+    if (unit !== null) {
+      return unit.amount;
+    } else {
+      return 0;
+    }
+  };
+
+  Board.prototype.traversalCost = function(col, row) {
+    var square, tree;
+    square = this.squares.get(col, row);
+    if (square !== null) {
+      if (square.terrainType === 'plains') {
+        tree = this.trees.get(col, row);
+        if (tree) {
+          return 2;
+        } else {
+          return 1;
+        }
+      }
+      return square.traversalCost;
+    } else {
+      return 0;
+    }
   };
 
   Board.prototype.draw = function() {
-    var col, endCol, endRow, row, startCol, startRow, thisSquare, _i, _results;
+    var col, endCol, endRow, row, startCol, startRow, thisSquare, thisTree, thisUnit, _i, _results;
     TB.ctx.textAlign = 'center';
     TB.ctx.fillStyle = '#148743';
     TB.ctx.fillRect(0, 0, TB.camera.width, TB.camera.height);
@@ -32,7 +256,15 @@ Board = (function() {
         for (col = _j = startCol; startCol <= endCol ? _j <= endCol : _j >= endCol; col = startCol <= endCol ? ++_j : --_j) {
           thisSquare = this.squares.get(col, row);
           if (thisSquare) {
-            _results1.push(thisSquare.draw());
+            thisSquare.draw();
+          }
+          thisTree = this.trees.get(col, row);
+          if (thisTree) {
+            thisTree.draw();
+          }
+          thisUnit = this.units.get(col, row);
+          if (thisUnit) {
+            _results1.push(thisUnit.draw());
           } else {
             _results1.push(void 0);
           }

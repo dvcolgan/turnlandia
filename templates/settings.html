@@ -4,7 +4,10 @@
 {% block title %}Account Settings{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}js/colorpicker/css/colorpicker.css">
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}js/lib/colorpicker/css/colorpicker.css">
+{% endblock %}
+{% block foot %}
+<script src="{{ STATIC_URL }}js/lib/colorpicker/colorpicker.min.js"></script>
 {% endblock %}
 
 {% block body_class %}settings{% endblock %}
@@ -12,46 +15,31 @@
 
 {% block content %}
 <div class="container">
-    <div class="row">
-        <div class="col-lg-6 col-lg-offset-3">
+    {{ form.non_field_errors }}
+    <form action="" method="POST">{% csrf_token %}
+        <h2>Set up your Account</h2>
 
-            <div class="well">
-                {{ form.non_field_errors }}
-                <form action="" method="POST">{% csrf_token %}
-                    <legend>Set up your Account</legend>
-
-                    <div class="form-group">
-                        <label class="control-label">Team Color? <small><em>What color should your game pieces be?</em></small></label>
-                        {{ form.color|add_class:"color-swatch"|attr:"placeholder: Click Me"|add_class:"form-control" }}
-                    </div>
-
-                    <div class="form-group">
-                        <label class="control-label">Your Title? <small><em>What do the people of your country call you?</em></small></label>
-                        {{ form.leader_name|attr:'placeholder: Gandalf, Strong Bad, Larry King Live, etc'|add_class:"form-control"|attr:'data-bind: value: leaderName, valueUpdate: "keyup"' }}
-                    </div>
-
-                    <div class="form-group">
-                        <label class="control-label">Your People Name? <small><em>What do you call the people of you country?</em></small></label>
-                        {{ form.people_name|attr:'placeholder: Hylians, Hobbits, Koopas, etc'|add_class:"form-control"|attr:'data-bind: value: peopleName, valueUpdate: "keyup"' }}
-                    </div>
-
-                    <p><span data-bind="visible: leaderName()">Hail</span> <span data-bind="text: leaderName"></span><span data-bind="visible: leaderName() && peopleName()">, leader of the <span data-bind="text: peopleName"></span></span><span data-bind="visible: leaderName()">!</span></p>
-
-                    <hr/>
-
-                    <div class="form-group">
-                        <label class="control-label">Email? <small><em>Optional, if you set it, in the future when I make the feature we'll email you a daily summary of the game.</em></small></label>
-                        {{ form.email|add_class:"form-control" }}
-                        {{ form.email.errors }}
-                    </div>
-
-
-
-
-                    <input type="submit" class="btn btn-success" value="Make it so!" />
-                </form>
-            </div>
+        <div class="form-group">
+            <label class="control-label">Team Color? <small><em>What color should your game pieces be?</em></small></label>
+            {{ form.color|add_class:"color-swatch"|attr:"placeholder: Click Me"|add_class:"form-control" }}
         </div>
-    </div>
+
+        <div class="form-group">
+            <label class="control-label">Your Title? <small><em>What do the people of your country call you?</em></small></label>
+            {{ form.leader_name|attr:'placeholder: Gandalf, Strong Bad, Larry King Live, etc'|add_class:"form-control"|attr:'data-bind: value: leaderName, valueUpdate: "keyup"' }}
+        </div>
+
+        <div class="form-group">
+            <label class="control-label">Your People Name? <small><em>What do you call the people of your country?</em></small></label>
+            {{ form.people_name|attr:'placeholder: Hylians, Hobbits, Koopas, etc'|add_class:"form-control"|attr:'data-bind: value: peopleName, valueUpdate: "keyup"' }}
+        </div>
+
+        <p><span data-bind="visible: leaderName()">Hail</span> <span data-bind="text: leaderName"></span><span data-bind="visible: leaderName() && peopleName()">, leader of the <span data-bind="text: peopleName"></span></span><span data-bind="visible: leaderName()">!</span></p>
+
+
+
+
+        <input type="submit" class="btn" value="Make it so!" />
+    </form>
 </div>
 {% endblock %}

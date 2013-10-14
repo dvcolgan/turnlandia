@@ -1,0 +1,61 @@
+# Unit colors and then background colors
+COLORS = [
+    ('blue', '1E77B4', '7099B5'),
+    ('orange', 'FF7F0D', 'E5AB75'),
+    ('green', '2BA02B', '7AAF7A'),
+    ('red', 'D62728', 'C37273'),
+    ('purple', '9467BD', 'AD99C1'),
+    ('brown', '8C564B', 'A38B86'),
+    ('pink', 'E377C1', 'DAA8CA'),
+    ('grey', '7F7F7F', 'A4A4A4'),
+    ('yellow', 'BBBD21', 'CACB83'),
+    ('teal', '17BECF', '77C5CD'),
+]
+
+PLAYER_NAMES = [
+    ('Gandalf the White', 'Maiar'),
+    ('Frodo Baggins', 'Shire Hobbits'),
+    ('Elrond', 'Mirkwood Elves'),
+    ('Durin Darkhammer', 'Moria Dwarves'),
+    ('Ness', 'Eagleland'),
+    ('Daphnes Nohansen Hyrule', 'Hylians'),
+    ('Aragorn son of Arathorn', 'Gondorians'),
+    ('Strong Bad', 'Strongbadia'),
+    ('Captain Homestar', 'The Team'),
+    ('T-Rex', 'Dinosaurs'),
+    ('Refrigerator', 'Kitchen Appliances'),
+    ('The Burger King', 'Fast Foodies'),
+    ('Larry King Live', 'Interviewees'),
+    ('King', 'Mimigas'),
+    ('Luke Skywalker', 'The Rebel Alliance'),
+    ('Darth Vader', 'The Empire'),
+    ('Jean-Luc Picard', 'The Enterprise'),
+    ('The Borg Queen', 'The Borg'),
+    ('Bowser', 'Koopas'),
+]
+
+WORLD_NAMES = [
+    'Atlantis',
+    'Azeroth',
+    'Camelot',
+    'Narnia',
+    'Hyrule',
+    'Middle-earth',
+    'The Neverhood',
+    'Rapture',
+    'Terabithia',
+    'Kanto',
+    'The Grand Line',
+    'Tatooine',
+    'Naboo',
+    'Pandora',
+    'Corneria',
+    'Termina',
+    'Xen',
+    'City 17',
+    'Tokyo',
+    'Ithica',
+    'Peru',
+]
+
+

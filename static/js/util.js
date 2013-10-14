@@ -8,6 +8,58 @@ util = {
   random_choice: function(collection) {
     return collection[Math.floor(Math.random() * collection.length)];
   },
+  sum: function(arr) {
+    return _.reduce(arr, function(sum, num) {
+      return sum + num;
+    });
+  },
+  hexToRGB: function(hex) {
+    var result, shorthandRegex;
+    shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+      return r + r + g + g + b + b;
+    });
+    result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if (result) {
+      return {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      };
+    } else {
+      return null;
+    }
+  },
+  makeFPSCounter: function(numSamples) {
+    var fpsSamples, timestamps;
+    timestamps = [+new Date()];
+    fpsSamples = [];
+    return function(timestamp) {
+      var deltas, fps, fpsSum, i, _i, _ref;
+      timestamps.push(timestamp);
+      if (timestamps.length > numSamples) {
+        timestamps.shift();
+      }
+      deltas = (function() {
+        var _i, _ref, _results;
+        _results = [];
+        for (i = _i = 0, _ref = numSamples - 1; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+          _results.push(timestamps[i + 1] - timestamps[i]);
+        }
+        return _results;
+      })();
+      fps = util.sum(deltas) / numSamples;
+      fpsSamples.push(parseInt(1000 / fps));
+      if (fpsSamples.length > numSamples) {
+        fpsSamples.shift();
+      }
+      fpsSum = 0;
+      for (i = _i = 0, _ref = numSamples - 1; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        fpsSum = fpsSamples;
+      }
+      return parseInt(util.sum(fpsSamples) / numSamples);
+    };
+  },
   Hash2D: Hash2D = (function() {
     function Hash2D() {
       this.hash = {};
@@ -43,7 +95,56 @@ util = {
       var val;
       val = this.get(x, y);
       this.set(x, y, null);
+      delete this.hash[x][y];
       return val;
+    };
+
+    Hash2D.prototype.iterate = function(callback) {
+      var val, x, y, yData, _ref, _results;
+      _ref = this.hash;
+      _results = [];
+      for (x in _ref) {
+        yData = _ref[x];
+        _results.push((function() {
+          var _results1;
+          _results1 = [];
+          for (y in yData) {
+            val = yData[y];
+            _results1.push(callback(x, y, val));
+          }
+          return _results1;
+        })());
+      }
+      return _results;
+    };
+
+    Hash2D.prototype.iterateIntKeys = function(callback) {
+      var val, x, y, yData, _ref, _results;
+      _ref = this.hash;
+      _results = [];
+      for (x in _ref) {
+        yData = _ref[x];
+        _results.push((function() {
+          var _results1;
+          _results1 = [];
+          for (y in yData) {
+            val = yData[y];
+            _results1.push(callback(parseInt(x), parseInt(y), val));
+          }
+          return _results1;
+        })());
+      }
+      return _results;
+    };
+
+    Hash2D.prototype.push = function(x, y, val) {
+      var cur;
+      cur = this.get(x, y);
+      if ($.isArray(cur)) {
+        return cur.push(val);
+      } else {
+        return this.set(x, y, [val]);
+      }
     };
 
     Hash2D.prototype.values = function() {
@@ -56,6 +157,22 @@ util = {
           val = yData[y];
           result.push(val);
         }
+      }
+      return result;
+    };
+
+    Hash2D.prototype.values2D = function() {
+      var result, val, x, y, yData, ys, _ref;
+      result = [];
+      _ref = this.hash;
+      for (x in _ref) {
+        yData = _ref[x];
+        ys = [];
+        for (y in yData) {
+          val = yData[y];
+          ys.push(val);
+        }
+        result.push(ys);
       }
       return result;
     };
@@ -88,6 +205,10 @@ util = {
 
     Hash2D.prototype.getRaw = function() {
       return this.hash;
+    };
+
+    Hash2D.prototype.clear = function() {
+      return this.hash = {};
     };
 
     return Hash2D;

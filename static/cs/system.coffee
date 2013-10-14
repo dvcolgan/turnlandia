@@ -5,33 +5,32 @@ requestAnimationFrame = window.requestAnimationFrame or window.mozRequestAnimati
 window.requestAnimationFrame = requestAnimationFrame
 
 window.TB =
-    #@action_log = new action.ActionLog()
-    #@actions = []
-    #@current_action = 'move'
-
     players: {}
 
-    currentAction: 'initial'
+    currentAction: 'move'
 
     dragging: false
     lastMouse: { x: 0, y: 0 }
     lastScroll: { x: 0, y: 0 }
+    activeSquare: { col: 0, row: 0 }
 
     unitSize: 32
     gridSize: 48
     sectorSize: 10
     myAccount: null
+    isInitialPlacement: false
 
     # Images that have been preloaded in the HTML
     images:
+        othertilesImage: $('#othertiles-image').get(0)
         gridImage: $('#grid-image').get(0)
         forestTiles: $('#forest-tiles').get(0)
         mountainsTiles: $('#mountains-tiles').get(0)
         waterTiles: $('#water-tiles').get(0)
+        grassImage: $('#grass-image').get(0)
 
-    init: (selector) ->
-        TB.selector = selector
-        TB.ctx = $(TB.selector).get(0).getContext('2d')
+    init: ->
+        TB.ctx = $('.board').get(0).getContext('2d')
 
         TB.camera = new Camera()
 
@@ -41,76 +40,137 @@ window.TB =
 
         TB.fetcher = new DataFetcher()
         TB.fetcher.loadInitialData (data) ->
-            TB.myAccount = data.account
-            for action in data.actions
-                TB.actions.add(action)
             TB.registerEventHandlers()
-            TB.startMainLoop()
+            TB.isInitialPlacement = data.isInitialPlacement
+
+            if TB.isInitialPlacement
+                $('.game-toolbar').find('.btn-action').not('.btn-initial').not('.btn-undo').hide()
+                $('.btn-initial').trigger('click')
+            else
+                $('.game-toolbar').find('.btn-initial').hide()
+                $('.btn-move').trigger('click')
+
+            TB.fpsCounter = util.makeFPSCounter(20)
+            TB.myAccount = data.account
+            $('#total-unit-display').text(data.totalUnits)
+            TB.actions.loadFromJSON(data.actions)
+            requestAnimationFrame(TB.mainLoop)
+            TB.camera.moveTo(
+                data.centerCol * TB.camera.zoomedGridSize
+                data.centerRow * TB.camera.zoomedGridSize
+            )
+            TB.camera.moveBy(
+                -TB.camera.width / 2
+                -TB.camera.height / 2
+            )
             TB.fetcher.loadSectorsOnScreen()
 
 
     registerEventHandlers: ->
-        $(TB.selector).mousedown (event) =>
+
+        $('.btn-action').click (event) ->
+            kind = $(@).data('action')
+            if kind == 'undo'
+                TB.actions.undo()
+                requestAnimationFrame(TB.mainLoop)
+            else if kind == 'move' and $(@).hasClass('yellow')
+                TB.actions.cancelMove()
+            else
+                TB.currentAction = kind
+                $('.btn-action').removeClass('active')
+                $(@).addClass('active')
+            requestAnimationFrame(TB.mainLoop)
+
+
+
+        $('.board').mousedown (event) =>
             event.preventDefault()
             TB.lastMouse = { x: event.offsetX, y: event.offsetY }
             TB.lastScroll.x = TB.camera.x
             TB.lastScroll.y = TB.camera.y
             TB.dragging = true
+            requestAnimationFrame(TB.mainLoop)
 
-        $(TB.selector).mousemove (event) =>
-            TB.cursor.move(event.offsetX + TB.camera.x, event.offsetY + TB.camera.y)
+        $('.board').mousemove(( ->
+            lastX = null
+            lastY = null
+            (event) =>
+                if event.clientX == lastX and event.clientY == lastY
+                    return
+                lastX = event.clientX
+                lastY = event.clientY
 
-            #TB.activeSquare.col = TB.pixelToSectorCoord(x + TB.camera.x)
-            #TB.activeSquare.row = TB.pixelToSectorCoord(y + TB.camera.y)
+                TB.cursor.move(event.offsetX + TB.camera.x, event.offsetY + TB.camera.y)
 
-            if TB.dragging
-                event.preventDefault()
-                TB.camera.move(
-                    TB.lastScroll.x - (event.offsetX - TB.lastMouse.x),
-                    TB.lastScroll.y - (event.offsetY - TB.lastMouse.y)
-                )
+                TB.activeSquare.col = TB.camera.mouseXToCol(event.offsetX)
+                TB.activeSquare.row = TB.camera.mouseYToRow(event.offsetY)
 
-                TB.fetcher.loadSectorsOnScreen()
+                if TB.dragging
+                    event.preventDefault()
+                    TB.camera.moveTo(
+                        TB.lastScroll.x - (event.offsetX - TB.lastMouse.x),
+                        TB.lastScroll.y - (event.offsetY - TB.lastMouse.y)
+                    )
 
-        $(document).mouseup (event) =>
+                    TB.fetcher.loadSectorsOnScreen()
+
+                requestAnimationFrame(TB.mainLoop)
+        )())
+
+        $('.board').mouseup (event) =>
             TB.dragging = false
             if Math.abs(TB.camera.x - TB.lastScroll.x) < 5 and Math.abs(TB.camera.y - TB.lastScroll.y) < 5
                 TB.actions.handleAction(
-                    'initial'
+                    TB.currentAction
                     TB.camera.mouseXToCol(event.offsetX)
                     TB.camera.mouseYToRow(event.offsetY)
                 )
+            requestAnimationFrame(TB.mainLoop)
+
+        $('.board').mouseleave (event) =>
+            TB.dragging = false
+            requestAnimationFrame(TB.mainLoop)
 
 
-        $(TB.selector).mousewheel (event, delta, deltaX, deltaY) =>
+        $('.board').mousewheel (event, delta, deltaX, deltaY) =>
             TB.camera.zoom(event.offsetX, event.offsetY, delta)
+            requestAnimationFrame(TB.mainLoop)
 
         $(window).resize ->
             TB.camera.resize()
-            $(TB.selector).attr('width', TB.camera.width).attr('height', TB.camera.height)
-            TB.ctx = $(TB.selector).get(0).getContext('2d')
+            $('.board').attr('width', TB.camera.width).attr('height', TB.camera.height)
+            $('.stats-bar').css('width', TB.camera.width)
+            TB.ctx = $('.board').get(0).getContext('2d')
+            requestAnimationFrame(TB.mainLoop)
         $(window).trigger('resize')
 
         # Check out all my decoupling of the fetcher and the board~!
-        $(window).on 'sectorLoaded', (event) ->
-            for square in event.squareData
-                TB.board.addSquare(square)
+        $(window).on 'squaresLoaded', (event) ->
+            for squareData in event.squareData
+                TB.board.addSquare(squareData)
+            requestAnimationFrame(TB.mainLoop)
+
+        $(window).on 'objectsLoaded', (event) ->
+            for unitData in event.sectorData.units
+                TB.board.addUnit(unitData)
+            for treeData in event.sectorData.trees
+                TB.board.addTree(treeData)
+            requestAnimationFrame(TB.mainLoop)
 
 
+    mainLoop: (timestamp) ->
 
+        TB.board.draw()
+        TB.actions.draw()
+        TB.cursor.draw()
 
-    startMainLoop: ->
-        start = null
-        mainLoop = (timestamp) ->
+        #fps = TB.fpsCounter(timestamp)
+        #TB.fillOutlinedText(fps + ' FPS', 30, 30)
 
-            TB.board.draw()
-            TB.actions.draw()
-            TB.cursor.draw()
-
-            requestAnimationFrame(mainLoop)
-        requestAnimationFrame(mainLoop)
 
     fillOutlinedText: (text, screenX, screenY) ->
+        TB.ctx.save()
+        TB.ctx.font = 'bold 16px Arial'
         TB.ctx.fillStyle = 'black'
         TB.ctx.fillText(text, screenX+1, screenY+1)
         TB.ctx.fillText(text, screenX+1, screenY-1)
@@ -118,4 +178,5 @@ window.TB =
         TB.ctx.fillText(text, screenX-1, screenY-1)
         TB.ctx.fillStyle = 'white'
         TB.ctx.fillText(text, screenX, screenY)
+        TB.ctx.restore()
 

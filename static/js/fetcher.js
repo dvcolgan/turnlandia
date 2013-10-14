@@ -13,14 +13,6 @@ DataFetcher = (function() {
       method: 'GET',
       dataType: 'json',
       success: function(data) {
-        var prevTurn;
-        if ('turn' in localStorage) {
-          prevTurn = localStorage.get('turn');
-          if (prevTurn !== data.currentTurn) {
-            localStorage.setItem('turn', data.currentTurn);
-            localStorage.clear();
-          }
-        }
         return callback(data);
       }
     });
@@ -48,29 +40,34 @@ DataFetcher = (function() {
   };
 
   DataFetcher.prototype.loadSector = function(sectorX, sectorY, callback) {
-    var key, squareData,
+    var excludeSquares, key, squareData,
       _this = this;
     key = sectorX + '|' + sectorY;
+    excludeSquares = '';
     if (key in localStorage) {
       squareData = JSON.parse(localStorage.getItem(key));
-      if (squareData[0].turn === 1) {
-        console.log('cache hit at ' + key);
-        $(window).trigger({
-          type: 'sectorLoaded',
-          squareData: squareData
-        });
-        return;
-      }
+      $(window).trigger({
+        type: 'squaresLoaded',
+        squareData: squareData
+      });
+      excludeSquares = 'nosquares/';
     }
     return $.ajax({
-      url: '/api/squares/' + (sectorX * TB.sectorSize) + '/' + (sectorY * TB.sectorSize) + '/' + TB.sectorSize + '/' + TB.sectorSize + '/',
+      url: '/api/squares/' + (sectorX * TB.sectorSize) + '/' + (sectorY * TB.sectorSize) + '/' + TB.sectorSize + '/' + TB.sectorSize + '/' + excludeSquares,
       method: 'GET',
       dataType: 'json',
-      success: function(squareData) {
+      success: function(sectorData) {
         _this.loadingStates.set(sectorX, sectorY, true);
+        if (!excludeSquares) {
+          localStorage.setItem(key, JSON.stringify(sectorData.squares));
+          $(window).trigger({
+            type: 'squaresLoaded',
+            squareData: sectorData.squares
+          });
+        }
         return $(window).trigger({
-          type: 'sectorLoaded',
-          squareData: squareData
+          type: 'objectsLoaded',
+          sectorData: sectorData
         });
       }
     });
@@ -79,8 +76,8 @@ DataFetcher = (function() {
   DataFetcher.prototype.loadSectorsOnScreen = function() {
     var endSectorX, endSectorY, sectorPixelSize, sectorSectorX, sectorSectorY, sectorsHigh, sectorsWide, startSectorX, startSectorY, x, y, _i, _j;
     sectorPixelSize = TB.sectorSize * TB.camera.zoomedGridSize;
-    sectorsWide = Math.ceil(TB.camera.width / TB.sectorSize / TB.camera.zoomedGridSize);
-    sectorsHigh = Math.ceil(TB.camera.height / TB.sectorSize / TB.camera.zoomedGridSize);
+    sectorsWide = Math.ceil(TB.camera.width / TB.camera.zoomedGridSize / TB.sectorSize) + 3;
+    sectorsHigh = Math.ceil(TB.camera.height / TB.camera.zoomedGridSize / TB.sectorSize) + 3;
     startSectorX = null;
     startSectorY = null;
     endSectorX = null;

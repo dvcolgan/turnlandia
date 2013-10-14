@@ -8,28 +8,19 @@ class Cursor
 
     draw: ->
         cursorSize = TB.gridSize * TB.camera.zoomFactor
-        offset = cursorSize/2
-        TB.ctx.strokeStyle = 'black'
-        TB.ctx.fillStyle = 'black'
 
         col = Math.floor(@pos.x / cursorSize)
         row = Math.floor(@pos.y / cursorSize)
 
-        snappedX = col * cursorSize
-        snappedY = row * cursorSize
+        screenX = TB.camera.worldToScreenPosX(col * TB.camera.zoomedGridSize)
+        screenY = TB.camera.worldToScreenPosY(row * TB.camera.zoomedGridSize)
 
-        screenX = TB.camera.worldToScreenPosX(snappedX)
-        screenY = TB.camera.worldToScreenPosY(snappedY)
-        TB.ctx.strokeRect(screenX, screenY, cursorSize, cursorSize)
-
-        TB.ctx.font = 'bold 16px Arial'
+        TB.ctx.save()
+        TB.ctx.strokeStyle = 'black'
         TB.ctx.fillStyle = 'black'
+        TB.ctx.strokeRect(screenX, screenY, cursorSize, cursorSize)
+        TB.ctx.restore()
+
         textX = screenX - 8
         textY = screenY - 4
-        TB.ctx.fillText(col + ',' + row, textX+1, textY+1)
-        TB.ctx.fillText(col + ',' + row, textX-1, textY+1)
-        TB.ctx.fillText(col + ',' + row, textX+1, textY-1)
-        TB.ctx.fillText(col + ',' + row, textX-1, textY-1)
-
-        TB.ctx.fillStyle = 'white'
-        TB.ctx.fillText(col + ',' + row, textX, textY)
+        TB.fillOutlinedText(col + ',' + row, textX, textY)

@@ -2,28 +2,66 @@ from django.core.management.base import BaseCommand, CommandError
 from game.models import *
 import random
 
+def parse_move(move_path):
+    moves = [step.split(',') for step in move_path.split('|')]
+    for move in moves:
+        move[0] = int(move[0])
+        move[1] = int(move[1])
+    return moves
+
 class Command(BaseCommand):
     args = ''
     help = 'Run this command whenever the turn is over.'
 
     def handle(self, *args, **options):
-        day_setting = Setting.objects.get(name='Current Day')
-        day_setting.value = str(int(day_setting.value) + 1)
-        day_setting.save()
+        turn = Setting.objects.get(name='turn')
+        current_turn = int(turn.value)
 
-        print 'Generating new units'
-        self.generate_units_from_resources()
+        for action in Action.objects.filter(turn=current_turn, kind='initial'):
+            unit = get_object_or_None(Unit, col=action.col, row=action.row, owner=action.player)
+            if unit == None:
+                Unit.objects.create(
+                    col=action.col,
+                    row=action.row,
+                    owner=action.player,
+                    amount=1
+                )
+            else:
+                unit.amount += 1
+                unit.save()
 
-        #print 'Attacking walls'
-        #self.attack_walls()
+        actions = Action.objects.filter(turn=current_turn, kind='move')
+        moves = []
+        for action in actions:
+            # Sometime figure out what to do if we have an invalid move here
+            unit = get_object_or_None(Unit, col=action.col, row=action.row, owner=action.player)
+            if unit != None and action.move_path != '':
+                #moves.push(parse_move(action.move_path))
+                col, row = parse_move(action.move_path)[-1]
+                unit.col = col
+                unit.row = row
+                unit.save()
 
-        print 'Resolving battles'
-        self.resolve_battles()
 
-        print 'Assigning squares\' ownership'
-        self.assign_squares_ownership()
+        # At some point only check the units around you, or this will quickly take forever
+        #for i in range(6):
+        #    for move in moves:
+        #        for other_move in moves:
+        #            if move is other_move: continue
+        #            step1_col, step1_row = move[i]
+        #            step2_col, step2_row = other_move[i]
 
-        print 'Reticulating splines'
+
+
+
+
+            
+                
+                
+
+        turn.value = str(current_turn + 1)
+        turn.save()
+        print 'It is now turn %d.' % current_turn
 
         print 'ALL DONE'
 

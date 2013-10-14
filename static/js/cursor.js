@@ -15,28 +15,20 @@ Cursor = (function() {
   };
 
   Cursor.prototype.draw = function() {
-    var col, cursorSize, offset, row, screenX, screenY, snappedX, snappedY, textX, textY;
+    var col, cursorSize, row, screenX, screenY, textX, textY;
     cursorSize = TB.gridSize * TB.camera.zoomFactor;
-    offset = cursorSize / 2;
-    TB.ctx.strokeStyle = 'black';
-    TB.ctx.fillStyle = 'black';
     col = Math.floor(this.pos.x / cursorSize);
     row = Math.floor(this.pos.y / cursorSize);
-    snappedX = col * cursorSize;
-    snappedY = row * cursorSize;
-    screenX = TB.camera.worldToScreenPosX(snappedX);
-    screenY = TB.camera.worldToScreenPosY(snappedY);
-    TB.ctx.strokeRect(screenX, screenY, cursorSize, cursorSize);
-    TB.ctx.font = 'bold 16px Arial';
+    screenX = TB.camera.worldToScreenPosX(col * TB.camera.zoomedGridSize);
+    screenY = TB.camera.worldToScreenPosY(row * TB.camera.zoomedGridSize);
+    TB.ctx.save();
+    TB.ctx.strokeStyle = 'black';
     TB.ctx.fillStyle = 'black';
+    TB.ctx.strokeRect(screenX, screenY, cursorSize, cursorSize);
+    TB.ctx.restore();
     textX = screenX - 8;
     textY = screenY - 4;
-    TB.ctx.fillText(col + ',' + row, textX + 1, textY + 1);
-    TB.ctx.fillText(col + ',' + row, textX - 1, textY + 1);
-    TB.ctx.fillText(col + ',' + row, textX + 1, textY - 1);
-    TB.ctx.fillText(col + ',' + row, textX - 1, textY - 1);
-    TB.ctx.fillStyle = 'white';
-    return TB.ctx.fillText(col + ',' + row, textX, textY);
+    return TB.fillOutlinedText(col + ',' + row, textX, textY);
   };
 
   return Cursor;

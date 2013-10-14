@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, Avg
 from django.contrib.auth.models import *
 from settings import SECTOR_SIZE
 from util.functions import *
@@ -7,66 +7,6 @@ import PIL
 import noise
 import math
 import ipdb
-
-# Unit colors and then background colors
-COLORS = [
-    ('blue', '1E77B4', '7099B5'),
-    ('orange', 'FF7F0D', 'E5AB75'),
-    ('green', '2BA02B', '7AAF7A'),
-    ('red', 'D62728', 'C37273'),
-    ('purple', '9467BD', 'AD99C1'),
-    ('brown', '8C564B', 'A38B86'),
-    ('pink', 'E377C1', 'DAA8CA'),
-    ('grey', '7F7F7F', 'A4A4A4'),
-    ('yellow', 'BBBD21', 'CACB83'),
-    ('teal', '17BECF', '77C5CD'),
-]
-
-PLAYER_NAMES = [
-    ('Gandalf the White', 'Maiar'),
-    ('Frodo Baggins', 'Shire Hobbits'),
-    ('Elrond', 'Mirkwood Elves'),
-    ('Durin Darkhammer', 'Moria Dwarves'),
-    ('Ness', 'Eagleland'),
-    ('Daphnes Nohansen Hyrule', 'Hylians'),
-    ('Aragorn son of Arathorn', 'Gondorians'),
-    ('Strong Bad', 'Strongbadia'),
-    ('Captain Homestar', 'The Team'),
-    ('T-Rex', 'Dinosaurs'),
-    ('Refrigerator', 'Kitchen Appliances'),
-    ('The Burger King', 'Fast Foodies'),
-    ('Larry King Live', 'Interviewees'),
-    ('King', 'Mimigas'),
-    ('Luke Skywalker', 'The Rebel Alliance'),
-    ('Darth Vader', 'The Empire'),
-    ('Jean-Luc Picard', 'The Enterprise'),
-    ('The Borg Queen', 'The Borg'),
-    ('Bowser', 'Koopas'),
-]
-
-WORLD_NAMES = [
-    'Atlantis',
-    'Azeroth',
-    'Camelot',
-    'Narnia',
-    'Hyrule',
-    'Middle-earth',
-    'The Neverhood',
-    'Rapture',
-    'Terabithia',
-    'Kanto',
-    'The Grand Line',
-    'Tatooine',
-    'Naboo',
-    'Pandora',
-    'Corneria',
-    'Termina',
-    'Xen',
-    'City 17',
-    'Tokyo',
-    'Ithica',
-    'Peru',
-]
 
 
 class Trophy(models.Model):
@@ -108,8 +48,9 @@ class AccountManager(BaseUserManager):
 
 class Account(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=255, unique=True)
-    email = models.EmailField(blank=True)
+    email = models.EmailField()
     color = models.CharField(max_length=10, blank=True)
+    country_name = models.CharField(max_length=255, blank=True)
     leader_name = models.CharField(max_length=255, blank=True)
     people_name = models.CharField(max_length=255, blank=True)
     unplaced_units = models.IntegerField(default=0)
@@ -127,7 +68,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
     objects = AccountManager()
 
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['email']
 
     class Meta:
         verbose_name = 'account'
@@ -147,6 +88,19 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     def email_user(self, subject, message, from_email=None):
         send_mail(subject, message, from_email, [self.email])
+
+    def get_total_unit_count(self):
+        return (Unit.objects.filter(
+            owner=self
+        ).aggregate(
+            Sum('amount')
+        )['amount__sum']) or 0
+
+    def get_empire_center(self):
+        return [
+            int(self.units.aggregate(Avg('col'))['col__avg'] or 0),
+            int(self.units.aggregate(Avg('row'))['row__avg'] or 0),
+        ]
 
 
 class TrophyAwarding(models.Model):
@@ -183,13 +137,29 @@ class SquareManager(models.Manager):
         # operation won't happen very often.
         if squares.count() != width * height:
             # Nobody has gone out here yet, create the squares that don't exist
-            batch = []
+            square_batch = []
+            tree_batch = []
             for this_row in range(lower_row, upper_row):
                 for this_col in range(lower_col, upper_col):
                     if get_object_or_None(self.model, col=this_col, row=this_row) == None:
-                        batch.append(self.generate_unsaved_square(this_col, this_row))
-            self.model.objects.bulk_create(batch)
-            print 'Created %d new squares' % len(batch)
+                        new_square = self.model(
+                            col=this_col,
+                            row=this_row,
+                            terrain_type=self.terrain_type_for_square(this_col, this_row)
+                        )
+                        if new_square.terrain_type == 'forest':
+                            new_square.terrain_type = 'plains'
+                            tree_batch.append(Tree(
+                                col=this_col,
+                                row=this_row
+                            ))
+                        square_batch.append(new_square)
+
+            self.model.objects.bulk_create(square_batch)
+            Tree.objects.bulk_create(tree_batch)
+
+            print 'Created %d new squares' % len(square_batch)
+            print 'and %d new trees' % len(tree_batch)
 
             # Fetch these all again
             squares = (self.model.objects.filter(col__lt=upper_col)
@@ -208,65 +178,33 @@ class SquareManager(models.Manager):
         return squares
 
 
-    def generate_unsaved_square(self, col, row):
-        this_terrain = self.terrain_type_for_square(col, row)
 
-        north = self.terrain_type_for_square(col, row-1) == this_terrain
-        south = self.terrain_type_for_square(col, row+1) == this_terrain
-        east = self.terrain_type_for_square(col+1, row) == this_terrain
-        west = self.terrain_type_for_square(col-1, row) == this_terrain
 
-        north_east = self.terrain_type_for_square(col+1, row-1) == this_terrain
-        north_west = self.terrain_type_for_square(col-1, row-1) == this_terrain
-        south_east = self.terrain_type_for_square(col+1, row+1) == this_terrain
-        south_west = self.terrain_type_for_square(col-1, row+1) == this_terrain
+    #def terrain_type_for_square(self, col, row):
+    #    terrain_type = 'plains'
 
-        if     west and     north_west and     north: north_west_tile_24 = 4
-        if     west and not north_west and     north: north_west_tile_24 = 14
-        if     west and     north_west and not north: north_west_tile_24 = 2
-        if     west and not north_west and not north: north_west_tile_24 = 2
-        if not west and     north_west and     north: north_west_tile_24 = 12
-        if not west and not north_west and     north: north_west_tile_24 = 12
-        if not west and     north_west and not north: north_west_tile_24 = 0
-        if not west and not north_west and not north: north_west_tile_24 = 0
+    #    frequency = 1.0/5
+    #    forest_value = noise.pnoise2(col*frequency, row*frequency, 20)
+    #    if forest_value < -0.05:
+    #        terrain_type = 'forest'
 
-        if     east and     north_east and     north: north_east_tile_24 = 5
-        if     east and not north_east and     north: north_east_tile_24 = 13
-        if     east and     north_east and not north: north_east_tile_24 = 1
-        if     east and not north_east and not north: north_east_tile_24 = 1
-        if not east and     north_east and     north: north_east_tile_24 = 15
-        if not east and not north_east and     north: north_east_tile_24 = 15
-        if not east and     north_east and not north: north_east_tile_24 = 3
-        if not east and not north_east and not north: north_east_tile_24 = 3
+    #    frequency = 1.0/5
+    #    mountain_value = noise.pnoise2(col*frequency, row*frequency, 1)
+    #    if mountain_value > 0.2:
+    #        terrain_type = 'mountains'
 
-        if     west and     south_west and     south: south_west_tile_24 = 10
-        if     west and not south_west and     south: south_west_tile_24 = 8
-        if     west and     south_west and not south: south_west_tile_24 = 20
-        if     west and not south_west and not south: south_west_tile_24 = 20
-        if not west and     south_west and     south: south_west_tile_24 = 6
-        if not west and not south_west and     south: south_west_tile_24 = 6
-        if not west and     south_west and not south: south_west_tile_24 = 18
-        if not west and not south_west and not south: south_west_tile_24 = 18
+    #    frequency_x = 1.0/45
+    #    frequency_y = 1.0/30
+    #    river_value = noise.pnoise2(col*frequency_x, row*frequency_y, 10, -0.3)
+    #    if river_value < 0.04 and river_value > -0.04:
+    #        terrain_type = 'water'
 
-        if     east and     south_east and     south: south_east_tile_24 = 11
-        if     east and not south_east and     south: south_east_tile_24 = 7
-        if     east and     south_east and not south: south_east_tile_24 = 19
-        if     east and not south_east and not south: south_east_tile_24 = 19
-        if not east and     south_east and     south: south_east_tile_24 = 9
-        if not east and not south_east and     south: south_east_tile_24 = 9
-        if not east and     south_east and not south: south_east_tile_24 = 21
-        if not east and not south_east and not south: south_east_tile_24 = 21
+    #    frequency = 1.0/20
+    #    lake_value = noise.pnoise2(col*frequency, row*frequency, 6)
+    #    if lake_value < -0.2:
+    #        terrain_type = 'water'
 
-        return self.model(
-            col=col,
-            row=row,
-            terrain_type=this_terrain,
-            north_west_tile_24=north_west_tile_24,
-            north_east_tile_24=north_east_tile_24,
-            south_west_tile_24=south_west_tile_24,
-            south_east_tile_24=south_east_tile_24,
-        )
-
+    #    return terrain_type
 
     def terrain_type_for_square(self, col, row):
         terrain_type = 'plains'
@@ -276,35 +214,24 @@ class SquareManager(models.Manager):
         if forest_value < -0.05:
             terrain_type = 'forest'
 
-        frequency = 1.0/5
+        frequency_x = 1.0/30
+        frequency_y = 1.0/40
         mountain_value = noise.pnoise2(col*frequency, row*frequency, 1)
         if mountain_value > 0.2:
             terrain_type = 'mountains'
 
-        frequency_x = 1.0/45
-        frequency_y = 1.0/30
+        frequency_x = 1.0/60
+        frequency_y = 1.0/45
         river_value = noise.pnoise2(col*frequency_x, row*frequency_y, 10, -0.3)
         if river_value < 0.04 and river_value > -0.04:
             terrain_type = 'water'
 
-        frequency = 1.0/20
+        frequency = 1.0/30
         lake_value = noise.pnoise2(col*frequency, row*frequency, 6)
         if lake_value < -0.2:
             terrain_type = 'water'
 
         return terrain_type
-
-
-TILES48 = [
-    ['arrow-west-end', 'arrow-south-end', 'arrow-east-end', 'arrow-north-end'],
-    ['arrow-south-east', 'arrow-north-east', 'arrow-north-west', 'arrow-south-west'],
-    ['arrow-start-east', 'arrow-start-north', 'arrow-start-west', 'arrow-start-south'],
-    ['arrow-west-east', 'arrow-north-south', 'under-construction', 'arrow-north-end'],
-    ['arrow-west-end', 'arrow-south-end', 'arrow-east-end', 'arrow-north-end'],
-    ['arrow-west-end', 'arrow-south-end', 'arrow-east-end', 'arrow-north-end'],
-    ['arrow-west-end', 'arrow-south-end', 'arrow-east-end', 'arrow-north-end'],
-    ['arrow-west-end', 'arrow-south-end', 'arrow-east-end', 'arrow-north-end'],
-]
 
 
 class SquareOccupiedException(Exception):
@@ -325,21 +252,7 @@ class Square(models.Model):
     )
     col = models.IntegerField()
     row = models.IntegerField()
-    #owner = models.ForeignKey(Account, related_name='squares_owned', null=True, blank=True)
-    resource_amount = models.IntegerField(default=0)
-    #wall_health = models.IntegerField(default=0)
     terrain_type = models.CharField(max_length=20, choices=TERRAIN_TYPES)
-    unit_owner = models.ForeignKey(Account, related_name='squares_with_units', null=True, blank=True)
-    unit_amount = models.IntegerField(default=0)
-
-    north_west_tile_24 = models.IntegerField(null=True, blank=True)
-    north_east_tile_24 = models.IntegerField(null=True, blank=True)
-    south_west_tile_24 = models.IntegerField(null=True, blank=True)
-    south_east_tile_24 = models.IntegerField(null=True, blank=True)
-    tile_48 = models.IntegerField(null=True, blank=True)
-
-    #has_road = models.BooleanField(default=False)
-    #has_city = models.BooleanField(default=False)
 
     objects = SquareManager()
 
@@ -359,6 +272,163 @@ class Square(models.Model):
 
     def get_turn(self):
         return Setting.objects.get_integer('turn')
+
+    def __unicode__(self):
+        return '(%d, %d)' % (self.col, self.row)
+
+
+
+class SettingManager(models.Manager):
+    def get_integer(self, name):
+        return int(Setting.objects.get(name=name).value)
+    def get_string(self, name):
+        return Setting.objects.get(name=name).value
+
+
+class Setting(models.Model):
+    name = models.CharField(max_length=255)
+    value = models.CharField(max_length=255)
+
+    objects = SettingManager()
+
+    def __unicode__(self):
+        return '%s: %s' % (self.name, self.value)
+
+
+class Message(models.Model):
+    sender = models.ForeignKey(Account, related_name='sent_messages')
+    recipient = models.ForeignKey(Account, related_name='received_messages')
+    subject = models.CharField(max_length=255)
+    body = models.TextField()
+    time_sent = models.DateTimeField(auto_now=True)
+
+
+ACTION_KINDS = (
+    ('initial', 'Initial Placement'),
+    ('move', 'Move Units'),
+    ('attack', 'Attack'),
+    ('city', 'Build City'),
+    ('road', 'Build Road'),
+)
+# Squares are more or less read only until the turn resolves, before that we deal with actions
+class Action(models.Model):
+    player = models.ForeignKey(Account, related_name='actions')
+    turn = models.IntegerField()
+
+    kind = models.CharField(max_length=30, choices=ACTION_KINDS)
+    col = models.IntegerField()
+    row = models.IntegerField()
+
+    move_path = models.CharField(max_length=255, blank=True)
+
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __unicode__(self):
+        return self.kind + ' ' + self.move_path
+
+    def is_valid(self):
+        return True
+        #if any(self.kind in kind for kind in ACTION_KINDS):
+        #    self.errors = 'Invalid action.'
+
+        #src_square = get_object_or_None(Square, col=src_col, row=src_row)
+        #dest_square = get_object_or_None(Square, col=dest_col, row=dest_row)
+        #if src_square == None or dest_square == None:
+        #    self.errors = 'Square does not exist.'
+        #    return False
+
+        #if action == 'move':
+        #    if src_square.units.filter(owner=player).amount < self.amount:
+        #        return False
+        #    
+        #elif action == 'attack':
+        #    pass
+
+        #elif action == 'city':
+        #    pass
+
+        return True
+
+
+
+
+
+
+class UnitManager(models.Manager):
+
+    def get_region(self, col, row, width, height):
+        upper_col = int(col + width)
+        lower_col = int(col)
+        upper_row = int(row + height)
+        lower_row = int(row)
+
+        return (self.model.objects.filter(col__lt=upper_col)
+                                  .filter(col__gte=lower_col)
+                                  .filter(row__lt=upper_row)
+                                  .filter(row__gte=lower_row))
+
+class Unit(models.Model):
+    col = models.IntegerField()
+    row = models.IntegerField()
+    owner = models.ForeignKey(Account, related_name='units')
+    amount = models.IntegerField(default=0)
+
+    objects = UnitManager()
+
+    def __unicode__(self):
+        return "(%d, %d) %s (%d)" % (self.col, self.row, self.owner, self.amount)
+
+
+
+class TreeManager(models.Manager):
+
+    def get_region(self, col, row, width, height):
+        upper_col = int(col + width)
+        lower_col = int(col)
+        upper_row = int(row + height)
+        lower_row = int(row)
+
+        return (self.model.objects.filter(col__lt=upper_col)
+                                  .filter(col__gte=lower_col)
+                                  .filter(row__lt=upper_row)
+                                  .filter(row__gte=lower_row))
+class Tree(models.Model):
+    col = models.IntegerField()
+    row = models.IntegerField()
+
+    objects = TreeManager()
+
+    def __unicode__(self):
+        return "(%d, %d)" % (self.col, self.row)
+
+
+
+class Road(models.Model):
+    col = models.IntegerField()
+    row = models.IntegerField()
+
+
+#------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
 
     def place_unit(self, account):
         if account.unplaced_units > 0:
@@ -476,100 +546,4 @@ class Square(models.Model):
                     square.save()
                     print 'creating unit'
 
-
-
-    def __unicode__(self):
-        return '(%d, %d)' % (self.col, self.row)
-
-
-#class UnitManager(models.Manager):
-#    def total_placed_units(self, owner):
-#        total = self.model.objects.filter(owner=owner).aggregate(total=Sum('amount'))['total']
-#        if total == None:
-#            return 0
-#        else:
-#            return total
-#
-#class Unit(models.Model):
-#    owner = models.ForeignKey(Account, related_name='units')
-#    square = models.ForeignKey(Square, related_name='units')
-#    amount = models.IntegerField()
-#    last_turn_amount = models.IntegerField(default=0)
-#
-#    objects = UnitManager()
-#
-#    def __unicode__(self):
-#        return unicode(self.square)
-
-
-class SettingManager(models.Manager):
-    def get_integer(self, name):
-        return int(Setting.objects.get(name=name).value)
-    def get_string(self, name):
-        return Setting.objects.get(name=name).value
-
-
-class Setting(models.Model):
-    name = models.CharField(max_length=255)
-    value = models.CharField(max_length=255)
-
-    objects = SettingManager()
-
-    def __unicode__(self):
-        return '%s: %s' % (self.name, self.value)
-
-
-class Message(models.Model):
-    sender = models.ForeignKey(Account, related_name='sent_messages')
-    recipient = models.ForeignKey(Account, related_name='received_messages')
-    subject = models.CharField(max_length=255)
-    body = models.TextField()
-    time_sent = models.DateTimeField(auto_now=True)
-
-
-ACTION_KINDS = (
-    ('initial', 'Initial Placement'),
-    ('move', 'Move Units'),
-    ('attack', 'Attack'),
-    ('city', 'Build City'),
-    ('road', 'Build Road'),
-)
-# Squares are more or less read only until the turn resolves, before that we deal with actions
-class Action(models.Model):
-    player = models.ForeignKey(Account, related_name='actions')
-    turn = models.IntegerField()
-
-    kind = models.CharField(max_length=30, choices=ACTION_KINDS)
-
-    # Also used for the location you are wanting to place a building
-    src_col = models.IntegerField()
-    src_row = models.IntegerField()
-
-    # Used only for moving units
-    dest_col = models.IntegerField()
-    dest_row = models.IntegerField()
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-    def is_valid(self):
-        return True
-        #if any(self.kind in kind for kind in ACTION_KINDS):
-        #    self.errors = 'Invalid action.'
-
-        #src_square = get_object_or_None(Square, col=src_col, row=src_row)
-        #dest_square = get_object_or_None(Square, col=dest_col, row=dest_row)
-        #if src_square == None or dest_square == None:
-        #    self.errors = 'Square does not exist.'
-        #    return False
-
-        #if action == 'move':
-        #    if src_square.units.filter(owner=player).amount < self.amount:
-        #        return False
-        #    
-        #elif action == 'attack':
-        #    pass
-
-        #elif action == 'city':
-        #    pass
-
-        return True
-
+"""

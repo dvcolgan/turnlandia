@@ -1,3 +1,4 @@
+
 switch sqlite to postgres for improved performance
 
 Cache all of the json objects locally and have those in a global data store thingy
@@ -12,11 +13,44 @@ make tiles fly in somehow
 Make the cron job that makes the game resolve
 Read through the lodash documentation
 
+The only time that you will ever see someone else's moves is during your initial placement, it will not allow you to place where other players are going to initially place, instead of showing the other players, it just marks all unavailable squares in red
+
+advertise this game on project wonderful
+add touch event handlers for tablets for moving units
 Board stuff
     finalize the noise generator
     fix the board loader being off for higher zoom levels
     make zooming zoom where your cursor is
     caching of board data on the client
+make it so that if you try to pathfind into an empty square, it will do it as soon as the board is loaded
+
+have a swag store but don't call it swag because thats horrible to half of the people
+
+Add server side logic for initial placements
+add back walls?
+natural disasters
+have random events - maybe one before each turn
+fix the problem where sectors aren't loading right away from the cache
+
+
+make the background image of the home page be the current board state
+ways of monitizing the game:
+
+have a store
+pay for cosmetic enhancements (hats)
+
+pay a montly fee
+have an ad on the sidebar
+
+
+
+add dinosaurs as units
+
+
+
+
+make the ground snowy in the winter
+make the trees change colors in the fall
 
 Architecture for other pages (popup/modal)
     http://www.ericmmartin.com/projects/simplemodal/
@@ -145,12 +179,12 @@ water, mountains, forests, plains as terrain
 
 use arrows to move the map around
 
-2 for forests 3 for plains 5 for roads
 6 movement points per turn
 roads = 1 point
 plains = 2 points
 forests = 3 points
 mountains = 6 points?
+
 
 
 all actions:
@@ -181,7 +215,7 @@ currency and resources - make colgans the cu
 jools64 has best coin
 
 
-
+make a credits page
 
 
 
@@ -261,7 +295,44 @@ Texture packs
 
 add floating semitransparent clouds
 
+make each grass tile slightly different in color for making it look better
 
 
+Trophies:
+
+Tim:
+Tileset
+Fixer of horrible grammar mistake
+early adopter
+found the horrible bug
+mechanic designer
+
+Ocreds:
+Choosing the background grass texture
+Seasonal events idea
+
+Joeb3219
+    Frequent watcher
+
+Dooskington
+    frequent watcher, there from the beginning
+    minecraft server mod
+
+Stingraynine:
+    Fixer of the button bug
+
+Frinlet:
+    Fixer of the elusive shadow bug
+
+Kurtymckurt:
+    FINDER OF THE FLIPPED COMPARISOR
+
+Zezioen:
+Pointed out that the arrows aren't done yet
+
+Erigitic:
+Asked for a trophy
 
 
+Mdjustin:
+    Supporter of $8

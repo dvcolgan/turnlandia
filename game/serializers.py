@@ -28,31 +28,26 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = ('id', 'username', 'color', 'leader_name', 'people_name', 'unplaced_units', 'password')
 
-#class UnitSerializer(serializers.ModelSerializer):
-#    owner_color = serializers.Field(source='owner.color')
-#    class Meta:
-#        model = Unit
+class TreeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tree
+
+class RoadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Road
+
+class UnitSerializer(serializers.ModelSerializer):
+    owner_color = serializers.Field(source='owner.color')
+    class Meta:
+        model = Unit
 
 class SquareSerializer(serializers.ModelSerializer):
+    # Base traversal cost before adding modifiers like roads or trees
     traversal_cost = serializers.Field(source='get_traversal_cost')
-    #turn = serializers.Field(source='get_turn')
-    # This doubles the server response time D:
-    #units = UnitSerializer()
     class Meta:
         model = Square
 
 class ActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Action
-
-
-
-#class PlayerSerializer(serializers.ModelSerializer):
-#    name = serializers.Field(source='account.name')
-#    class Meta:
-#        model = Player
-#
-#class GameSerializer(serializers.ModelSerializer):
-#    players = PlayerSerializer(many=True, required=False)
-#    class Meta:
-#        model = Game
+        exclude = ('player', 'turn')

@@ -33,6 +33,11 @@ def home(request):
     player_count = Account.objects.count()
     return render(request, 'home.html', locals())
 
+def irc(request):
+    day_counter = Setting.objects.get_integer('turn')
+    player_count = Account.objects.count()
+    return render(request, 'irc.html', locals())
+
 def how_to_play(request):
     day_counter = Setting.objects.get_integer('turn')
     player_count = Account.objects.count()
@@ -154,7 +159,7 @@ def api_email_existence(request, email):
 
 @login_required
 @api_view(['GET'])
-def api_squares(request, col, row, width, height):
+def api_squares(request, col, row, width, height, exclude_squares=None):
     try:
         col = int(col)
         row = int(row)
@@ -166,13 +171,13 @@ def api_squares(request, col, row, width, height):
 
     # TODO a lot of this function can be computed on the turn change and then cached, do this if we get a bunch of traffic
     # TODO make this instead limit it to a few screens beyond where the furthest person is
-    #if (col > MAX_SECTOR_X * SECTOR_SIZE or
-    #   col < MIN_SECTOR_X * SECTOR_SIZE or
-    #   row > MAX_SECTOR_Y * SECTOR_SIZE or
-    #   row < MIN_SECTOR_Y * SECTOR_SIZE):
-    #    return Response({
-    #        'error': 'I really don\'t feel like fetching the map that far out.'
-    #    }, status=status.HTTP_400_BAD_REQUEST)
+    if (col > MAX_SECTOR_X * SECTOR_SIZE or
+       col < MIN_SECTOR_X * SECTOR_SIZE or
+       row > MAX_SECTOR_Y * SECTOR_SIZE or
+       row < MIN_SECTOR_Y * SECTOR_SIZE):
+        return Response({
+            'error': 'I really don\'t feel like fetching the map that far out.'
+        }, status=status.HTTP_400_BAD_REQUEST)
 
     if width > 200 or height > 200:
         return Response({
@@ -184,14 +189,22 @@ def api_squares(request, col, row, width, height):
             'error': 'What is this, a quantum computer?  Your screen size must be expressed in positive numbers.'
         }, status=status.HTTP_400_BAD_REQUEST)
 
-    squares = Square.objects.get_region(col, row, width, height)
+    if exclude_squares:
+        squares = {}
+    else:
+        squares = Square.objects.get_region(col, row, width, height)
+    units = Unit.objects.get_region(col, row, width, height)
+    trees = Tree.objects.get_region(col, row, width, height)
+    response = {
+        'squares': SquareSerializer(squares, many=True).data,
+        'units': UnitSerializer(units, many=True).data,
+        'trees': TreeSerializer(trees, many=True).data,
+    }
 
-    #is_initial = (
-    #    Unit.objects.filter(owner=request.user).count() == 0 and
-    #    Square.objects.filter(owner=request.user).count() == 0
-    #)
+    return Response(response)
 
-    return Response(SquareSerializer(squares, many=True).data)
+
+
 
 @login_required
 @api_view(['GET'])
@@ -200,28 +213,45 @@ def api_initial_load(request):
 
     actions = Action.objects.filter(player=request.user).filter(turn=current_turn)
 
+    total_units = request.user.get_total_unit_count()
+
+    center_col, center_row = request.user.get_empire_center()
+
     return Response({
-        'board_consts': {
-            'min_sector_x': MIN_SECTOR_X,
-            'max_sector_x': MAX_SECTOR_X,
-            'min_sector_y': MIN_SECTOR_Y,
-            'max_sector_y': MAX_SECTOR_Y,
-            'sector_size': SECTOR_SIZE,
-            'grid_size': GRID_SIZE,
-        },
         'current_turn': current_turn,
         'actions': ActionSerializer(actions, many=True).data,
         'account': AccountSerializer(request.user).data,
+        'total_units': total_units,
+        # This will need to be expanded when cities are introduced
+        'is_initial_placement': total_units == 0,
+        'center_col': center_col,
+        'center_row': center_row,
     })
     
 @login_required
 @api_view(['POST'])
 def api_action(request):
+    current_turn = Setting.objects.get_integer('turn')
 
-    ipdb.set_trace()
     serializer = ActionSerializer(data=request.DATA)
+    print request.DATA
 
     if serializer.is_valid():
+
+        if serializer.object.kind == 'initial':
+            #TODO make this check all the conditions SECURITY HOLE
+            if request.user.actions.filter(turn=current_turn, kind='initial').count() >= 8:
+                #get_object_or_404(Square, col=serializer.object.col, row=serializer.object.row).unit
+                return Response('{}')
+
+        elif serializer.object.kind == 'move':
+            pass
+
+        else:
+            return Response('{}')
+
+        serializer.object.player = request.user
+        serializer.object.turn = current_turn
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     else:
@@ -230,13 +260,17 @@ def api_action(request):
 
 @login_required
 @api_view(['POST'])
-def api_undo(request, action_id):
+def api_undo(request):
     current_turn = Setting.objects.get_integer('turn')
-    action = get_object_or_None(Action, pk=action_id)
-    if action != None:
+
+    try:
+        action = Action.objects.filter(player=request.user, turn=current_turn).latest('timestamp')
         action.delete()
-    print "YO DOG I'M TOTALLY HERE"
+    except (Action.DoesNotExist):
+        pass
+
     return Response('{}')
+
 
 
 

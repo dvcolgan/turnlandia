@@ -13,22 +13,29 @@ class Camera
 
         @zoomedGridSize = TB.gridSize
         @zoomedUnitSize = TB.unitSize
-        @subGridSize = TB.gridSize/2
+        @zoomedSubGridSize = TB.gridSize/2
 
-    move: (@x, @y) ->
+    moveBy: (x, y) ->
+        @x += parseInt(x)
+        @y += parseInt(y)
+    moveTo: (x, y) ->
+        @x = parseInt(x)
+        @y = parseInt(y)
 
-    worldToScreenPosX: (worldX) -> worldX - @x
-    worldToScreenPosY: (worldY) -> worldY - @y
+    worldColToScreenPosX: (worldX) -> worldX * TB.gridSize * @zoomFactor - @x
+    worldRowToScreenPosY: (worldY) -> worldY * TB.gridSize * @zoomFactor - @y
+
+    worldToScreenPosX: (worldX) -> worldX * @zoomFactor - @x
+    worldToScreenPosY: (worldY) -> worldY * @zoomFactor - @y
     screenToWorldPosX: (screenX) -> screenX + @x
     screenToWorldPosY: (screenY) -> screenY + @y
-    pixelToSectorCoord: (coord) -> Math.floor(coord / @zoomedGridSize)
-    mouseXToCol: (mouseX) -> @pixelToSectorCoord(mouseX + @x)
-    mouseYToRow: (mouseY) -> @pixelToSectorCoord(mouseY + @y)
+    pixelToSquareCoord: (coord) -> Math.floor(coord / @zoomedGridSize)
+    mouseXToCol: (mouseX) -> @pixelToSquareCoord(mouseX + @x)
+    mouseYToRow: (mouseY) -> @pixelToSquareCoord(mouseY + @y)
 
     resize: ->
-        @width = $(window).width() - (48+20) - 220
-        @height = $(window).height() - 96
-
+        @width = $(window).width() - 110
+        @height = $(window).height() - 71
 
     zoom: (x, y, delta) ->
         #previousCol = TB.worldToScreenPosX(TB.pixelToSectorCoord(x))
@@ -44,7 +51,7 @@ class Camera
 
         @zoomedGridSize = TB.gridSize*@zoomFactor
         @zoomedUnitSize = TB.unitSize*@zoomFactor
-        @subGridSize = @zoomedGridSize/2
+        @zoomedSubGridSize = @zoomedGridSize/2
 
         #if TB.zoomLevel == 4 then TB.zoomFactor = 12/48
         #if TB.zoomLevel == 5 then TB.zoomFactor = 6/48
@@ -58,3 +65,5 @@ class Camera
 
         #TB.scroll.x = TB.scroll.x - TB.scroll.x * TB.zoomFactor
         #TB.scroll.y = TB.zoomFactor - TB.scroll.y * TB.zoomFactor
+    
+        

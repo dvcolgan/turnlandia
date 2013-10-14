@@ -3,35 +3,35 @@
 
 {% block title %}Create An Account{% endblock %}
 
+{% block body_class %}create_account{% endblock %}
+
 {% block content %}
 <div class="container">
-    <div class="row">
-        <div class="col-lg-4 col-lg-offset-4">
-
-            <div class="well">
-                {{ form.non_field_errors }}
-                <form action="" method="POST">{% csrf_token %}
-                    <legend>Just a few questions for you:</legend>
-                    <div class="form-group">
-                        <label>Username? <small><em>Log in with this.</em></small></label>
-                        {{ form.username|add_class:"form-control" }}
-                        {{ form.username.errors }}
-                    </div>
-                    <div class="form-group">
-                        <label>Password? <small><em>Make it real secure.</em></small></label>
-                        {{ form.password1|add_class:"form-control" }}
-                        {{ form.password1.errors }}
-                    </div>
-                    <div class="form-group">
-                        <label>Retype Password? <small><em>Just in case.</em></small></label>
-                        {{ form.password2|add_class:"form-control" }}
-                        {{ form.password2.errors }}
-                    </div>
-                    <input type="submit" class="btn btn-success" value="Create that account!" />
-                </form>
-            </div>
+    {{ form.non_field_errors }}
+    <form action="" method="POST">{% csrf_token %}
+        <h2>Just a few questions for you:</h2>
+        <div class="form-group">
+            <label>Username? <small><em>Log in with this.</em></small></label>
+            {{ form.username|add_class:"form-control" }}
+            {{ form.username.errors }}
         </div>
-    </div>
-</div>
+
+        <div class="form-group">
+            <label class="control-label">Email? <small><em>We promise never to spam or sell your address.</em></small></label>
+            {{ form.email|add_class:"form-control" }}
+            {{ form.email.errors }}
+        </div>
+        <div class="form-group">
+            <label>Password? <small><em>Make it real secure.</em></small></label>
+            {{ form.password1|add_class:"form-control" }}
+            {{ form.password1.errors }}
+        </div>
+        <div class="form-group">
+            <label>Retype Password? <small><em>Just in case.</em></small></label>
+            {{ form.password2|add_class:"form-control" }}
+            {{ form.password2.errors }}
+        </div>
+        <input type="submit" class="btn btn-success" value="Create that account!" />
+    </form>
 </div>
 {% endblock %}

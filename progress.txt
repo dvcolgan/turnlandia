@@ -1,0 +1,19 @@
+Wednesday October 09, 2013 08:59:55 PM
+day 3:
+    made it so that the board doesn't draw unless user input happens
+    got actions working for initial placement
+    got resolution working for initial placement
+    got units drawing
+    possibly fixed the button not working bug caused by dropshadow
+    made a FPS counter USING CLOSURES
+
+Thursday October 10, 2013 08:48:18 PM
+day 4:
+    made initial moves fully work
+    got the possible moves area showing
+    styled the top bar that shows stats
+    infrastructure stuff
+    others made bots in the chat
+
+day 5:
+    made the camera center on the center of your units on page load

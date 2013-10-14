@@ -7,7 +7,7 @@ window.requestAnimationFrame = requestAnimationFrame;
 
 window.TB = {
   players: {},
-  currentAction: 'initial',
+  currentAction: 'move',
   dragging: false,
   lastMouse: {
     x: 0,
@@ -17,40 +17,68 @@ window.TB = {
     x: 0,
     y: 0
   },
+  activeSquare: {
+    col: 0,
+    row: 0
+  },
   unitSize: 32,
   gridSize: 48,
   sectorSize: 10,
   myAccount: null,
+  isInitialPlacement: false,
   images: {
+    othertilesImage: $('#othertiles-image').get(0),
     gridImage: $('#grid-image').get(0),
     forestTiles: $('#forest-tiles').get(0),
     mountainsTiles: $('#mountains-tiles').get(0),
-    waterTiles: $('#water-tiles').get(0)
+    waterTiles: $('#water-tiles').get(0),
+    grassImage: $('#grass-image').get(0)
   },
-  init: function(selector) {
-    TB.selector = selector;
-    TB.ctx = $(TB.selector).get(0).getContext('2d');
+  init: function() {
+    TB.ctx = $('.board').get(0).getContext('2d');
     TB.camera = new Camera();
     TB.board = new Board();
     TB.cursor = new Cursor();
     TB.actions = new ActionManager();
     TB.fetcher = new DataFetcher();
     return TB.fetcher.loadInitialData(function(data) {
-      var action, _i, _len, _ref;
-      TB.myAccount = data.account;
-      _ref = data.actions;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        action = _ref[_i];
-        TB.actions.add(action);
-      }
       TB.registerEventHandlers();
-      TB.startMainLoop();
+      TB.isInitialPlacement = data.isInitialPlacement;
+      if (TB.isInitialPlacement) {
+        $('.game-toolbar').find('.btn-action').not('.btn-initial').not('.btn-undo').hide();
+        $('.btn-initial').trigger('click');
+      } else {
+        $('.game-toolbar').find('.btn-initial').hide();
+        $('.btn-move').trigger('click');
+      }
+      TB.fpsCounter = util.makeFPSCounter(20);
+      TB.myAccount = data.account;
+      $('#total-unit-display').text(data.totalUnits);
+      TB.actions.loadFromJSON(data.actions);
+      requestAnimationFrame(TB.mainLoop);
+      TB.camera.moveTo(data.centerCol * TB.camera.zoomedGridSize, data.centerRow * TB.camera.zoomedGridSize);
+      TB.camera.moveBy(-TB.camera.width / 2, -TB.camera.height / 2);
       return TB.fetcher.loadSectorsOnScreen();
     });
   },
   registerEventHandlers: function() {
     var _this = this;
-    $(TB.selector).mousedown(function(event) {
+    $('.btn-action').click(function(event) {
+      var kind;
+      kind = $(this).data('action');
+      if (kind === 'undo') {
+        TB.actions.undo();
+        requestAnimationFrame(TB.mainLoop);
+      } else if (kind === 'move' && $(this).hasClass('yellow')) {
+        TB.actions.cancelMove();
+      } else {
+        TB.currentAction = kind;
+        $('.btn-action').removeClass('active');
+        $(this).addClass('active');
+      }
+      return requestAnimationFrame(TB.mainLoop);
+    });
+    $('.board').mousedown(function(event) {
       event.preventDefault();
       TB.lastMouse = {
         x: event.offsetX,
@@ -58,60 +86,93 @@ window.TB = {
       };
       TB.lastScroll.x = TB.camera.x;
       TB.lastScroll.y = TB.camera.y;
-      return TB.dragging = true;
+      TB.dragging = true;
+      return requestAnimationFrame(TB.mainLoop);
     });
-    $(TB.selector).mousemove(function(event) {
-      TB.cursor.move(event.offsetX + TB.camera.x, event.offsetY + TB.camera.y);
-      if (TB.dragging) {
-        event.preventDefault();
-        TB.camera.move(TB.lastScroll.x - (event.offsetX - TB.lastMouse.x), TB.lastScroll.y - (event.offsetY - TB.lastMouse.y));
-        return TB.fetcher.loadSectorsOnScreen();
-      }
-    });
-    $(document).mouseup(function(event) {
+    $('.board').mousemove((function() {
+      var lastX, lastY,
+        _this = this;
+      lastX = null;
+      lastY = null;
+      return function(event) {
+        if (event.clientX === lastX && event.clientY === lastY) {
+          return;
+        }
+        lastX = event.clientX;
+        lastY = event.clientY;
+        TB.cursor.move(event.offsetX + TB.camera.x, event.offsetY + TB.camera.y);
+        TB.activeSquare.col = TB.camera.mouseXToCol(event.offsetX);
+        TB.activeSquare.row = TB.camera.mouseYToRow(event.offsetY);
+        if (TB.dragging) {
+          event.preventDefault();
+          TB.camera.moveTo(TB.lastScroll.x - (event.offsetX - TB.lastMouse.x), TB.lastScroll.y - (event.offsetY - TB.lastMouse.y));
+          TB.fetcher.loadSectorsOnScreen();
+        }
+        return requestAnimationFrame(TB.mainLoop);
+      };
+    })());
+    $('.board').mouseup(function(event) {
       TB.dragging = false;
       if (Math.abs(TB.camera.x - TB.lastScroll.x) < 5 && Math.abs(TB.camera.y - TB.lastScroll.y) < 5) {
-        return TB.actions.handleAction('initial', TB.camera.mouseXToCol(event.offsetX), TB.camera.mouseYToRow(event.offsetY));
+        TB.actions.handleAction(TB.currentAction, TB.camera.mouseXToCol(event.offsetX), TB.camera.mouseYToRow(event.offsetY));
       }
+      return requestAnimationFrame(TB.mainLoop);
     });
-    $(TB.selector).mousewheel(function(event, delta, deltaX, deltaY) {
-      return TB.camera.zoom(event.offsetX, event.offsetY, delta);
+    $('.board').mouseleave(function(event) {
+      TB.dragging = false;
+      return requestAnimationFrame(TB.mainLoop);
+    });
+    $('.board').mousewheel(function(event, delta, deltaX, deltaY) {
+      TB.camera.zoom(event.offsetX, event.offsetY, delta);
+      return requestAnimationFrame(TB.mainLoop);
     });
     $(window).resize(function() {
       TB.camera.resize();
-      $(TB.selector).attr('width', TB.camera.width).attr('height', TB.camera.height);
-      return TB.ctx = $(TB.selector).get(0).getContext('2d');
+      $('.board').attr('width', TB.camera.width).attr('height', TB.camera.height);
+      $('.stats-bar').css('width', TB.camera.width);
+      TB.ctx = $('.board').get(0).getContext('2d');
+      return requestAnimationFrame(TB.mainLoop);
     });
     $(window).trigger('resize');
-    return $(window).on('sectorLoaded', function(event) {
-      var square, _i, _len, _ref, _results;
+    $(window).on('squaresLoaded', function(event) {
+      var squareData, _i, _len, _ref;
       _ref = event.squareData;
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        square = _ref[_i];
-        _results.push(TB.board.addSquare(square));
+        squareData = _ref[_i];
+        TB.board.addSquare(squareData);
       }
-      return _results;
+      return requestAnimationFrame(TB.mainLoop);
+    });
+    return $(window).on('objectsLoaded', function(event) {
+      var treeData, unitData, _i, _j, _len, _len1, _ref, _ref1;
+      _ref = event.sectorData.units;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        unitData = _ref[_i];
+        TB.board.addUnit(unitData);
+      }
+      _ref1 = event.sectorData.trees;
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        treeData = _ref1[_j];
+        TB.board.addTree(treeData);
+      }
+      return requestAnimationFrame(TB.mainLoop);
     });
   },
-  startMainLoop: function() {
-    var mainLoop, start;
-    start = null;
-    mainLoop = function(timestamp) {
-      TB.board.draw();
-      TB.actions.draw();
-      TB.cursor.draw();
-      return requestAnimationFrame(mainLoop);
-    };
-    return requestAnimationFrame(mainLoop);
+  mainLoop: function(timestamp) {
+    TB.board.draw();
+    TB.actions.draw();
+    return TB.cursor.draw();
   },
   fillOutlinedText: function(text, screenX, screenY) {
+    TB.ctx.save();
+    TB.ctx.font = 'bold 16px Arial';
     TB.ctx.fillStyle = 'black';
     TB.ctx.fillText(text, screenX + 1, screenY + 1);
     TB.ctx.fillText(text, screenX + 1, screenY - 1);
     TB.ctx.fillText(text, screenX - 1, screenY + 1);
     TB.ctx.fillText(text, screenX - 1, screenY - 1);
     TB.ctx.fillStyle = 'white';
-    return TB.ctx.fillText(text, screenX, screenY);
+    TB.ctx.fillText(text, screenX, screenY);
+    return TB.ctx.restore();
   }
 };

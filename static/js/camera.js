@@ -14,20 +14,33 @@ Camera = (function() {
     this.maxZoomLevel = 3;
     this.zoomedGridSize = TB.gridSize;
     this.zoomedUnitSize = TB.unitSize;
-    this.subGridSize = TB.gridSize / 2;
+    this.zoomedSubGridSize = TB.gridSize / 2;
   }
 
-  Camera.prototype.move = function(x, y) {
-    this.x = x;
-    this.y = y;
+  Camera.prototype.moveBy = function(x, y) {
+    this.x += parseInt(x);
+    return this.y += parseInt(y);
+  };
+
+  Camera.prototype.moveTo = function(x, y) {
+    this.x = parseInt(x);
+    return this.y = parseInt(y);
+  };
+
+  Camera.prototype.worldColToScreenPosX = function(worldX) {
+    return worldX * TB.gridSize * this.zoomFactor - this.x;
+  };
+
+  Camera.prototype.worldRowToScreenPosY = function(worldY) {
+    return worldY * TB.gridSize * this.zoomFactor - this.y;
   };
 
   Camera.prototype.worldToScreenPosX = function(worldX) {
-    return worldX - this.x;
+    return worldX * this.zoomFactor - this.x;
   };
 
   Camera.prototype.worldToScreenPosY = function(worldY) {
-    return worldY - this.y;
+    return worldY * this.zoomFactor - this.y;
   };
 
   Camera.prototype.screenToWorldPosX = function(screenX) {
@@ -38,21 +51,21 @@ Camera = (function() {
     return screenY + this.y;
   };
 
-  Camera.prototype.pixelToSectorCoord = function(coord) {
+  Camera.prototype.pixelToSquareCoord = function(coord) {
     return Math.floor(coord / this.zoomedGridSize);
   };
 
   Camera.prototype.mouseXToCol = function(mouseX) {
-    return this.pixelToSectorCoord(mouseX + this.x);
+    return this.pixelToSquareCoord(mouseX + this.x);
   };
 
   Camera.prototype.mouseYToRow = function(mouseY) {
-    return this.pixelToSectorCoord(mouseY + this.y);
+    return this.pixelToSquareCoord(mouseY + this.y);
   };
 
   Camera.prototype.resize = function() {
-    this.width = $(window).width() - (48 + 20) - 220;
-    return this.height = $(window).height() - 96;
+    this.width = $(window).width() - 110;
+    return this.height = $(window).height() - 71;
   };
 
   Camera.prototype.zoom = function(x, y, delta) {
@@ -74,7 +87,7 @@ Camera = (function() {
     }
     this.zoomedGridSize = TB.gridSize * this.zoomFactor;
     this.zoomedUnitSize = TB.unitSize * this.zoomFactor;
-    return this.subGridSize = this.zoomedGridSize / 2;
+    return this.zoomedSubGridSize = this.zoomedGridSize / 2;
   };
 
   return Camera;

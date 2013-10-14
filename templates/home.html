@@ -2,36 +2,23 @@
 {% load custom_tags %}
 {% block title %}Home{% endblock %}
 
+{% block body_class %}home{% endblock %}
+
 {% block head %}
 {% endblock %}
 
 {% block content %}
 <div class="container">
-    <div class="row">
-        <div class="col-lg-6 col-lg-offset-3">
-            <div class="well">
-                <h1>Turn Based: The Game</h1>
-                <h2>A Massively Multiplayer<br/>Online Board Game (MMOBG)</h2>
+    <h1>Turnlandia</h1>
+    <h2>A Massively Multiplayer<br/>Online Board Game (MMOBG)</h2>
 
-                <p>Compete with {{ player_count }} other players to control the most territory on an infinite board.</p>
+    <p>Compete with more than <strong>{{ player_count }}</strong> other players to control the most territory on an infinite board.</p>
 
-                <div class="row ">
-                    <div class="col-lg-offset-1 col-lg-5">
-                        <a href="{% url 'create-account' %}" class="btn btn-lg btn-block btn-success">Sign Up Now for Free!</a>
-                    </div>
-                    <div class="col-lg-5">
-                        <a href="{% url 'login' %}" class="btn btn-lg btn-block btn-primary">Log In!</a>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <p class="home-minimap">
-                        <img class="img-thumbnail" src="{{ STATIC_URL }}images/home-page-minimap.png" title="A map of the board as it currently stands" alt="The map of the game" />
-                    </p>
-                </div>
-            </div>
-        </div>
+    <div class="home-btn-container cf">
+        <a href="{% url 'create-account' %}" class="btn btn-green pull-left">Sign Up Now for Free!</a>
+        <a href="{% url 'login' %}" class="btn btn-blue pull-right">Log In!</a>
     </div>
+
 </div>
 {% endblock %}
 

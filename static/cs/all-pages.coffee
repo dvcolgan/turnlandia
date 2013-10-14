@@ -57,7 +57,7 @@ ALL_PAGES =
 
     home: ->
 
-    create_accout: ->
+    create_account: ->
 
     messages: ->
 

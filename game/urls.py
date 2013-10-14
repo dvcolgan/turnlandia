@@ -7,6 +7,7 @@ from game.views import *
 urlpatterns = patterns('game.views',
     url(r'^$', 'home', name='home'),
     url(r'^settings/$', 'settings', name='settings'),
+    url(r'^irc/$', 'irc', name='irc'),
 
     url(r'^game/$', 'game', name='game'),
     url(r'^messages/$', 'messages', name='messages'),
@@ -52,8 +53,9 @@ urlpatterns = patterns('game.views',
     #),
 
     url(r'^api/squares/(?P<col>[0-9-]+)/(?P<row>[0-9-]+)/(?P<width>[0-9]+)/(?P<height>[0-9]+)/$', 'api_squares', name='api-squares'),
+    url(r'^api/squares/(?P<col>[0-9-]+)/(?P<row>[0-9-]+)/(?P<width>[0-9]+)/(?P<height>[0-9]+)/(?P<exclude_squares>nosquares)/$', 'api_squares', name='api-squares'),
 
-    url(r'^api/undo/(?P<action_id>\d+)/$', 'api_undo', name='api-undo'),
+    url(r'^api/undo/$', 'api_undo', name='api-undo'),
 
     url(r'^api/action/$', 'api_action', name='api-action'),
 
