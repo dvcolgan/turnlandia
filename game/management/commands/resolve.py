@@ -33,14 +33,15 @@ class Command(BaseCommand):
         actions = Action.objects.filter(turn=current_turn, kind='move')
         moves = []
         for action in actions:
-            # Sometime figure out what to do if we have an invalid move here
-            unit = get_object_or_None(Unit, col=action.col, row=action.row, owner=action.player)
-            if unit != None and action.move_path != '':
-                #moves.push(parse_move(action.move_path))
-                col, row = parse_move(action.move_path)[-1]
-                unit.col = col
-                unit.row = row
-                unit.save()
+            if action.move_path != '':
+                # Sometime figure out what to do if we have an invalid move here
+                units = Unit.objects.filter(col=action.col, row=action.row, owner=action.player)
+                for unit in units:
+                    #moves.push(parse_move(action.move_path))
+                    col, row = parse_move(action.move_path)[-1]
+                    unit.col = col
+                    unit.row = row
+                    unit.save()
 
 
         # At some point only check the units around you, or this will quickly take forever
