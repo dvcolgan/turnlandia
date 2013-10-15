@@ -57,3 +57,4 @@ class Tree
             TB.camera.zoomedSubGridSize, TB.camera.zoomedSubGridSize
         )
 
+class Road

@@ -32,7 +32,8 @@ window.TB = {
     forestTiles: $('#forest-tiles').get(0),
     mountainsTiles: $('#mountains-tiles').get(0),
     waterTiles: $('#water-tiles').get(0),
-    grassImage: $('#grass-image').get(0)
+    roadTiles: $('#road-tiles').get(0),
+    cityTiles: $('#city-tiles').get(0)
   },
   init: function() {
     TB.ctx = $('.board').get(0).getContext('2d');

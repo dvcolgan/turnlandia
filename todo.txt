@@ -1,13 +1,14 @@
 
-switch sqlite to postgres for improved performance
+when the turn resolves, generate all of the board json and put it into a redis cache, or the django cache or whatever
+
 
 Cache all of the json objects locally and have those in a global data store thingy
+
 When a user scrolls to a part of the map offscreen, you first check to see if the store has it in it, if so don't send a request
 
 add easter eggs
 add konami code - when you enter it, the board tiles turn into ascii art
 make it so that when you go to a certain distance out, there are mountains in the shape of ascii art
-
 
 make tiles fly in somehow
 Make the cron job that makes the game resolve
@@ -31,6 +32,10 @@ add back walls?
 natural disasters
 have random events - maybe one before each turn
 fix the problem where sectors aren't loading right away from the cache
+
+fix the problem where firefox dies
+
+make it so that if you try to do an action after the turn has resolved but you ar estill on the last turn, refresh the page
 
 
 make the background image of the home page be the current board state
@@ -284,6 +289,8 @@ you can trade with cities that have roads connecting them - jared314
 
 can harvest wood, have to let it regrow
 
+improve performance by using select_related, try installing the profiler at
+http://gun.io/blog/fast-as-fuck-django-part-1-using-a-profiler/
 
 
 
@@ -336,3 +343,23 @@ Asked for a trophy
 
 Mdjustin:
     Supporter of $8
+
+
+
+Things Done
+
+switch sqlite to postgres for improved performance
+
+
+
+
+
+
+
+
+
+
+
+
+
+

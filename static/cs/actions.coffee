@@ -212,6 +212,17 @@ class BuildRoadAction extends Action
 
     isValid: -> TB.myAccount.wood >= 10 and TB.board.isPassable(@col, @row)
 
+class BuildCityAction extends Action
+
+    constructor: (@col, @row) ->
+        @kind = 'city'
+        @name = 'Build city'
+
+    isValid: -> TB.myAccount.wood >= 10 and TB.board.isPassable(@col, @row)
+
+    draw: ->
+
+
 
 
 
@@ -269,6 +280,10 @@ class ActionManager
             else
                 # If there are no previous actions then just make a new move
                 action = new MoveAction(col, row)
+        if kind == 'road'
+            action = new BuildRoadAction(col, row)
+        if kind == 'city'
+            action = new BuildCityAction(col, row)
 
 
         if action.isValid()

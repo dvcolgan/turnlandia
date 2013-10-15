@@ -37,11 +37,11 @@ THEREFORE NOW IT DOES
     <button class="btn-action btn-initial" type="button" data-action="initial"><img src="{{ STATIC_URL }}images/place-icon.png" width="18" height="18"/> Initial Placement</button>
     
     <button class="btn-action btn-move" type="button" data-action="move"><img src="{{ STATIC_URL }}images/move-icon.png" />   <span>Move Unit</span></button>
+    <button class="btn-action btn-road" type="button" data-action="road"><img src="{{ STATIC_URL }}images/move-icon.png" />  Build Road</button>
+    <button class="btn-action btn-city" type="button" data-action="city"><img src="{{ STATIC_URL }}images/city-icon.png"/>   Build City</button>
     {% comment %}
     <button class="btn-action btn-attack" type="button" data-action="attack"><img src="{{ STATIC_URL }}images/attack-icon.png"/> Attack</button>
 
-    <button class="btn-action btn-road" type="button" data-action="road"><img src="{{ STATIC_URL }}images/move-icon.png" />  Build Road</button>
-    <button class="btn-action btn-city" type="button" data-action="city"><img src="{{ STATIC_URL }}images/city-icon.png"/>   Build City</button>
     {% endcomment %}
 
     <button class="btn-action btn-undo" data-action="undo"><img src="{{ STATIC_URL }}images/undo-icon.png"/> Undo</button>
@@ -64,8 +64,9 @@ THEREFORE NOW IT DOES
     <img id="forest-tiles" src="{{ STATIC_URL }}images/forest-tiles.png" />
     <img id="water-tiles" src="{{ STATIC_URL }}images/water-tiles-thin.png" />
     <img id="mountains-tiles" src="{{ STATIC_URL }}images/mountains-tiles.png" />
+    <img id="road-tiles" src="{{ STATIC_URL }}images/road-tiles.png" />
+    <img id="city-tiles" src="{{ STATIC_URL }}images/city-tiles.png" />
 
-    <img id="grass-image" src="{{ STATIC_URL }}images/grass3.png" />
 </div>
 
 {% endblock %}

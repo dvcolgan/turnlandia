@@ -15,6 +15,8 @@ class Cursor
         screenX = TB.camera.worldToScreenPosX(col * TB.camera.zoomedGridSize)
         screenY = TB.camera.worldToScreenPosY(row * TB.camera.zoomedGridSize)
 
+        # tile x = (mousex - camerax) / Scale
+
         TB.ctx.save()
         TB.ctx.strokeStyle = 'black'
         TB.ctx.fillStyle = 'black'
