@@ -11,10 +11,22 @@ def parse_move(move_path):
 
 class Command(BaseCommand):
     args = ''
-    help = 'Run this command whenever the turn is over.'
+    help = 'Run this command when the game starts and whenever the turn is over.'
 
     def handle(self, *args, **options):
-        turn = Setting.objects.get(name='turn')
+        turn = get_object_or_None(Setting, name='turn')
+
+        # Do this if there hasn't been an initial booting of the game
+        if turn == None:
+            print 'Initial setup'
+            Setting.objects.create(name='turn', value='1')
+            Square.objects.initialize()
+            return
+
+
+
+
+
         current_turn = int(turn.value)
 
         for action in Action.objects.filter(turn=current_turn, kind='initial'):
@@ -43,6 +55,11 @@ class Command(BaseCommand):
                     unit.row = row
                     unit.save()
 
+        actions = Action.objects.filter(turn=current_turn, kind='road')
+        for action in actions:
+            square = Square.objects.get(col=action.col, row=action.row)
+            square.terrain_type = ROAD
+            square.save()
 
         # At some point only check the units around you, or this will quickly take forever
         #for i in range(6):

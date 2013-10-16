@@ -1,3 +1,4 @@
+
 class Action
     isValid: ->
         return false
@@ -87,7 +88,7 @@ class MoveAction extends Action
     isValid: ->
         return TB.board.units.get(@col, @row) and
                TB.board.units.get(@col, @row).amount > 0 and
-               TB.board.units.get(@col, @row).owner == TB.myAccount.id
+               TB.board.units.get(@col, @row).ownerID == TB.myAccount.id
 
     update: (mouseX, mouseY) ->
         TB.mouse.x
@@ -103,7 +104,7 @@ class MoveAction extends Action
                 screenY = TB.camera.worldRowToScreenPosY(row)
                 TB.ctx.save()
                 TB.ctx.fillStyle = 'rgba(255,255,255,0.3)'
-                TB.ctx.fillRect(screenX, screenY, 48, 48)
+                TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize)
                 TB.ctx.restore()
                 
 
@@ -209,8 +210,31 @@ class BuildRoadAction extends Action
     constructor: (@col, @row) ->
         @kind = 'road'
         @name = 'Build Road'
+        @finished = false
 
-    isValid: -> TB.myAccount.wood >= 10 and TB.board.isPassable(@col, @row)
+    isValid: ->
+        console.log @col + ' ' + @row + ' ' + TB.board.getTerrainType(@col, @row)
+        console.log TB.myAccount.wood
+        for action in TB.actions.actions
+            if action.col == @col and action.row == @row then return false
+        return TB.myAccount.wood >= 10 and TB.board.isPassable(@col, @row)
+
+    draw: ->
+        screenX = TB.camera.worldColToScreenPosX(@col)
+        screenY = TB.camera.worldRowToScreenPosY(@row)
+        TB.ctx.save()
+        TB.ctx.fillStyle = 'rgba(0,0,0,0.5)'
+        TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize)
+        TB.ctx.restore()
+
+
+
+
+
+
+
+
+
 
 class BuildCityAction extends Action
 
@@ -300,6 +324,7 @@ class ActionManager
         TB.ctx.textAlign = 'right'
         TB.fillOutlinedText("This Turn's Actions", TB.camera.width - 16, 24)
         initialPlacements = new util.Hash2D()
+
 
         if not TB.isInitialPlacement
             for action, i in @actions

@@ -1,6 +1,17 @@
-
+add a turn timer to the top bar
 when the turn resolves, generate all of the board json and put it into a redis cache, or the django cache or whatever
 
+prevent moving a unit more than once somehow
+
+grey out arrows when you are not hovering over a unit or something
+
+make roads look like this?
+http://i.imgur.com/CjbSFVN.png
+
+
+instead of requiring email, add a captcha
+
+show the hex value in the color field
 
 Cache all of the json objects locally and have those in a global data store thingy
 
@@ -25,6 +36,8 @@ Board stuff
     caching of board data on the client
 make it so that if you try to pathfind into an empty square, it will do it as soon as the board is loaded
 
+be able to see the board in previous days with slider or something
+
 have a swag store but don't call it swag because thats horrible to half of the people
 
 Add server side logic for initial placements
@@ -46,6 +59,13 @@ pay for cosmetic enhancements (hats)
 
 pay a montly fee
 have an ad on the sidebar
+
+log in with steam
+log in with twitch
+log in with twitter
+log in with gmail
+log in with facebook
+https://github.com/omab/python-social-auth
 
 
 

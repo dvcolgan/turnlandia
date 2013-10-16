@@ -13,11 +13,13 @@ from util.functions import *
 from django.contrib.auth import authenticate, login
 
 from rest_framework.generics import *
-from rest_framework.decorators import api_view
+from rest_framework.decorators import *
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from settings import MIN_SECTOR_X, MAX_SECTOR_X, MIN_SECTOR_Y, MAX_SECTOR_Y, SECTOR_SIZE, GRID_SIZE
+
+from game.parsers import PlainTextRenderer
 
 from django.utils import simplejson
 import random
@@ -159,7 +161,10 @@ def api_email_existence(request, email):
 
 @login_required
 @api_view(['GET'])
+@renderer_classes((PlainTextRenderer,))
 def api_squares(request, col, row, width, height, exclude_squares=None):
+
+    
     try:
         col = int(col)
         row = int(row)
@@ -171,37 +176,54 @@ def api_squares(request, col, row, width, height, exclude_squares=None):
 
     # TODO a lot of this function can be computed on the turn change and then cached, do this if we get a bunch of traffic
     # TODO make this instead limit it to a few screens beyond where the furthest person is
-    if (col > MAX_SECTOR_X * SECTOR_SIZE or
-       col < MIN_SECTOR_X * SECTOR_SIZE or
-       row > MAX_SECTOR_Y * SECTOR_SIZE or
-       row < MIN_SECTOR_Y * SECTOR_SIZE):
-        return Response({
-            'error': 'I really don\'t feel like fetching the map that far out.'
-        }, status=status.HTTP_400_BAD_REQUEST)
+    if col > 200 or col < -200 or row > 200 or row < -200:
+        return Response('I really don\'t feel like fetching the map that far out.', status=status.HTTP_400_BAD_REQUEST)
 
     if width > 200 or height > 200:
-        return Response({
-            'error': 'Yo dog, you can\'t seriously have a screen that big.  If you do, let the admin know though and I\'ll increase the max screen size.'
-        }, status=status.HTTP_400_BAD_REQUEST)
+        return Response('Yo dog, you can\'t seriously have a screen that big.  If you do, let the admin know though and I\'ll increase the max screen size.', status=status.HTTP_400_BAD_REQUEST)
 
     if width < 1 or height < 1:
-        return Response({
-            'error': 'What is this, a quantum computer?  Your screen size must be expressed in positive numbers.'
-        }, status=status.HTTP_400_BAD_REQUEST)
+        return Response('What is this, a quantum computer?  Your screen size must be expressed in positive numbers.', status=status.HTTP_400_BAD_REQUEST)
 
-    if exclude_squares:
-        squares = {}
-    else:
-        squares = Square.objects.get_region(col, row, width, height)
+
+    squares = Square.objects.get_region(col, row, width, height)
+    square_data = []
+    col = 0
+    row_data = []
+    for square in squares:
+        row_data.append(str(square.terrain_type))
+        col += 1
+        if col >= width:
+            square_data.append(','.join(row_data))
+            col = 0
+            row_data = []
+    square_csv = '\n'.join(square_data)
+
     units = Unit.objects.get_region(col, row, width, height)
-    trees = Tree.objects.get_region(col, row, width, height)
-    response = {
-        'squares': SquareSerializer(squares, many=True).data,
-        'units': UnitSerializer(units, many=True).data,
-        'trees': TreeSerializer(trees, many=True).data,
-    }
+    unit_data = []
+    account_data = []
+    for unit in units:
+        unit_data.append("%d,%d,%d,%d" % (unit.col, unit.row, unit.owner.pk, unit.amount))
+        account_data.append("%d,%s,%s" % (unit.owner.id, unit.owner.username, unit.owner.color))
+    unit_csv = '\n'.join(unit_data)
+    account_csv = '\n'.join(account_data)
 
-    return Response(response)
+    return Response('|'.join([square_csv,unit_csv,account_csv]))
+
+    #if exclude_squares:
+    #    squares = {}
+    #else:
+    #    squares = Square.objects.get_region(col, row, width, height)
+
+    #units = Unit.objects.get_region(col, row, width, height)
+    #trees = Tree.objects.get_region(col, row, width, height)
+    #response = {
+    #    'squares': SquareSerializer(squares, many=True).data,
+    #    'units': UnitSerializer(units, many=True).data,
+    #    'trees': TreeSerializer(trees, many=True).data,
+    #}
+
+    #return Response(response)
 
 
 
@@ -238,6 +260,7 @@ def api_action(request):
 
     if serializer.is_valid():
 
+        #TODO make all of these check all the conditions SECURITY HOLE
         if serializer.object.kind == 'initial':
             #TODO make this check all the conditions SECURITY HOLE
             if request.user.actions.filter(turn=current_turn, kind='initial').count() >= 8:
@@ -245,6 +268,9 @@ def api_action(request):
                 return Response('{}')
 
         elif serializer.object.kind == 'move':
+            pass
+
+        elif serializer.object.kind == 'road':
             pass
 
         else:

@@ -1,28 +1,17 @@
 
+
 class Board
 
     constructor: ->
         @squares = new util.Hash2D()
         @units = new util.Hash2D()
-        @trees = new util.Hash2D()
         @unfinalizedSquares = new util.Hash2D()
+        @roadOverlay = new util.Hash2D()
+        @showRoadOverlay = false
 
-    placeUnitOnSquare: (col, row, ownerID) ->
-        @squares.get(col, row).placeUnit(ownerID)
-
-
-
-
-
-        # when a square is first loaded
-        #   check all 8 of its neighbors
-        #   if any of them are not yet loaded, load anyway, but add to a hashwhere key is the not yet loaded square, and the value is a list of squares that need to be reloaded when that square is loaded
-        #
-        #
-        #
-        #
-        #
-
+    # when a square is first loaded
+    #   check all 8 of its neighbors
+    #   if any of them are not yet loaded, load anyway, but add to a hashwhere key is the not yet loaded square, and the value is a list of squares that need to be reloaded when that square is loaded
     getSubtiles: (col, row) ->
         thisTerrain = @getTerrainType(col, row)
 
@@ -94,42 +83,51 @@ class Board
         otherUnfinalized = @unfinalizedSquares.get(col, row)
         if otherUnfinalized
             for [otherCol, otherRow] in otherUnfinalized
-                if @getTerrainType(otherCol, otherRow) == 'forest'
-                    tree = @trees.get(otherCol, otherRow)
-                    tree.subTiles = @getSubtiles(otherCol, otherRow)
-                else
-                    square = @squares.get(otherCol, otherRow)
-                    square.subTiles = @getSubtiles(otherCol, otherRow)
-
+                square = @squares.get(otherCol, otherRow)
+                square.subTiles = @getSubtiles(otherCol, otherRow)
         return [[northWestTile, northEastTile],[southWestTile, southEastTile]]
 
-    addSquare: (squareData) ->
-        @squares.set(squareData.col, squareData.row, new Square(squareData))
+    addSquare: (col, row, terrainType) ->
+        if terrainType == 0 then terrainType = 'plains'
+        if terrainType == 1 then terrainType = 'water'
+        if terrainType == 2 then terrainType = 'mountains'
+        if terrainType == 3 then terrainType = 'forest'
+        if terrainType == 4 then terrainType = 'road'
+        if terrainType == 5 then terrainType = 'city'
+        newSquare = new Square(col, row, terrainType)
+        @squares.set(col, row, newSquare)
+        newSquare.terrainType = @getTerrainType(col, row)
 
-    addUnit: (unitData) ->
-        @units.set(unitData.col, unitData.row, new Unit(unitData))
+    addUnit: (col, row, ownerID, amount) ->
+        unit = new Unit(col, row, ownerID, amount)
+        @units.set(col, row, unit)
 
-    addTree: (treeData) ->
-        @trees.set(treeData.col, treeData.row, new Tree(treeData))
+        @roadOverlay.set(unit.col, unit.row, 0)
+
+        for i in [1..6]
+            @roadOverlay.iterateIntKeys (thisCol, thisRow, dist) =>
+                if dist == i-1
+                    east = TB.board.isPassable(thisCol+1, thisRow)
+                    west = TB.board.isPassable(thisCol-1, thisRow)
+                    south = TB.board.isPassable(thisCol, thisRow+1)
+                    north = TB.board.isPassable(thisCol, thisRow-1)
+                    if east then @roadOverlay.set(thisCol+1, thisRow, i)
+                    if west then @roadOverlay.set(thisCol-1, thisRow, i)
+                    if south then @roadOverlay.set(thisCol, thisRow+1, i)
+                    if north then @roadOverlay.set(thisCol, thisRow-1, i)
+
 
     isPassable: (col, row) ->
-        square = @squares.get(col, row)
-        if square != null
-            return square.terrainType != 'water' and square.terrainType != 'mountains'
+        terrainType = @getTerrainType(col, row)
+        if terrainType
+            return terrainType != 'water' and terrainType != 'mountains'
         else
             return null
 
     getTerrainType: (col, row) ->
         square = @squares.get(col, row)
         if square != null
-            if square.terrainType == 'plains'
-                tree = @trees.get(col, row)
-                if tree
-                    return 'forest'
-                else
-                    return 'plains'
-            else
-                return square.terrainType
+            return square.terrainType
         else
             return null
 
@@ -140,20 +138,18 @@ class Board
         else
             return 0
 
-
-
     traversalCost: (col, row) ->
-        square = @squares.get(col, row)
-        if square != null
-            if square.terrainType == 'plains'
-                tree = @trees.get(col, row)
-                if tree
-                    return 2
-                else
-                    return 1
-            return square.traversalCost
+        terrainType = @getTerrainType(col, row)
+        if terrainType != null
+            if terrainType == 'plains' then return 2
+            if terrainType == 'water' then return 0
+            if terrainType == 'mountains' then return 0
+            if terrainType == 'forest' then return 3
+            if terrainType == 'road' then return 1
+            if terrainType == 'city' then return 1
         else
             return 0
+
 
     draw: ->
         #tilesWide = Math.ceil(TB.camera.width / TB.images.grassImage.width)
@@ -183,9 +179,15 @@ class Board
                 thisSquare = @squares.get(col, row)
                 if thisSquare
                     thisSquare.draw()
-                thisTree = @trees.get(col, row)
-                if thisTree
-                    thisTree.draw()
                 thisUnit = @units.get(col, row)
                 if thisUnit
                     thisUnit.draw()
+                if @showRoadOverlay and @roadOverlay.get(col, row) != null and @getTerrainType(col, row) == 'plains'
+                    screenX = TB.camera.worldColToScreenPosX(col)
+                    screenY = TB.camera.worldRowToScreenPosY(row)
+                    TB.ctx.save()
+                    TB.ctx.fillStyle = 'rgba(255,255,255,0.3)'
+                    TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize)
+                    TB.ctx.restore()
+
+

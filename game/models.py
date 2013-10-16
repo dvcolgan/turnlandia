@@ -3,6 +3,7 @@ from django.db.models import Sum, Avg
 from django.contrib.auth.models import *
 from settings import SECTOR_SIZE
 from util.functions import *
+import re
 import PIL
 import noise
 import math
@@ -45,11 +46,19 @@ class AccountManager(BaseUserManager):
         return u
 
 
-
 class Account(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(max_length=255, unique=True)
-    email = models.EmailField()
-    color = models.CharField(max_length=10, blank=True)
+    username = models.CharField(
+        max_length=25,
+        unique=True,
+        help_text='25 chars max, letters, numbers and @/./+/-/_ characters',
+        validators=[
+            validators.RegexValidator(re.compile('^[\w.@+-]+$'), 'Usernames can be at most 25 characters and include letters, numbers and @ . + - _', 'invalid')
+        ]
+    )
+    email = models.EmailField(blank=True)
+    color = models.CharField(max_length=10, blank=True, validators=[
+        validators.RegexValidator(re.compile('^#[0-9[a-f][A-F]$'), 'Enter a valid color.', 'invalid')
+    ])
     country_name = models.CharField(max_length=255, blank=True)
     leader_name = models.CharField(max_length=255, blank=True)
     people_name = models.CharField(max_length=255, blank=True)
@@ -115,67 +124,96 @@ class TrophyAwarding(models.Model):
 
 class SquareManager(models.Manager):
 
-    # get the squares that encompass the coordinates given
-    def get_region(self, col, row, width, height):
+    def initialize(self):
+        batch = []
+        for this_row in range(-100, 100):
+            print 'Added 200 squares to the batch', this_row
+            for this_col in range(-100, 100):
+                if get_object_or_None(self.model, col=this_col, row=this_row) == None:
+                    new_square = self.model(
+                        col=this_col,
+                        row=this_row,
+                        terrain_type=self.terrain_type_for_square(this_col, this_row)
+                    )
+                    batch.append(new_square)
+        print 'Bulk creating squares'
+        self.model.objects.bulk_create(batch)
 
+    #TODO MAKE THIS NOT DUPLICATED EXACTLY MANN
+    def get_region(self, col, row, width, height):
         upper_col = int(col + width)
         lower_col = int(col)
         upper_row = int(row + height)
         lower_row = int(row)
 
-        squares = (self.model.objects.filter(col__lt=upper_col)
-                                     .filter(col__gte=lower_col)
-                                     .filter(row__lt=upper_row)
-                                     .filter(row__gte=lower_row))
+        return (self.model.objects.filter(col__lt=upper_col)
+                                  .filter(col__gte=lower_col)
+                                  .filter(row__lt=upper_row)
+                                  .filter(row__gte=lower_row)
+                                  .order_by('row', 'col'))
 
-        # If we have a duplication of squares, that is kind of a problem, but shouldn't happen.
-        if squares.count() > width * height:
-            raise Exception('The game has happened upon an inconsistent state.  Sorry about this.'
-                        'The admin has been contacted and is fixing the problem as we speak.')
 
-        # The common case will be that they all exist, so this expensive
-        # operation won't happen very often.
-        if squares.count() != width * height:
-            # Nobody has gone out here yet, create the squares that don't exist
-            square_batch = []
-            tree_batch = []
-            for this_row in range(lower_row, upper_row):
-                for this_col in range(lower_col, upper_col):
-                    if get_object_or_None(self.model, col=this_col, row=this_row) == None:
-                        new_square = self.model(
-                            col=this_col,
-                            row=this_row,
-                            terrain_type=self.terrain_type_for_square(this_col, this_row)
-                        )
-                        if new_square.terrain_type == 'forest':
-                            new_square.terrain_type = 'plains'
-                            tree_batch.append(Tree(
-                                col=this_col,
-                                row=this_row
-                            ))
-                        square_batch.append(new_square)
+    # get the squares that encompass the coordinates given
+    #def get_region(self, col, row, width, height):
 
-            self.model.objects.bulk_create(square_batch)
-            Tree.objects.bulk_create(tree_batch)
+    #    upper_col = int(col + width)
+    #    lower_col = int(col)
+    #    upper_row = int(row + height)
+    #    lower_row = int(row)
 
-            print 'Created %d new squares' % len(square_batch)
-            print 'and %d new trees' % len(tree_batch)
+    #    squares = (self.model.objects.filter(col__lt=upper_col)
+    #                                 .filter(col__gte=lower_col)
+    #                                 .filter(row__lt=upper_row)
+    #                                 .filter(row__gte=lower_row))
 
-            # Fetch these all again
-            squares = (self.model.objects.filter(col__lt=upper_col)
-                                    .filter(col__gte=lower_col)
-                                    .filter(row__lt=upper_row)
-                                    .filter(row__gte=lower_row))
-            if squares.count() > width * height:
-                raise Exception('The game has happened upon an inconsistent state after '
-                            'trying to rectify the situation once already.  Sorry about this.'
-                            'The admin has been contacted and is fixing the problem as we speak.')
-        else:
-            print 'All squares already created'
+    #    # If we have a duplication of squares, that is kind of a problem, but shouldn't happen.
+    #    if squares.count() > width * height:
+    #        raise Exception('The game has happened upon an inconsistent state.  Sorry about this.'
+    #                    'The admin has been contacted and is fixing the problem as we speak.')
 
-        squares = squares.order_by('row', 'col')
+    #    # The common case will be that they all exist, so this expensive
+    #    # operation won't happen very often.
+    #    if squares.count() != width * height:
+    #        # Nobody has gone out here yet, create the squares that don't exist
+    #        square_batch = []
+    #        tree_batch = []
+    #        for this_row in range(lower_row, upper_row):
+    #            for this_col in range(lower_col, upper_col):
+    #                if get_object_or_None(self.model, col=this_col, row=this_row) == None:
+    #                    new_square = self.model(
+    #                        col=this_col,
+    #                        row=this_row,
+    #                        terrain_type=self.terrain_type_for_square(this_col, this_row)
+    #                    )
+    #                    if new_square.terrain_type == 'forest':
+    #                        new_square.terrain_type = 'plains'
+    #                        tree_batch.append(Tree(
+    #                            col=this_col,
+    #                            row=this_row
+    #                        ))
+    #                    square_batch.append(new_square)
 
-        return squares
+    #        self.model.objects.bulk_create(square_batch)
+    #        Tree.objects.bulk_create(tree_batch)
+
+    #        print 'Created %d new squares' % len(square_batch)
+    #        print 'and %d new trees' % len(tree_batch)
+
+    #        # Fetch these all again
+    #        squares = (self.model.objects.filter(col__lt=upper_col)
+    #                                .filter(col__gte=lower_col)
+    #                                .filter(row__lt=upper_row)
+    #                                .filter(row__gte=lower_row))
+    #        if squares.count() > width * height:
+    #            raise Exception('The game has happened upon an inconsistent state after '
+    #                        'trying to rectify the situation once already.  Sorry about this.'
+    #                        'The admin has been contacted and is fixing the problem as we speak.')
+    #    else:
+    #        print 'All squares already created'
+
+    #    squares = squares.order_by('row', 'col')
+
+    #    return squares
 
 
 
@@ -207,29 +245,29 @@ class SquareManager(models.Manager):
     #    return terrain_type
 
     def terrain_type_for_square(self, col, row):
-        terrain_type = 'plains'
+        terrain_type = PLAINS
 
         frequency = 1.0/5
         forest_value = noise.pnoise2(col*frequency, row*frequency, 20)
         if forest_value < -0.05:
-            terrain_type = 'forest'
+            terrain_type = FOREST
 
         frequency_x = 1.0/30
         frequency_y = 1.0/40
         mountain_value = noise.pnoise2(col*frequency, row*frequency, 1)
         if mountain_value > 0.2:
-            terrain_type = 'mountains'
+            terrain_type = MOUNTAINS
 
         frequency_x = 1.0/60
         frequency_y = 1.0/45
         river_value = noise.pnoise2(col*frequency_x, row*frequency_y, 10, -0.3)
         if river_value < 0.04 and river_value > -0.04:
-            terrain_type = 'water'
+            terrain_type = WATER
 
         frequency = 1.0/30
         lake_value = noise.pnoise2(col*frequency, row*frequency, 6)
         if lake_value < -0.2:
-            terrain_type = 'water'
+            terrain_type = WATER
 
         return terrain_type
 
@@ -241,18 +279,25 @@ class InvalidPlacementException(Exception):
 class SquareDoesNotExistException(Exception):
     pass
 
+PLAINS = 0
+WATER = 1
+MOUNTAINS = 2
+FOREST = 3
+ROAD = 4
+CITY = 5
+TERRAIN_TYPES = (
+    (PLAINS, 'Plains'),
+    (WATER, 'Water'),
+    (MOUNTAINS, 'Mountains'),
+    (FOREST, 'Forest'),
+    (ROAD, 'Road'),
+    (CITY, 'City'),
+)
 
 class Square(models.Model):
-    TERRAIN_TYPES = (
-        ('plains', 'Plains'),
-        ('water', 'Water'),
-        ('mountains', 'Mountains'),
-        ('forest', 'Forest'),
-        ('road', 'Road'),
-    )
     col = models.IntegerField()
     row = models.IntegerField()
-    terrain_type = models.CharField(max_length=20, choices=TERRAIN_TYPES)
+    terrain_type = models.IntegerField(choices=TERRAIN_TYPES)
 
     objects = SquareManager()
 
@@ -365,7 +410,8 @@ class UnitManager(models.Manager):
         return (self.model.objects.filter(col__lt=upper_col)
                                   .filter(col__gte=lower_col)
                                   .filter(row__lt=upper_row)
-                                  .filter(row__gte=lower_row))
+                                  .filter(row__gte=lower_row)
+                                  .order_by('row', 'col'))
 
 class Unit(models.Model):
     col = models.IntegerField()
@@ -379,33 +425,6 @@ class Unit(models.Model):
         return "(%d, %d) %s (%d)" % (self.col, self.row, self.owner, self.amount)
 
 
-
-class TreeManager(models.Manager):
-
-    def get_region(self, col, row, width, height):
-        upper_col = int(col + width)
-        lower_col = int(col)
-        upper_row = int(row + height)
-        lower_row = int(row)
-
-        return (self.model.objects.filter(col__lt=upper_col)
-                                  .filter(col__gte=lower_col)
-                                  .filter(row__lt=upper_row)
-                                  .filter(row__gte=lower_row))
-class Tree(models.Model):
-    col = models.IntegerField()
-    row = models.IntegerField()
-
-    objects = TreeManager()
-
-    def __unicode__(self):
-        return "(%d, %d)" % (self.col, self.row)
-
-
-
-class Road(models.Model):
-    col = models.IntegerField()
-    row = models.IntegerField()
 
 
 #------------

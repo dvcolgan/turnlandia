@@ -1,6 +1,7 @@
 import re
-
+from django.utils.encoding import smart_unicode
 from rest_framework import serializers, renderers, parsers
+import ipdb
 
 
 class JSONRenderer(renderers.JSONRenderer):
@@ -45,3 +46,14 @@ def recursive_key_map(function, obj):
         return [recursive_key_map(function, value) for value in obj]
     else:
         return obj
+
+
+
+
+
+class PlainTextRenderer(renderers.BaseRenderer):
+    media_type = 'text/plain'
+    format = 'txt'
+
+    def render(self, data, media_type=None, renderer_context=None):
+        return data.encode(self.charset)

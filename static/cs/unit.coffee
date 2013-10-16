@@ -1,7 +1,6 @@
 class Unit
-    constructor: (json) ->
-        _.extend(@, json)
-
+    constructor: (@col, @row, @ownerID, @amount) ->
+        @ownerColor = TB.accounts[@ownerID].color
 
     draw: ->
         screenX = TB.camera.worldToScreenPosX(@col * TB.gridSize)
@@ -30,31 +29,3 @@ class Unit
         TB.ctx.textAlign = 'center'
         TB.fillOutlinedText(@amount, textX, textY)
         TB.ctx.restore()
-
-class Tree
-    constructor: (json) ->
-        _.extend(@, json)
-
-    draw: ->
-        if not @subTiles
-            @subTiles = TB.board.getSubtiles(@col, @row)
-        @drawSubTile(@subTiles[0][0], 0, 0)
-        @drawSubTile(@subTiles[0][1], TB.camera.zoomedSubGridSize, 0)
-        @drawSubTile(@subTiles[1][0], 0, TB.camera.zoomedSubGridSize)
-        @drawSubTile(@subTiles[1][1], TB.camera.zoomedSubGridSize, TB.camera.zoomedSubGridSize)
-
-
-    drawSubTile: (subTile, subTileOffsetX, subTileOffsetY) ->
-
-        screenX = TB.camera.worldColToScreenPosX(@col)
-        screenY = TB.camera.worldRowToScreenPosY(@row)
-
-        TB.ctx.drawImage(
-            TB.images.forestTiles
-            subTile[0], subTile[1],
-            TB.gridSize/2, TB.gridSize/2,
-            screenX + subTileOffsetX, screenY + subTileOffsetY,
-            TB.camera.zoomedSubGridSize, TB.camera.zoomedSubGridSize
-        )
-
-class Road

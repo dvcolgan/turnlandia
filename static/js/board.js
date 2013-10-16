@@ -5,16 +5,13 @@ Board = (function() {
   function Board() {
     this.squares = new util.Hash2D();
     this.units = new util.Hash2D();
-    this.trees = new util.Hash2D();
     this.unfinalizedSquares = new util.Hash2D();
+    this.roadOverlay = new util.Hash2D();
+    this.showRoadOverlay = false;
   }
 
-  Board.prototype.placeUnitOnSquare = function(col, row, ownerID) {
-    return this.squares.get(col, row).placeUnit(ownerID);
-  };
-
   Board.prototype.getSubtiles = function(col, row) {
-    var east, eastTerrain, north, northEast, northEastTerrain, northEastTile, northTerrain, northWest, northWestTerrain, northWestTile, otherCol, otherRow, otherUnfinalized, s, south, southEast, southEastTerrain, southEastTile, southTerrain, southWest, southWestTerrain, southWestTile, square, thisTerrain, tree, west, westTerrain, _i, _len, _ref;
+    var east, eastTerrain, north, northEast, northEastTerrain, northEastTile, northTerrain, northWest, northWestTerrain, northWestTile, otherCol, otherRow, otherUnfinalized, s, south, southEast, southEastTerrain, southEastTile, southTerrain, southWest, southWestTerrain, southWestTile, square, thisTerrain, west, westTerrain, _i, _len, _ref;
     thisTerrain = this.getTerrainType(col, row);
     northTerrain = this.getTerrainType(col, row - 1);
     southTerrain = this.getTerrainType(col, row + 1);
@@ -157,54 +154,86 @@ Board = (function() {
     if (otherUnfinalized) {
       for (_i = 0, _len = otherUnfinalized.length; _i < _len; _i++) {
         _ref = otherUnfinalized[_i], otherCol = _ref[0], otherRow = _ref[1];
-        if (this.getTerrainType(otherCol, otherRow) === 'forest') {
-          tree = this.trees.get(otherCol, otherRow);
-          tree.subTiles = this.getSubtiles(otherCol, otherRow);
-        } else {
-          square = this.squares.get(otherCol, otherRow);
-          square.subTiles = this.getSubtiles(otherCol, otherRow);
-        }
+        square = this.squares.get(otherCol, otherRow);
+        square.subTiles = this.getSubtiles(otherCol, otherRow);
       }
     }
     return [[northWestTile, northEastTile], [southWestTile, southEastTile]];
   };
 
-  Board.prototype.addSquare = function(squareData) {
-    return this.squares.set(squareData.col, squareData.row, new Square(squareData));
+  Board.prototype.addSquare = function(col, row, terrainType) {
+    var newSquare;
+    if (terrainType === 0) {
+      terrainType = 'plains';
+    }
+    if (terrainType === 1) {
+      terrainType = 'water';
+    }
+    if (terrainType === 2) {
+      terrainType = 'mountains';
+    }
+    if (terrainType === 3) {
+      terrainType = 'forest';
+    }
+    if (terrainType === 4) {
+      terrainType = 'road';
+    }
+    if (terrainType === 5) {
+      terrainType = 'city';
+    }
+    newSquare = new Square(col, row, terrainType);
+    this.squares.set(col, row, newSquare);
+    return newSquare.terrainType = this.getTerrainType(col, row);
   };
 
-  Board.prototype.addUnit = function(unitData) {
-    return this.units.set(unitData.col, unitData.row, new Unit(unitData));
-  };
-
-  Board.prototype.addTree = function(treeData) {
-    return this.trees.set(treeData.col, treeData.row, new Tree(treeData));
+  Board.prototype.addUnit = function(col, row, ownerID, amount) {
+    var i, unit, _i, _results,
+      _this = this;
+    unit = new Unit(col, row, ownerID, amount);
+    this.units.set(col, row, unit);
+    this.roadOverlay.set(unit.col, unit.row, 0);
+    _results = [];
+    for (i = _i = 1; _i <= 6; i = ++_i) {
+      _results.push(this.roadOverlay.iterateIntKeys(function(thisCol, thisRow, dist) {
+        var east, north, south, west;
+        if (dist === i - 1) {
+          east = TB.board.isPassable(thisCol + 1, thisRow);
+          west = TB.board.isPassable(thisCol - 1, thisRow);
+          south = TB.board.isPassable(thisCol, thisRow + 1);
+          north = TB.board.isPassable(thisCol, thisRow - 1);
+          if (east) {
+            _this.roadOverlay.set(thisCol + 1, thisRow, i);
+          }
+          if (west) {
+            _this.roadOverlay.set(thisCol - 1, thisRow, i);
+          }
+          if (south) {
+            _this.roadOverlay.set(thisCol, thisRow + 1, i);
+          }
+          if (north) {
+            return _this.roadOverlay.set(thisCol, thisRow - 1, i);
+          }
+        }
+      }));
+    }
+    return _results;
   };
 
   Board.prototype.isPassable = function(col, row) {
-    var square;
-    square = this.squares.get(col, row);
-    if (square !== null) {
-      return square.terrainType !== 'water' && square.terrainType !== 'mountains';
+    var terrainType;
+    terrainType = this.getTerrainType(col, row);
+    if (terrainType) {
+      return terrainType !== 'water' && terrainType !== 'mountains';
     } else {
       return null;
     }
   };
 
   Board.prototype.getTerrainType = function(col, row) {
-    var square, tree;
+    var square;
     square = this.squares.get(col, row);
     if (square !== null) {
-      if (square.terrainType === 'plains') {
-        tree = this.trees.get(col, row);
-        if (tree) {
-          return 'forest';
-        } else {
-          return 'plains';
-        }
-      } else {
-        return square.terrainType;
-      }
+      return square.terrainType;
     } else {
       return null;
     }
@@ -221,25 +250,34 @@ Board = (function() {
   };
 
   Board.prototype.traversalCost = function(col, row) {
-    var square, tree;
-    square = this.squares.get(col, row);
-    if (square !== null) {
-      if (square.terrainType === 'plains') {
-        tree = this.trees.get(col, row);
-        if (tree) {
-          return 2;
-        } else {
-          return 1;
-        }
+    var terrainType;
+    terrainType = this.getTerrainType(col, row);
+    if (terrainType !== null) {
+      if (terrainType === 'plains') {
+        return 2;
       }
-      return square.traversalCost;
+      if (terrainType === 'water') {
+        return 0;
+      }
+      if (terrainType === 'mountains') {
+        return 0;
+      }
+      if (terrainType === 'forest') {
+        return 3;
+      }
+      if (terrainType === 'road') {
+        return 1;
+      }
+      if (terrainType === 'city') {
+        return 1;
+      }
     } else {
       return 0;
     }
   };
 
   Board.prototype.draw = function() {
-    var col, endCol, endRow, row, startCol, startRow, thisSquare, thisTree, thisUnit, _i, _results;
+    var col, endCol, endRow, row, screenX, screenY, startCol, startRow, thisSquare, thisUnit, _i, _results;
     TB.ctx.textAlign = 'center';
     TB.ctx.fillStyle = '#148743';
     TB.ctx.fillRect(0, 0, TB.camera.width, TB.camera.height);
@@ -258,13 +296,17 @@ Board = (function() {
           if (thisSquare) {
             thisSquare.draw();
           }
-          thisTree = this.trees.get(col, row);
-          if (thisTree) {
-            thisTree.draw();
-          }
           thisUnit = this.units.get(col, row);
           if (thisUnit) {
-            _results1.push(thisUnit.draw());
+            thisUnit.draw();
+          }
+          if (this.showRoadOverlay && this.roadOverlay.get(col, row) !== null && this.getTerrainType(col, row) === 'plains') {
+            screenX = TB.camera.worldColToScreenPosX(col);
+            screenY = TB.camera.worldRowToScreenPosY(row);
+            TB.ctx.save();
+            TB.ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize);
+            _results1.push(TB.ctx.restore());
           } else {
             _results1.push(void 0);
           }

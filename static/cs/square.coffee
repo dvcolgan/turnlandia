@@ -1,11 +1,10 @@
 class Square
 
-    constructor: (json) ->
-        _.extend(@, json)
+    constructor: (@col, @row, @terrainType) ->
 
     draw: ->
 
-        if @terrainType == 'water' or @terrainType == 'mountains' # or @terrainType == 'forest'
+        if @terrainType == 'water' or @terrainType == 'mountains' or @terrainType == 'forest' or @terrainType == 'road'
             if not @subTiles
                 @subTiles = TB.board.getSubtiles(@col, @row)
             @drawSubTile(@subTiles[0][0], 0, 0)

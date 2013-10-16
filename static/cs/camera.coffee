@@ -48,6 +48,8 @@ class Camera
         if @zoomLevel == 1 then @zoomFactor = 1
         if @zoomLevel == 2 then @zoomFactor = 36/48
         if @zoomLevel == 3 then @zoomFactor = 24/48
+        if @zoomLevel == 4 then @zoomFactor = 12/48
+        if @zoomLevel == 5 then @zoomFactor = 6/48
 
         @zoomedGridSize = TB.gridSize*@zoomFactor
         @zoomedUnitSize = TB.unitSize*@zoomFactor

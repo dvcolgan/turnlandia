@@ -140,7 +140,7 @@ MoveAction = (function(_super) {
   };
 
   MoveAction.prototype.isValid = function() {
-    return TB.board.units.get(this.col, this.row) && TB.board.units.get(this.col, this.row).amount > 0 && TB.board.units.get(this.col, this.row).owner === TB.myAccount.id;
+    return TB.board.units.get(this.col, this.row) && TB.board.units.get(this.col, this.row).amount > 0 && TB.board.units.get(this.col, this.row).ownerID === TB.myAccount.id;
   };
 
   MoveAction.prototype.update = function(mouseX, mouseY) {
@@ -169,7 +169,7 @@ MoveAction = (function(_super) {
         screenY = TB.camera.worldRowToScreenPosY(row);
         TB.ctx.save();
         TB.ctx.fillStyle = 'rgba(255,255,255,0.3)';
-        TB.ctx.fillRect(screenX, screenY, 48, 48);
+        TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize);
         return TB.ctx.restore();
       });
     }
@@ -306,10 +306,31 @@ BuildRoadAction = (function(_super) {
     this.row = row;
     this.kind = 'road';
     this.name = 'Build Road';
+    this.finished = false;
   }
 
   BuildRoadAction.prototype.isValid = function() {
+    var action, _i, _len, _ref;
+    console.log(this.col + ' ' + this.row + ' ' + TB.board.getTerrainType(this.col, this.row));
+    console.log(TB.myAccount.wood);
+    _ref = TB.actions.actions;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      action = _ref[_i];
+      if (action.col === this.col && action.row === this.row) {
+        return false;
+      }
+    }
     return TB.myAccount.wood >= 10 && TB.board.isPassable(this.col, this.row);
+  };
+
+  BuildRoadAction.prototype.draw = function() {
+    var screenX, screenY;
+    screenX = TB.camera.worldColToScreenPosX(this.col);
+    screenY = TB.camera.worldRowToScreenPosY(this.row);
+    TB.ctx.save();
+    TB.ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize);
+    return TB.ctx.restore();
   };
 
   return BuildRoadAction;

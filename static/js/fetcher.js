@@ -40,33 +40,17 @@ DataFetcher = (function() {
   };
 
   DataFetcher.prototype.loadSector = function(sectorX, sectorY, callback) {
-    var excludeSquares, key, squareData,
-      _this = this;
-    key = sectorX + '|' + sectorY;
-    excludeSquares = '';
-    if (key in localStorage) {
-      squareData = JSON.parse(localStorage.getItem(key));
-      $(window).trigger({
-        type: 'squaresLoaded',
-        squareData: squareData
-      });
-      excludeSquares = 'nosquares/';
-    }
+    var _this = this;
     return $.ajax({
-      url: '/api/squares/' + (sectorX * TB.sectorSize) + '/' + (sectorY * TB.sectorSize) + '/' + TB.sectorSize + '/' + TB.sectorSize + '/' + excludeSquares,
+      url: '/api/squares/' + (sectorX * TB.sectorSize) + '/' + (sectorY * TB.sectorSize) + '/' + TB.sectorSize + '/' + TB.sectorSize + '/',
       method: 'GET',
-      dataType: 'json',
+      dataType: 'text',
       success: function(sectorData) {
         _this.loadingStates.set(sectorX, sectorY, true);
-        if (!excludeSquares) {
-          localStorage.setItem(key, JSON.stringify(sectorData.squares));
-          $(window).trigger({
-            type: 'squaresLoaded',
-            squareData: sectorData.squares
-          });
-        }
         return $(window).trigger({
-          type: 'objectsLoaded',
+          type: 'sectorLoaded',
+          sectorX: sectorX,
+          sectorY: sectorY,
           sectorData: sectorData
         });
       }
@@ -74,32 +58,14 @@ DataFetcher = (function() {
   };
 
   DataFetcher.prototype.loadSectorsOnScreen = function() {
-    var endSectorX, endSectorY, sectorPixelSize, sectorSectorX, sectorSectorY, sectorsHigh, sectorsWide, startSectorX, startSectorY, x, y, _i, _j;
+    var endSectorX, endSectorY, sectorPixelSize, sectorsHigh, sectorsWide, startSectorX, startSectorY;
     sectorPixelSize = TB.sectorSize * TB.camera.zoomedGridSize;
-    sectorsWide = Math.ceil(TB.camera.width / TB.camera.zoomedGridSize / TB.sectorSize) + 3;
-    sectorsHigh = Math.ceil(TB.camera.height / TB.camera.zoomedGridSize / TB.sectorSize) + 3;
-    startSectorX = null;
-    startSectorY = null;
-    endSectorX = null;
-    endSectorY = null;
-    for (sectorSectorX = _i = 0; 0 <= sectorsWide ? _i <= sectorsWide : _i >= sectorsWide; sectorSectorX = 0 <= sectorsWide ? ++_i : --_i) {
-      for (sectorSectorY = _j = 0; 0 <= sectorsHigh ? _j <= sectorsHigh : _j >= sectorsHigh; sectorSectorY = 0 <= sectorsHigh ? ++_j : --_j) {
-        x = (Math.floor(TB.camera.x / sectorPixelSize)) + sectorSectorX;
-        y = (Math.floor(TB.camera.y / sectorPixelSize)) + sectorSectorY;
-        if (startSectorX === null || x < startSectorX) {
-          startSectorX = x;
-        }
-        if (startSectorY === null || y < startSectorY) {
-          startSectorY = y;
-        }
-        if (endSectorX === null || x > endSectorX) {
-          endSectorX = x;
-        }
-        if (endSectorY === null || y > endSectorY) {
-          endSectorY = x;
-        }
-      }
-    }
+    sectorsWide = Math.ceil(TB.camera.width / TB.camera.zoomedGridSize / TB.sectorSize) + 1;
+    sectorsHigh = Math.ceil(TB.camera.height / TB.camera.zoomedGridSize / TB.sectorSize) + 1;
+    startSectorX = Math.floor(TB.camera.x / sectorPixelSize);
+    startSectorY = Math.floor(TB.camera.y / sectorPixelSize);
+    endSectorX = Math.ceil((TB.camera.x + TB.camera.width) / sectorPixelSize);
+    endSectorY = Math.ceil((TB.camera.y + TB.camera.height) / sectorPixelSize);
     return this.loadSectors(startSectorX, startSectorY, endSectorX, endSectorY);
   };
 

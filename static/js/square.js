@@ -2,12 +2,14 @@
 var Square;
 
 Square = (function() {
-  function Square(json) {
-    _.extend(this, json);
+  function Square(col, row, terrainType) {
+    this.col = col;
+    this.row = row;
+    this.terrainType = terrainType;
   }
 
   Square.prototype.draw = function() {
-    if (this.terrainType === 'water' || this.terrainType === 'mountains') {
+    if (this.terrainType === 'water' || this.terrainType === 'mountains' || this.terrainType === 'forest' || this.terrainType === 'road') {
       if (!this.subTiles) {
         this.subTiles = TB.board.getSubtiles(this.col, this.row);
       }

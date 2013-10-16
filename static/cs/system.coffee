@@ -4,6 +4,10 @@ requestAnimationFrame = window.requestAnimationFrame or window.mozRequestAnimati
                         window.webkitRequestAnimationFrame or window.msRequestAnimationFrame
 window.requestAnimationFrame = requestAnimationFrame
 
+
+class Account
+    constructor: (@id, @username, @color) ->
+
 window.TB =
     players: {}
 
@@ -16,8 +20,9 @@ window.TB =
 
     unitSize: 32
     gridSize: 48
-    sectorSize: 10
+    sectorSize: 50
     myAccount: null
+    accounts: {}
     isInitialPlacement: false
 
     # Images that have been preloaded in the HTML
@@ -36,7 +41,6 @@ window.TB =
         TB.camera = new Camera()
 
         TB.board = new Board()
-        TB.cursor = new Cursor()
         TB.actions = new ActionManager()
 
         TB.fetcher = new DataFetcher()
@@ -54,6 +58,10 @@ window.TB =
             TB.fpsCounter = util.makeFPSCounter(20)
             TB.myAccount = data.account
             $('#total-unit-display').text(data.totalUnits)
+            $('#wood-display').text(data.account.wood)
+            $('#food-display').text(data.account.food)
+            $('#ore-display').text(data.account.ore)
+            $('#money-display').text(data.account.money)
             TB.actions.loadFromJSON(data.actions)
             requestAnimationFrame(TB.mainLoop)
             TB.camera.moveTo(
@@ -80,8 +88,8 @@ window.TB =
                 TB.currentAction = kind
                 $('.btn-action').removeClass('active')
                 $(@).addClass('active')
+                TB.board.showRoadOverlay = (kind == 'road')
             requestAnimationFrame(TB.mainLoop)
-
 
 
         $('.board').mousedown (event) =>
@@ -100,8 +108,6 @@ window.TB =
                     return
                 lastX = event.clientX
                 lastY = event.clientY
-
-                TB.cursor.move(event.offsetX + TB.camera.x, event.offsetY + TB.camera.y)
 
                 TB.activeSquare.col = TB.camera.mouseXToCol(event.offsetX)
                 TB.activeSquare.row = TB.camera.mouseYToRow(event.offsetY)
@@ -146,27 +152,56 @@ window.TB =
         $(window).trigger('resize')
 
         # Check out all my decoupling of the fetcher and the board~!
-        $(window).on 'squaresLoaded', (event) ->
-            for squareData in event.squareData
-                TB.board.addSquare(squareData)
-            requestAnimationFrame(TB.mainLoop)
+        $(window).on 'sectorLoaded', (event) ->
+            if event.sectorData
+                [squareData, unitData, accountData] = event.sectorData.split('|')
 
-        $(window).on 'objectsLoaded', (event) ->
-            for unitData in event.sectorData.units
-                TB.board.addUnit(unitData)
-            for treeData in event.sectorData.trees
-                TB.board.addTree(treeData)
-            requestAnimationFrame(TB.mainLoop)
+                if squareData
+                    startCol = event.sectorX * TB.sectorSize
+                    startRow = event.sectorY * TB.sectorSize
+                    console.log startCol + ' ' + startRow
+                    for rowData, row in squareData.split('\n')
+                        for terrainType, col in rowData.split(',')
+                            TB.board.addSquare(startCol + col, startRow + row, parseInt(terrainType))
+
+                if accountData
+                    for thisAccountData in accountData.split('\n')
+                        [accountID, username, color] = thisAccountData.split(',')
+                        TB.accounts[accountID] = new Account(parseInt(accountID), username, color)
+
+                if unitData
+                    for thisUnitData in unitData.split('\n')
+                        [col, row, ownerID, amount] = thisUnitData.split(',')
+                        TB.board.addUnit(parseInt(col), parseInt(row), parseInt(ownerID), parseInt(amount))
+
+                requestAnimationFrame(TB.mainLoop)
 
 
     mainLoop: (timestamp) ->
 
         TB.board.draw()
         TB.actions.draw()
-        TB.cursor.draw()
-
+        TB.drawCursor()
         #fps = TB.fpsCounter(timestamp)
         #TB.fillOutlinedText(fps + ' FPS', 30, 30)
+
+
+    drawCursor: ->
+        cursorSize = TB.camera.zoomedGridSize
+
+        screenX = TB.camera.worldColToScreenPosX(TB.activeSquare.col)
+        screenY = TB.camera.worldRowToScreenPosY(TB.activeSquare.row)
+
+        TB.ctx.save()
+        TB.ctx.strokeStyle = 'black'
+        TB.ctx.fillStyle = 'black'
+        TB.ctx.strokeRect(screenX, screenY, cursorSize, cursorSize)
+        TB.ctx.restore()
+
+        textX = screenX - 8
+        textY = screenY - 4
+        TB.fillOutlinedText(TB.activeSquare.col + ',' + TB.activeSquare.row, textX, textY)
+
 
 
     fillOutlinedText: (text, screenX, screenY) ->

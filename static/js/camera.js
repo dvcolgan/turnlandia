@@ -85,6 +85,12 @@ Camera = (function() {
     if (this.zoomLevel === 3) {
       this.zoomFactor = 24 / 48;
     }
+    if (this.zoomLevel === 4) {
+      this.zoomFactor = 12 / 48;
+    }
+    if (this.zoomLevel === 5) {
+      this.zoomFactor = 6 / 48;
+    }
     this.zoomedGridSize = TB.gridSize * this.zoomFactor;
     this.zoomedUnitSize = TB.unitSize * this.zoomFactor;
     return this.zoomedSubGridSize = this.zoomedGridSize / 2;
