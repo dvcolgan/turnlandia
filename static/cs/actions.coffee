@@ -213,11 +213,13 @@ class BuildRoadAction extends Action
         @finished = false
 
     isValid: ->
-        console.log @col + ' ' + @row + ' ' + TB.board.getTerrainType(@col, @row)
-        console.log TB.myAccount.wood
         for action in TB.actions.actions
             if action.col == @col and action.row == @row then return false
-        return TB.myAccount.wood >= 10 and TB.board.isPassable(@col, @row)
+        terrainType = TB.board.getTerrainType(@col, @row)
+        if terrainType != 'plains' then return false
+        if TB.myAccount.wood < 10 then return false
+        if TB.board.roadOverlay.get(@col, @row) == null then return false
+        return true
 
     draw: ->
         screenX = TB.camera.worldColToScreenPosX(@col)

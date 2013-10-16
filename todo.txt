@@ -1,3 +1,7 @@
+make it so that when the turn is resolving, show a screen that says it is resolving, and if someone tries to make a move while the turn is resolving, redirect them to that page
+fix firefox
+
+
 add a turn timer to the top bar
 when the turn resolves, generate all of the board json and put it into a redis cache, or the django cache or whatever
 

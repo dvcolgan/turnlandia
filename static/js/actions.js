@@ -310,9 +310,7 @@ BuildRoadAction = (function(_super) {
   }
 
   BuildRoadAction.prototype.isValid = function() {
-    var action, _i, _len, _ref;
-    console.log(this.col + ' ' + this.row + ' ' + TB.board.getTerrainType(this.col, this.row));
-    console.log(TB.myAccount.wood);
+    var action, terrainType, _i, _len, _ref;
     _ref = TB.actions.actions;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       action = _ref[_i];
@@ -320,7 +318,17 @@ BuildRoadAction = (function(_super) {
         return false;
       }
     }
-    return TB.myAccount.wood >= 10 && TB.board.isPassable(this.col, this.row);
+    terrainType = TB.board.getTerrainType(this.col, this.row);
+    if (terrainType !== 'plains') {
+      return false;
+    }
+    if (TB.myAccount.wood < 10) {
+      return false;
+    }
+    if (TB.board.roadOverlay.get(this.col, this.row) === null) {
+      return false;
+    }
+    return true;
   };
 
   BuildRoadAction.prototype.draw = function() {

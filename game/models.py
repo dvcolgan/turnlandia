@@ -62,7 +62,6 @@ class Account(AbstractBaseUser, PermissionsMixin):
     country_name = models.CharField(max_length=255, blank=True)
     leader_name = models.CharField(max_length=255, blank=True)
     people_name = models.CharField(max_length=255, blank=True)
-    unplaced_units = models.IntegerField(default=0)
 
     wood = models.PositiveIntegerField(default=0)
     food = models.PositiveIntegerField(default=0)

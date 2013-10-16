@@ -26,7 +26,7 @@ class AccountSerializer(serializers.ModelSerializer):
     password = PasswordField()
     class Meta:
         model = Account
-        fields = ('id', 'username', 'color', 'leader_name', 'people_name', 'unplaced_units', 'password', 'wood', 'food', 'ore', 'money')
+        fields = ('id', 'username', 'color', 'leader_name', 'people_name', 'password', 'wood', 'food', 'ore', 'money')
 
 class UnitSerializer(serializers.ModelSerializer):
     owner_color = serializers.Field(source='owner.color')
