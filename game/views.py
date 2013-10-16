@@ -235,7 +235,7 @@ def api_initial_load(request):
 
     actions = Action.objects.filter(player=request.user).filter(turn=current_turn)
 
-    total_units = request.user.get_total_unit_count()
+    total_units = request.user.units.count()
 
     center_col, center_row = request.user.get_empire_center()
 

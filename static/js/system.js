@@ -65,6 +65,7 @@ window.TB = {
       }
       TB.fpsCounter = util.makeFPSCounter(20);
       TB.myAccount = data.account;
+      TB.myAccount.wood = 100;
       $('#total-unit-display').text(data.totalUnits);
       $('#wood-display').text(data.account.wood);
       $('#food-display').text(data.account.food);

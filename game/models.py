@@ -57,7 +57,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
     )
     email = models.EmailField(blank=True)
     color = models.CharField(max_length=10, blank=True, validators=[
-        validators.RegexValidator(re.compile('^#[0-9[a-f][A-F]$'), 'Enter a valid color.', 'invalid')
+        validators.RegexValidator(re.compile('^#[0-9a-fA-F]{6}$'), 'Enter a valid color.', 'invalid')
     ])
     country_name = models.CharField(max_length=255, blank=True)
     leader_name = models.CharField(max_length=255, blank=True)
@@ -97,13 +97,6 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     def email_user(self, subject, message, from_email=None):
         send_mail(subject, message, from_email, [self.email])
-
-    def get_total_unit_count(self):
-        return (Unit.objects.filter(
-            owner=self
-        ).aggregate(
-            Sum('amount')
-        )['amount__sum']) or 0
 
     def get_empire_center(self):
         return [
