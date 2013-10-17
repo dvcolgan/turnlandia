@@ -97,10 +97,12 @@ window.TB = {
       return requestAnimationFrame(TB.mainLoop);
     });
     $('.board').mousedown(function(event) {
+      var offsetX, offsetY, _ref;
       event.preventDefault();
+      _ref = util.getMouseOffset(event), offsetX = _ref[0], offsetY = _ref[1];
       TB.lastMouse = {
-        x: event.offsetX,
-        y: event.offsetY
+        x: offsetX,
+        y: offsetY
       };
       TB.lastScroll.x = TB.camera.x;
       TB.lastScroll.y = TB.camera.y;
@@ -113,25 +115,29 @@ window.TB = {
       lastX = null;
       lastY = null;
       return function(event) {
-        if (event.clientX === lastX && event.clientY === lastY) {
+        var offsetX, offsetY, _ref;
+        _ref = util.getMouseOffset(event), offsetX = _ref[0], offsetY = _ref[1];
+        if (offsetX === lastX && offsetY === lastY) {
           return;
         }
-        lastX = event.clientX;
-        lastY = event.clientY;
-        TB.activeSquare.col = TB.camera.mouseXToCol(event.offsetX);
-        TB.activeSquare.row = TB.camera.mouseYToRow(event.offsetY);
+        lastX = offsetX;
+        lastY = offsetY;
+        TB.activeSquare.col = TB.camera.mouseXToCol(offsetX);
+        TB.activeSquare.row = TB.camera.mouseYToRow(offsetY);
         if (TB.dragging) {
           event.preventDefault();
-          TB.camera.moveTo(TB.lastScroll.x - (event.offsetX - TB.lastMouse.x), TB.lastScroll.y - (event.offsetY - TB.lastMouse.y));
+          TB.camera.moveTo(TB.lastScroll.x - (offsetX - TB.lastMouse.x), TB.lastScroll.y - (offsetY - TB.lastMouse.y));
           TB.fetcher.loadSectorsOnScreen();
         }
         return requestAnimationFrame(TB.mainLoop);
       };
     })());
     $('.board').mouseup(function(event) {
+      var offsetX, offsetY, _ref;
+      _ref = util.getMouseOffset(event), offsetX = _ref[0], offsetY = _ref[1];
       TB.dragging = false;
       if (Math.abs(TB.camera.x - TB.lastScroll.x) < 5 && Math.abs(TB.camera.y - TB.lastScroll.y) < 5) {
-        TB.actions.handleAction(TB.currentAction, TB.camera.mouseXToCol(event.offsetX), TB.camera.mouseYToRow(event.offsetY));
+        TB.actions.handleAction(TB.currentAction, TB.camera.mouseXToCol(offsetX), TB.camera.mouseYToRow(offsetY));
       }
       return requestAnimationFrame(TB.mainLoop);
     });
@@ -140,7 +146,9 @@ window.TB = {
       return requestAnimationFrame(TB.mainLoop);
     });
     $('.board').mousewheel(function(event, delta, deltaX, deltaY) {
-      TB.camera.zoom(event.offsetX, event.offsetY, delta);
+      var offsetX, offsetY, _ref;
+      _ref = util.getMouseOffset(event), offsetX = _ref[0], offsetY = _ref[1];
+      TB.camera.zoom(offsetX, offsetY, delta);
       return requestAnimationFrame(TB.mainLoop);
     });
     $(window).resize(function() {
@@ -199,6 +207,7 @@ window.TB = {
     cursorSize = TB.camera.zoomedGridSize;
     screenX = TB.camera.worldColToScreenPosX(TB.activeSquare.col);
     screenY = TB.camera.worldRowToScreenPosY(TB.activeSquare.row);
+    console.log(screenX + ' ' + screenY);
     TB.ctx.save();
     TB.ctx.strokeStyle = 'black';
     TB.ctx.fillStyle = 'black';

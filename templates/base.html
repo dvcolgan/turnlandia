@@ -16,6 +16,20 @@
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/style.css">
 </head>
 <body class="{% block body_class %}{% endblock %}">
+<!--
+IT WAS DETERMINED THAT THIS GAME NEEDED MOAR COWBELL BY JOEB3219
+     (__)
+     (oo)
+    /-\/-\
+   /      \
+   |      |
+   |      |
+  /        \
+ /__________\
+      \\
+      (_)
+THEREFORE NOW IT DOES
+-->
     {% if request.user.is_authenticated %}
     <div class="header">
         <h1 class="pull-left"><a href="{% url 'game' %}">Turnlandia!</a></h1>

@@ -19,7 +19,6 @@ class Trophy(models.Model):
         return self.name
 
 
-
 class AccountManager(BaseUserManager):
 
     def create_user(self, username, password=None, **extra_fields):

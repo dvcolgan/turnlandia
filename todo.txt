@@ -1,3 +1,7 @@
+
+
+
+
 make it so that when the turn is resolving, show a screen that says it is resolving, and if someone tries to make a move while the turn is resolving, redirect them to that page
 fix firefox
 
@@ -12,11 +16,13 @@ grey out arrows when you are not hovering over a unit or something
 make roads look like this?
 http://i.imgur.com/CjbSFVN.png
 
+use google closure compiler
 
 instead of requiring email, add a captcha
 
 show the hex value in the color field
 
+make dirt roads upgradable to cobblestone roads and those are better for vehicles
 Cache all of the json objects locally and have those in a global data store thingy
 
 When a user scrolls to a part of the map offscreen, you first check to see if the store has it in it, if so don't send a request

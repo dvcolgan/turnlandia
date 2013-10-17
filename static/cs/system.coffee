@@ -98,7 +98,8 @@ window.TB =
 
         $('.board').mousedown (event) =>
             event.preventDefault()
-            TB.lastMouse = { x: event.offsetX, y: event.offsetY }
+            [offsetX, offsetY] = util.getMouseOffset(event)
+            TB.lastMouse = { x: offsetX, y: offsetY }
             TB.lastScroll.x = TB.camera.x
             TB.lastScroll.y = TB.camera.y
             TB.dragging = true
@@ -108,19 +109,20 @@ window.TB =
             lastX = null
             lastY = null
             (event) =>
-                if event.clientX == lastX and event.clientY == lastY
+                [offsetX, offsetY] = util.getMouseOffset(event)
+                if offsetX == lastX and offsetY == lastY
                     return
-                lastX = event.clientX
-                lastY = event.clientY
+                lastX = offsetX
+                lastY = offsetY
 
-                TB.activeSquare.col = TB.camera.mouseXToCol(event.offsetX)
-                TB.activeSquare.row = TB.camera.mouseYToRow(event.offsetY)
+                TB.activeSquare.col = TB.camera.mouseXToCol(offsetX)
+                TB.activeSquare.row = TB.camera.mouseYToRow(offsetY)
 
                 if TB.dragging
                     event.preventDefault()
                     TB.camera.moveTo(
-                        TB.lastScroll.x - (event.offsetX - TB.lastMouse.x),
-                        TB.lastScroll.y - (event.offsetY - TB.lastMouse.y)
+                        TB.lastScroll.x - (offsetX - TB.lastMouse.x),
+                        TB.lastScroll.y - (offsetY - TB.lastMouse.y)
                     )
 
                     TB.fetcher.loadSectorsOnScreen()
@@ -129,12 +131,13 @@ window.TB =
         )())
 
         $('.board').mouseup (event) =>
+            [offsetX, offsetY] = util.getMouseOffset(event)
             TB.dragging = false
             if Math.abs(TB.camera.x - TB.lastScroll.x) < 5 and Math.abs(TB.camera.y - TB.lastScroll.y) < 5
                 TB.actions.handleAction(
                     TB.currentAction
-                    TB.camera.mouseXToCol(event.offsetX)
-                    TB.camera.mouseYToRow(event.offsetY)
+                    TB.camera.mouseXToCol(offsetX)
+                    TB.camera.mouseYToRow(offsetY)
                 )
             requestAnimationFrame(TB.mainLoop)
 
@@ -144,7 +147,8 @@ window.TB =
 
 
         $('.board').mousewheel (event, delta, deltaX, deltaY) =>
-            TB.camera.zoom(event.offsetX, event.offsetY, delta)
+            [offsetX, offsetY] = util.getMouseOffset(event)
+            TB.camera.zoom(offsetX, offsetY, delta)
             requestAnimationFrame(TB.mainLoop)
 
         $(window).resize ->
@@ -195,6 +199,7 @@ window.TB =
 
         screenX = TB.camera.worldColToScreenPosX(TB.activeSquare.col)
         screenY = TB.camera.worldRowToScreenPosY(TB.activeSquare.row)
+        console.log screenX + ' ' + screenY
 
         TB.ctx.save()
         TB.ctx.strokeStyle = 'black'

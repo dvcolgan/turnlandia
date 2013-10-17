@@ -7,6 +7,18 @@ util =
 
     sum: (arr) -> _.reduce(arr, (sum, num) -> sum + num)
 
+    # Stupid fix for firefox not implementing offsetXY correctly BLARG
+    getMouseOffset: (e) ->
+        target = e.target || e.srcElement
+        style = target.currentStyle || window.getComputedStyle(target, null)
+        borderLeftWidth = parseInt(style['borderLeftWidth'], 10)
+        borderTopWidth = parseInt(style['borderTopWidth'], 10)
+        rect = target.getBoundingClientRect()
+        offsetX = e.clientX - borderLeftWidth - rect.left
+        offsetY = e.clientY - borderTopWidth - rect.top
+        return [offsetX, offsetY]
+
+
     # http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
     hexToRGB: (hex) ->
         shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i

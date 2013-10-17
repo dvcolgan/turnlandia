@@ -13,6 +13,17 @@ util = {
       return sum + num;
     });
   },
+  getMouseOffset: function(e) {
+    var borderLeftWidth, borderTopWidth, offsetX, offsetY, rect, style, target;
+    target = e.target || e.srcElement;
+    style = target.currentStyle || window.getComputedStyle(target, null);
+    borderLeftWidth = parseInt(style['borderLeftWidth'], 10);
+    borderTopWidth = parseInt(style['borderTopWidth'], 10);
+    rect = target.getBoundingClientRect();
+    offsetX = e.clientX - borderLeftWidth - rect.left;
+    offsetY = e.clientY - borderTopWidth - rect.top;
+    return [offsetX, offsetY];
+  },
   hexToRGB: function(hex) {
     var result, shorthandRegex;
     shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
