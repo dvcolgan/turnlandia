@@ -211,7 +211,7 @@ class RecruitUnitAction extends Action
 
     isValid: ->
         for action in TB.actions.actions
-            if action.col == @col and action.row == @row then return false
+            if action.col == @col and action.row == @row and action.kind == 'recruit' then return false
         unit = TB.board.units.get(@col, @row)
         if unit == null or unit.ownerID != TB.myAccount.id then return false
         if TB.myAccount.food < 2 then return false
@@ -234,11 +234,19 @@ class BuildRoadAction extends Action
 
     isValid: ->
         for action in TB.actions.actions
-            if action.col == @col and action.row == @row then return false
+            if action.col == @col and action.row == @row and action.kind == 'road'
+                console.log 'road already going to be built there'
+                return false
         terrainType = TB.board.getTerrainType(@col, @row)
-        if terrainType != 'plains' then return false
-        if TB.myAccount.wood < 10 then return false
-        if TB.board.roadOverlay.get(@col, @row) == null then return false
+        if terrainType != 'plains'
+            console.log 'terrain not plains'
+            return false
+        if TB.myAccount.wood < 10
+            console.log 'not enough wood'
+            return false
+        if TB.board.roadOverlay.get(@col, @row) == null
+            console.log 'square not in overlay'
+            return false
         return true
 
     draw: ->
@@ -257,7 +265,7 @@ class ClearForestAction extends Action
 
     isValid: ->
         for action in TB.actions.actions
-            if action.col == @col and action.row == @row then return false
+            if action.col == @col and action.row == @row and action.kind == 'tree' then return false
         terrainType = TB.board.getTerrainType(@col, @row)
         if terrainType != 'forest' then return false
         if TB.board.clearForestOverlay.get(@col, @row) == null then return false

@@ -162,9 +162,8 @@ def api_email_existence(request, email):
 @login_required
 @api_view(['GET'])
 @renderer_classes((PlainTextRenderer,))
-def api_squares(request, col, row, width, height, exclude_squares=None):
+def api_squares(request, col, row, width, height):
 
-    
     try:
         col = int(col)
         row = int(row)
@@ -188,14 +187,14 @@ def api_squares(request, col, row, width, height, exclude_squares=None):
 
     squares = Square.objects.get_region(col, row, width, height)
     square_data = []
-    col = 0
+    this_col = 0
     row_data = []
     for square in squares:
         row_data.append(str(square.terrain_type))
-        col += 1
-        if col >= width:
+        this_col += 1
+        if this_col >= width:
             square_data.append(','.join(row_data))
-            col = 0
+            this_col = 0
             row_data = []
     square_csv = '\n'.join(square_data)
 

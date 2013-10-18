@@ -313,7 +313,7 @@ RecruitUnitAction = (function(_super) {
     _ref = TB.actions.actions;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       action = _ref[_i];
-      if (action.col === this.col && action.row === this.row) {
+      if (action.col === this.col && action.row === this.row && action.kind === 'recruit') {
         return false;
       }
     }
@@ -356,18 +356,22 @@ BuildRoadAction = (function(_super) {
     _ref = TB.actions.actions;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       action = _ref[_i];
-      if (action.col === this.col && action.row === this.row) {
+      if (action.col === this.col && action.row === this.row && action.kind === 'road') {
+        console.log('road already going to be built there');
         return false;
       }
     }
     terrainType = TB.board.getTerrainType(this.col, this.row);
     if (terrainType !== 'plains') {
+      console.log('terrain not plains');
       return false;
     }
     if (TB.myAccount.wood < 10) {
+      console.log('not enough wood');
       return false;
     }
     if (TB.board.roadOverlay.get(this.col, this.row) === null) {
+      console.log('square not in overlay');
       return false;
     }
     return true;
@@ -402,7 +406,7 @@ ClearForestAction = (function(_super) {
     _ref = TB.actions.actions;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       action = _ref[_i];
-      if (action.col === this.col && action.row === this.row) {
+      if (action.col === this.col && action.row === this.row && action.kind === 'tree') {
         return false;
       }
     }

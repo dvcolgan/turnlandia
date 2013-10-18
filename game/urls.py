@@ -53,7 +53,7 @@ urlpatterns = patterns('game.views',
     #),
 
     url(r'^api/squares/(?P<col>[0-9-]+)/(?P<row>[0-9-]+)/(?P<width>[0-9]+)/(?P<height>[0-9]+)/$', 'api_squares', name='api-squares'),
-    url(r'^api/squares/(?P<col>[0-9-]+)/(?P<row>[0-9-]+)/(?P<width>[0-9]+)/(?P<height>[0-9]+)/(?P<exclude_squares>nosquares)/$', 'api_squares', name='api-squares'),
+    url(r'^api/squares/(?P<col>[0-9-]+)/(?P<row>[0-9-]+)/(?P<width>[0-9]+)/(?P<height>[0-9]+)/$', 'api_squares', name='api-squares'),
 
     url(r'^api/undo/$', 'api_undo', name='api-undo'),
 

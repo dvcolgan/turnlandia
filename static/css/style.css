@@ -226,6 +226,7 @@ input[type="password"] {
   width: 100%;
 }
 .btn {
+  text-shadow: 1px 1px 1px black;
   text-align: center;
   padding: 10px;
   display: block;
@@ -282,8 +283,7 @@ input[type="password"] {
   margin: 0;
   margin-bottom: 5px;
   padding: 4px;
-  height: 38px;
-  height: 60px;
+  height: 52px;
 }
 .btn-action .icon {
   background-image: url(/static/images/action-icons.png);
@@ -295,31 +295,37 @@ input[type="password"] {
   float: left;
 }
 .btn-action.btn-move .icon {
-  background-position: 0 0;
+  background-position: 0    0;
 }
 .btn-action.btn-road .icon {
-  background-position: -33px 0;
-}
-.btn-action.btn-scavenge .icon {
-  background-position: 0 -33px;
+  background-position: -32px 0;
 }
 .btn-action.btn-city .icon {
-  background-position: -66px 0;
+  background-position: -64px 0;
 }
 .btn-action.btn-recruit .icon {
-  background-position: -66px -66px;
+  background-position: -96px 0;
 }
-.btn-action.btn-mine .icon {
-  background-position: -33px -33px;
+.btn-action.btn-scavenge .icon {
+  background-position: -128px 0;
 }
 .btn-action.btn-tree .icon {
-  background-position: -66px -33px;
+  background-position: -160px 0;
+}
+.btn-action.btn-mine .icon {
+  background-position: -192px 0;
 }
 .btn-action.btn-plant .icon {
-  background-position: 0 -66px;
+  background-position: -224px 0;
 }
 .btn-action.btn-undo .icon {
-  background-position: -33px -66px;
+  background-position: -256px 0;
+}
+.btn-action.btn-attack .icon {
+  background-position: -288px 0;
+}
+.btn-action.btn-initial .icon {
+  background-position: -320px 0;
 }
 .header {
   height: 35px;

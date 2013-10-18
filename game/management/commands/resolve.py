@@ -16,17 +16,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         turn = get_object_or_None(Setting, name='turn')
 
-        # Do this if there hasn't been an initial booting of the game
-        if turn == None:
-            print 'Initial setup'
-            Setting.objects.create(name='turn', value='1')
-            Square.objects.initialize()
-            return
-
-
-
-
-
         current_turn = int(turn.value)
 
         for action in Action.objects.filter(turn=current_turn, kind='initial'):
