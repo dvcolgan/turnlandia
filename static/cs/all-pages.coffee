@@ -111,4 +111,4 @@ $ ->
     })
 
     cl = $('body').attr('class')
-    if cl then ALL_PAGES[cl]()
+    if cl and cl of ALL_PAGES then ALL_PAGES[cl]()

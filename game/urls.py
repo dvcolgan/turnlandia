@@ -19,6 +19,8 @@ urlpatterns = patterns('game.views',
 
     url(r'^how-to-play/$', 'how_to_play', name='how-to-play'),
 
+    url(r'^bug-tracker/$', 'bug_tracker', name='bug_tracker'),
+
     #url(r'^api/account/$', ListCreateAPIView.as_view(serializer_class=AccountSerializer, model=Account), name='api-account'),
     #url(r'^api/account/(?P<pk>\d+)/$', RetrieveAPIView.as_view(serializer_class=AccountSerializer, model=Account), name='api-account'),
     #url(r'^api/account/exists/username/(?P<username>.+)/$', 'api_username_existence', name='api-username-existence'),

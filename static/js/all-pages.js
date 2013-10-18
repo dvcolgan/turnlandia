@@ -72,7 +72,7 @@ $(function() {
     }
   });
   cl = $('body').attr('class');
-  if (cl) {
+  if (cl && cl in ALL_PAGES) {
     return ALL_PAGES[cl]();
   }
 });

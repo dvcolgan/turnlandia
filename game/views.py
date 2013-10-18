@@ -35,10 +35,17 @@ def home(request):
     player_count = Account.objects.count()
     return render(request, 'home.html', locals())
 
+@login_required
 def irc(request):
     day_counter = Setting.objects.get_integer('turn')
     player_count = Account.objects.count()
     return render(request, 'irc.html', locals())
+
+@login_required
+def bug_tracker(request):
+    day_counter = Setting.objects.get_integer('turn')
+    player_count = Account.objects.count()
+    return render(request, 'bug-tracker.html', locals())
 
 def how_to_play(request):
     day_counter = Setting.objects.get_integer('turn')
@@ -50,6 +57,7 @@ def how_to_play(request):
         next_link = reverse('game')
     return render(request, 'how-to-play.html', locals())
 
+@login_required
 def profile(request, account_id=None):
     if account_id == None:
         this_account = request.user
