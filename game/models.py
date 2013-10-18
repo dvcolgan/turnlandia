@@ -345,6 +345,8 @@ ACTION_KINDS = (
     ('attack', 'Attack'),
     ('city', 'Build City'),
     ('road', 'Build Road'),
+    ('tree', 'Clear Forest'),
+    ('recruit', 'Recruit Unit'),
 )
 # Squares are more or less read only until the turn resolves, before that we deal with actions
 class Action(models.Model):

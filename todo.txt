@@ -1,4 +1,81 @@
+Instead of moving a unit on top a thing and directly building the thing with the unit, units are camps of units that can build things inside of their sphere of influence
 
+Each unit is now called a camp
+each camp gets one type of action per turn,
+if you build a road, you can build one road square for every unit in the camp
+if you build a city, you can place 1 city tile per 2 or 3 or 4 units in the camp
+if you recruit, you get one unit the next turn
+if you harvest wood, you can click on trees equal to the number of units in the camp, and you get 1 resource per tree you cut down, and then you can also mine mountains for ore
+
+any resources that are gathered by a camp are held by that camp
+in order to do things, a camp has to either gather resources, give resources to another camp, or get resources from a city
+
+cities provide walls, enemy units can't walk through cities, they have to attack first
+friendly units can walk through cities at road speed
+recruitment happens at twice the pace in cities (maybe)
+
+resource sources:
+    each tree that you cut down gives 1-2-3 wood
+    each mountain that you mine gives ore, maybe a mountain has a fixed amount of ore in it
+    action scavenge for food gives 1 food for every 2 units that harvests
+    cities just generate food?
+    maybe have money, maybe not, you start with some
+
+resource costs:
+    movement costs food
+    recruiting takes 2 food to get 1 unit from 2 other units
+    roads take 1 wood
+    cities take 2 wood and 2 ore
+    cobblestone roads take 1 ore and must be placed on an existing road
+    actions require food, 1 food per unit per action, at least
+
+
+replanting:
+    trees can be replanted but ore runs out in mountains
+    if you harvest a mountain, it takes a number of turns before you can harvest it again (those squares have a depleted icon on them, maybe with a number of turns left until it can be remined?)
+    have a plant tree action, which sprouts trees after a number of turns
+    cities require 2 wood and 2 ore per square
+
+how does attacking work:
+    you get a bonus for being inside a city
+    maybe you have to breach the wall around the outside of the city
+
+surrender units to an enemy or ally
+
+if you attack with a camp, you can click on any enemy unit in your area, and it will attack that unit if they stay in your range, movement happens first, then attacking
+
+if you want to trade with someone, you click trade, and then click either on a city or a unit (including your own) it brings up an interface for trading, and it sends a trade request message to the other person, and if they accept or make a counteroffer befor ethe turn resolves, you do the trade, or you can make another counter offer to further the process
+
+have a messages queue for trade requests and such
+
+other players can trade resources with cities or other units
+
+perhaps ore is only seen partially by players
+
+make a radial thing for the buttons around the player
+
+
+make the action buttons different colors
+
+well trodden paths turn into dirt roads, cobble must be built
+
+
+
+
+
+
+
+
+
+
+
+
+
+wrap the entire resolve command in a transaction
+
+consider using this captcha: http://areyouahuman.com/about-playthru/
+
+put the board on the homepage, perhaps even a live scrollable version of the board
 
 
 
@@ -24,6 +101,25 @@ show the hex value in the color field
 
 make dirt roads upgradable to cobblestone roads and those are better for vehicles
 Cache all of the json objects locally and have those in a global data store thingy
+
+SHORTCUTS:
+pageup/down to zoom
+arrow keys to scroll the map
+number keys to change current action
+
+
+ fillOutlinedText: function(text, screenX, screenY) {
+    TB.ctx.save();
+    TB.ctx.font = 'bold 16px Arial';
+    TB.ctx.fillStyle = 'black';
+    TB.ctx.strokeStyle = 'black';
+    TB.ctx.lineWidth = 1;
+    TB.ctx.strokeText(text, screenX, screenY);
+    TB.ctx.fillStyle = 'white';
+    TB.ctx.fillText(text, screenX, screenY);
+    return TB.ctx.restore();
+  }
+
 
 When a user scrolls to a part of the map offscreen, you first check to see if the store has it in it, if so don't send a request
 
@@ -375,8 +471,27 @@ Mdjustin:
     Supporter of $8
 
 
+Frinlet:
+    Optimizer of Text!
+
+Technocf
+    Number one fan and fansite
+
+Aldermeer:
+    Maximum strength camper - came up with camps idea
 
 Things Done
+
+Stovebacon:
+    Sweet action icons
+Grakaio:
+    Sweet action icons
+
+JordanFitz:
+    frequent watcher, there from the beginning
+
+Drake07600:
+    Sweet action icons
 
 switch sqlite to postgres for improved performance
 

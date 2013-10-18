@@ -64,7 +64,7 @@ Camera = (function() {
   };
 
   Camera.prototype.resize = function() {
-    this.width = $(window).width() - 110;
+    this.width = $(window).width() - 120;
     return this.height = $(window).height() - 71;
   };
 

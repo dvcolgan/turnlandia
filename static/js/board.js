@@ -8,6 +8,8 @@ Board = (function() {
     this.unfinalizedSquares = new util.Hash2D();
     this.roadOverlay = new util.Hash2D();
     this.showRoadOverlay = false;
+    this.clearForestOverlay = new util.Hash2D();
+    this.showClearForestOverlay = false;
   }
 
   Board.prototype.getSubtiles = function(col, row) {
@@ -187,14 +189,13 @@ Board = (function() {
   };
 
   Board.prototype.addUnit = function(col, row, ownerID, amount) {
-    var i, unit, _i, _results,
+    var i, unit, _i, _j, _results,
       _this = this;
     unit = new Unit(col, row, ownerID, amount);
     this.units.set(col, row, unit);
     this.roadOverlay.set(unit.col, unit.row, 0);
-    _results = [];
     for (i = _i = 1; _i <= 6; i = ++_i) {
-      _results.push(this.roadOverlay.iterateIntKeys(function(thisCol, thisRow, dist) {
+      this.roadOverlay.iterateIntKeys(function(thisCol, thisRow, dist) {
         var east, north, south, west;
         if (dist === i - 1) {
           east = TB.board.isPassable(thisCol + 1, thisRow);
@@ -212,6 +213,35 @@ Board = (function() {
           }
           if (north) {
             return _this.roadOverlay.set(thisCol, thisRow - 1, i);
+          }
+        }
+      });
+    }
+    this.clearForestOverlay.set(unit.col, unit.row, 0);
+    _results = [];
+    for (i = _j = 1; _j <= 6; i = ++_j) {
+      _results.push(this.clearForestOverlay.iterateIntKeys(function(thisCol, thisRow, dist) {
+        var east, eastTerrain, north, northTerrain, south, southTerrain, west, westTerrain;
+        if (dist === i - 1) {
+          eastTerrain = TB.board.getTerrainType(thisCol + 1, thisRow);
+          westTerrain = TB.board.getTerrainType(thisCol - 1, thisRow);
+          southTerrain = TB.board.getTerrainType(thisCol, thisRow + 1);
+          northTerrain = TB.board.getTerrainType(thisCol, thisRow - 1);
+          east = eastTerrain === 'plains' || eastTerrain === 'forest';
+          west = westTerrain === 'plains' || westTerrain === 'forest';
+          south = southTerrain === 'plains' || southTerrain === 'forest';
+          north = northTerrain === 'plains' || northTerrain === 'forest';
+          if (east) {
+            _this.clearForestOverlay.set(thisCol + 1, thisRow, i);
+          }
+          if (west) {
+            _this.clearForestOverlay.set(thisCol - 1, thisRow, i);
+          }
+          if (south) {
+            _this.clearForestOverlay.set(thisCol, thisRow + 1, i);
+          }
+          if (north) {
+            return _this.clearForestOverlay.set(thisCol, thisRow - 1, i);
           }
         }
       }));
@@ -304,7 +334,15 @@ Board = (function() {
             screenX = TB.camera.worldColToScreenPosX(col);
             screenY = TB.camera.worldRowToScreenPosY(row);
             TB.ctx.save();
-            TB.ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            TB.ctx.fillStyle = 'rgba(119,65,27,0.3)';
+            TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize);
+            TB.ctx.restore();
+          }
+          if (this.showClearForestOverlay && this.clearForestOverlay.get(col, row) !== null && this.getTerrainType(col, row) === 'forest') {
+            screenX = TB.camera.worldColToScreenPosX(col);
+            screenY = TB.camera.worldRowToScreenPosY(row);
+            TB.ctx.save();
+            TB.ctx.fillStyle = 'rgba(0,255,0,0.3)';
             TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize);
             _results1.push(TB.ctx.restore());
           } else {

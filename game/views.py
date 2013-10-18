@@ -273,6 +273,12 @@ def api_action(request):
         elif serializer.object.kind == 'road':
             pass
 
+        elif serializer.object.kind == 'tree':
+            pass
+
+        elif serializer.object.kind == 'recruit':
+            pass
+
         else:
             return Response('{}')
 

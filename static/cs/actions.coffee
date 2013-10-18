@@ -52,7 +52,7 @@ class MoveAction extends Action
             @moves = []
             @started = false
             @finished = false
-            $('.btn-move').addClass('yellow').find('span').text('Move To?')
+            $('.btn-move').addClass('btn-yellow').find('span').text('Move To?')
 
             @possibleMoves = new util.Hash2D()
             @squareTraversalCosts = new util.Hash2D()
@@ -79,7 +79,7 @@ class MoveAction extends Action
         if @started == false
             @started = true
         else if @finished == false
-            $('.btn-move').removeClass('yellow').find('span').text('Move Unit')
+            $('.btn-move').removeClass('btn-yellow').find('span').html('Move<br/>Unit')
             @finished = true
             @movePath = @moves.join('|')
             super()
@@ -203,6 +203,27 @@ class MoveAction extends Action
 
 
 
+class RecruitUnitAction extends Action
+
+    constructor: (@col, @row) ->
+        @kind = 'recruit'
+        @name = 'Recruit Unit'
+
+    isValid: ->
+        for action in TB.actions.actions
+            if action.col == @col and action.row == @row then return false
+        unit = TB.board.units.get(@col, @row)
+        if unit == null or unit.ownerID != TB.myAccount.id then return false
+        if TB.myAccount.food < 2 then return false
+        return true
+
+    draw: ->
+        screenX = TB.camera.worldColToScreenPosX(@col)
+        screenY = TB.camera.worldRowToScreenPosY(@row)
+        TB.ctx.save()
+        TB.ctx.fillStyle = 'rgba(255,255,255,0.7)'
+        TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize)
+        TB.ctx.restore()
 
 
 class BuildRoadAction extends Action
@@ -210,7 +231,6 @@ class BuildRoadAction extends Action
     constructor: (@col, @row) ->
         @kind = 'road'
         @name = 'Build Road'
-        @finished = false
 
     isValid: ->
         for action in TB.actions.actions
@@ -225,10 +245,31 @@ class BuildRoadAction extends Action
         screenX = TB.camera.worldColToScreenPosX(@col)
         screenY = TB.camera.worldRowToScreenPosY(@row)
         TB.ctx.save()
-        TB.ctx.fillStyle = 'rgba(0,0,0,0.5)'
+        TB.ctx.fillStyle = 'rgba(119,65,27,0.7)'
         TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize)
         TB.ctx.restore()
 
+class ClearForestAction extends Action
+
+    constructor: (@col, @row) ->
+        @kind = 'tree'
+        @name = 'Clear Forest'
+
+    isValid: ->
+        for action in TB.actions.actions
+            if action.col == @col and action.row == @row then return false
+        terrainType = TB.board.getTerrainType(@col, @row)
+        if terrainType != 'forest' then return false
+        if TB.board.clearForestOverlay.get(@col, @row) == null then return false
+        return true
+
+    draw: ->
+        screenX = TB.camera.worldColToScreenPosX(@col)
+        screenY = TB.camera.worldRowToScreenPosY(@row)
+        TB.ctx.save()
+        TB.ctx.fillStyle = 'rgba(0,100,0,0.7)'
+        TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize)
+        TB.ctx.restore()
 
 
 
@@ -273,7 +314,7 @@ class ActionManager
         if action.kind == 'move' and not action.finished
             console.log 'canceling'
             @actions.pop()
-            $('.btn-move').removeClass('yellow').find('span').text('Move Unit')
+            $('.btn-move').removeClass('btn-yellow').find('span').html('Move<br/>Unit')
         else
             console.log action.kind + ' ' + action.finished
 
@@ -285,6 +326,10 @@ class ActionManager
                 @actions.push(new MoveAction(action.col, action.row, action.movePath))
             if action.kind == 'road'
                 @actions.push(new BuildRoadAction(action.col, action.row))
+            if action.kind == 'tree'
+                @actions.push(new ClearForestAction(action.col, action.row))
+            if action.kind == 'recruit'
+                @actions.push(new RecruitUnitAction(action.col, action.row))
 
 
     handleAction: (kind, col, row) ->
@@ -310,6 +355,10 @@ class ActionManager
             action = new BuildRoadAction(col, row)
         if kind == 'city'
             action = new BuildCityAction(col, row)
+        if kind == 'tree'
+            action = new ClearForestAction(col, row)
+        if kind == 'recruit'
+            action = new RecruitUnitAction(col, row)
 
 
         if action.isValid()

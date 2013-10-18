@@ -58,9 +58,6 @@ window.TB =
             TB.fpsCounter = util.makeFPSCounter(20)
             TB.myAccount = data.account
 
-            # TODO REMOVE ME WHEN THIS IS DONE
-            TB.myAccount.wood = 100
-
             $('#total-unit-display').text(data.totalUnits)
             $('#wood-display').text(data.account.wood)
             $('#food-display').text(data.account.food)
@@ -86,13 +83,23 @@ window.TB =
             if kind == 'undo'
                 TB.actions.undo()
                 requestAnimationFrame(TB.mainLoop)
-            else if kind == 'move' and $(@).hasClass('yellow')
+            else if kind == 'move' and $(@).hasClass('btn-yellow')
                 TB.actions.cancelMove()
             else
                 TB.currentAction = kind
                 $('.btn-action').removeClass('active')
                 $(@).addClass('active')
-                TB.board.showRoadOverlay = (kind == 'road')
+
+                if kind == 'road'
+                    TB.board.showRoadOverlay = true
+                    TB.board.showClearForestOverlay = false
+                else if kind == 'tree'
+                    TB.board.showRoadOverlay = false
+                    TB.board.showClearForestOverlay = true
+                else
+                    TB.board.showRoadOverlay = false
+                    TB.board.showClearForestOverlay = false
+
             requestAnimationFrame(TB.mainLoop)
 
 

@@ -61,6 +61,20 @@ class Command(BaseCommand):
             square.terrain_type = ROAD
             square.save()
 
+        actions = Action.objects.filter(turn=current_turn, kind='tree')
+        for action in actions:
+            square = Square.objects.get(col=action.col, row=action.row)
+            square.terrain_type = PLAINS
+            action.player.wood += 1
+            action.player.save()
+            square.save()
+
+        actions = Action.objects.filter(turn=current_turn, kind='recruit')
+        for action in actions:
+            unit = Unit.objects.get(col=action.col, row=action.row, owner=action.player)
+            unit.amount += 1
+            unit.save()
+
         # At some point only check the units around you, or this will quickly take forever
         #for i in range(6):
         #    for move in moves:

@@ -34,7 +34,7 @@ class Camera
     mouseYToRow: (mouseY) -> @pixelToSquareCoord(mouseY + @y)
 
     resize: ->
-        @width = $(window).width() - 110
+        @width = $(window).width() - 120
         @height = $(window).height() - 71
 
     zoom: (x, y, delta) ->
