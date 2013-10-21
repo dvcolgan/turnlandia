@@ -34,18 +34,27 @@ THEREFORE NOW IT DOES
     <div class="header">
         <h1 class="pull-left"><a href="{% url 'game' %}">Turnlandia!</a></h1>
 
-        {% comment %}
         <ul class="left-menu pull-left">
+            <li><a>
+                {% if request.user.leader_name %}
+                Hail {{ request.user.leader_name }}{% if request.user.people_name %}, leader of the {{ request.user.people_name }}{% endif %}{% if request.user.country_name %} of {{ request.user.country_name }}{% endif %}!
+                {% endif %}
+            </a></li>
+            <li><a>({{ request.user.username }})</a></li>
+        </ul>
+
+
+
+        {% comment %}
             {% if request.user.is_authenticated %}
             <li><a href="{% url 'game' %}">&nbsp;Join {{ player_count }} Players on Turn {{ day_counter }}</a></li>
             {% else %}
             <li><a href="{% url 'create-account' %}">&nbsp;Join {{ player_count }} Players on Turn {{ day_counter }}</a></li>
             {% endif %}
-        </ul>
         {% endcomment %}
         <ul class="right-menu pull-right">
             <!--<li><a href="{% url 'how-to-play' %}">How to Play</a></li> |-->
-            <!--<li><a href="{% url 'messages' %}">Messages</a></li> |-->
+            <li><a href="{% url 'messages' %}">Messages</a></li> |
             <li><a href="{% url 'bug_tracker' %}">Submit a Bug Report</a></li> |
             <li><a href="{% url 'settings' %}">Account Settings</a></li> |
             <li><a href="{% url 'logout' %}">Log Out</a></li>

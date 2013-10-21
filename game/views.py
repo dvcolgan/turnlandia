@@ -7,6 +7,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import *
 from django.shortcuts import _get_queryset
 from game.models import *
+from django.db import transaction
 from game.serializers import *
 from game.forms import *
 from util.functions import *
@@ -67,6 +68,7 @@ def profile(request, account_id=None):
     awardings = this_account.awardings.all()
     return render(request, 'profile.html', locals())
 
+@transaction.commit_on_success
 def create_account(request):
     day_counter = Setting.objects.get_integer('turn')
     player_count = Account.objects.count()
@@ -92,6 +94,7 @@ def create_account(request):
         form = CreateAccountForm()
     return render(request, 'create-account.html', locals())
 
+@transaction.commit_on_success
 @login_required
 def settings(request):
     day_counter = Setting.objects.get_integer('turn')
@@ -134,6 +137,7 @@ def messages(request):
     received_messages = Message.objects.filter(recipient=request.user)
     return render(request, 'messages.html', locals())
 
+@transaction.commit_on_success
 @login_required
 def compose(request):
     day_counter = Setting.objects.get_integer('turn')
@@ -257,6 +261,7 @@ def api_initial_load(request):
         'center_row': center_row,
     })
     
+@transaction.commit_on_success
 @login_required
 @api_view(['POST'])
 def api_action(request):
@@ -297,6 +302,7 @@ def api_action(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
+@transaction.commit_on_success
 @login_required
 @api_view(['POST'])
 def api_undo(request):

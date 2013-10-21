@@ -18,7 +18,8 @@ Account = (function() {
 
 window.TB = {
   players: {},
-  currentAction: 'move',
+  currentAction: null,
+  currentUnit: null,
   dragging: false,
   lastMouse: {
     x: 0,
@@ -32,7 +33,7 @@ window.TB = {
     col: 0,
     row: 0
   },
-  unitSize: 32,
+  unitSize: 38,
   gridSize: 48,
   sectorSize: 50,
   myAccount: null,
@@ -47,23 +48,16 @@ window.TB = {
     roadTiles: $('#road-tiles').get(0),
     cityTiles: $('#city-tiles').get(0)
   },
-  init: function() {
-    TB.ctx = $('.board').get(0).getContext('2d');
+  initialize: function() {
+    TB.ctx = $('.board-canvas').get(0).getContext('2d');
     TB.camera = new Camera();
     TB.board = new Board();
     TB.actions = new ActionManager();
+    $('.action-ring').hide();
     TB.fetcher = new DataFetcher();
     return TB.fetcher.loadInitialData(function(data) {
       TB.registerEventHandlers();
       TB.isInitialPlacement = data.isInitialPlacement;
-      if (TB.isInitialPlacement) {
-        $('.game-toolbar').find('.btn-action').not('.btn-initial').not('.btn-undo').hide();
-        $('.btn-initial').trigger('click');
-      } else {
-        $('.game-toolbar').find('.btn-initial').hide();
-        $('.btn-move').trigger('click');
-      }
-      TB.fpsCounter = util.makeFPSCounter(20);
       TB.myAccount = data.account;
       $('#total-unit-display').text(data.totalUnits);
       $('#wood-display').text(data.account.wood);
@@ -79,33 +73,9 @@ window.TB = {
   },
   registerEventHandlers: function() {
     var _this = this;
-    $('.btn-action').click(function(event) {
-      var kind;
-      kind = $(this).data('action');
-      if (kind === 'undo') {
-        TB.actions.undo();
-        requestAnimationFrame(TB.mainLoop);
-      } else if (kind === 'move' && $(this).hasClass('btn-yellow')) {
-        TB.actions.cancelMove();
-      } else {
-        TB.currentAction = kind;
-        $('.btn-action').removeClass('active');
-        $(this).addClass('active');
-        if (kind === 'road') {
-          TB.board.showRoadOverlay = true;
-          TB.board.showClearForestOverlay = false;
-        } else if (kind === 'tree') {
-          TB.board.showRoadOverlay = false;
-          TB.board.showClearForestOverlay = true;
-        } else {
-          TB.board.showRoadOverlay = false;
-          TB.board.showClearForestOverlay = false;
-        }
-      }
-      return requestAnimationFrame(TB.mainLoop);
-    });
-    $('.board').mousedown(function(event) {
+    $('.board-canvas').mousedown(function(event) {
       var offsetX, offsetY, _ref;
+      $('.action-ring').hide();
       event.preventDefault();
       _ref = util.getMouseOffset(event), offsetX = _ref[0], offsetY = _ref[1];
       TB.lastMouse = {
@@ -117,7 +87,7 @@ window.TB = {
       TB.dragging = true;
       return requestAnimationFrame(TB.mainLoop);
     });
-    $('.board').mousemove((function() {
+    $('.board-canvas').mousemove((function() {
       var lastX, lastY,
         _this = this;
       lastX = null;
@@ -140,20 +110,48 @@ window.TB = {
         return requestAnimationFrame(TB.mainLoop);
       };
     })());
-    $('.board').mouseup(function(event) {
-      var offsetX, offsetY, _ref;
+    $('.board-canvas').mouseup(function(event) {
+      var col, offsetX, offsetY, row, unit, valid, _ref;
       _ref = util.getMouseOffset(event), offsetX = _ref[0], offsetY = _ref[1];
       TB.dragging = false;
       if (Math.abs(TB.camera.x - TB.lastScroll.x) < 5 && Math.abs(TB.camera.y - TB.lastScroll.y) < 5) {
-        TB.actions.handleAction(TB.currentAction, TB.camera.mouseXToCol(offsetX), TB.camera.mouseYToRow(offsetY));
+        col = TB.camera.mouseXToCol(offsetX);
+        row = TB.camera.mouseYToRow(offsetY);
+        if (TB.currentAction === null) {
+          unit = TB.board.units.get(col, row);
+          if (unit !== null && unit.ownerID === TB.myAccount.id) {
+            TB.currentUnit = unit;
+            $('.action-ring').show();
+            $('.action-ring').css('left', TB.camera.worldColToScreenPosX(col) + TB.camera.zoomedGridSize / 2).css('top', TB.camera.worldRowToScreenPosY(row) + TB.camera.zoomedGridSize / 2);
+          }
+        } else {
+          valid = TB.actions.handleAction(TB.currentAction, col, row);
+          if (!valid) {
+            TB.actions.overlay = null;
+            TB.currentUnit = null;
+            TB.currentAction = null;
+          }
+        }
       }
       return requestAnimationFrame(TB.mainLoop);
     });
-    $('.board').mouseleave(function(event) {
+    $('.btn-undo').click(function(event) {
+      TB.actions.undo();
+      return requestAnimationFrame(TB.mainLoop);
+    });
+    $('.btn-action').click(function(event) {
+      var kind;
+      kind = $(this).data('action');
+      TB.currentAction = kind;
+      $('.action-ring').hide();
+      TB.actions.createOverlay(TB.currentUnit, kind);
+      return requestAnimationFrame(TB.mainLoop);
+    });
+    $('.board-canvas').mouseleave(function(event) {
       TB.dragging = false;
       return requestAnimationFrame(TB.mainLoop);
     });
-    $('.board').mousewheel(function(event, delta, deltaX, deltaY) {
+    $('.board-canvas').mousewheel(function(event, delta, deltaX, deltaY) {
       var offsetX, offsetY, _ref;
       _ref = util.getMouseOffset(event), offsetX = _ref[0], offsetY = _ref[1];
       TB.camera.zoom(offsetX, offsetY, delta);
@@ -161,9 +159,10 @@ window.TB = {
     });
     $(window).resize(function() {
       TB.camera.resize();
-      $('.board').attr('width', TB.camera.width).attr('height', TB.camera.height);
+      $('.board').css('width', TB.camera.width).css('height', TB.camera.height);
+      $('.board-canvas').attr('width', TB.camera.width).attr('height', TB.camera.height);
       $('.stats-bar').css('width', TB.camera.width);
-      TB.ctx = $('.board').get(0).getContext('2d');
+      TB.ctx = $('.board-canvas').get(0).getContext('2d');
       return requestAnimationFrame(TB.mainLoop);
     });
     $(window).trigger('resize');
@@ -174,7 +173,6 @@ window.TB = {
         if (squareData) {
           startCol = event.sectorX * TB.sectorSize;
           startRow = event.sectorY * TB.sectorSize;
-          console.log(startCol + ' ' + startRow);
           _ref1 = squareData.split('\n');
           for (row = _i = 0, _len = _ref1.length; _i < _len; row = ++_i) {
             rowData = _ref1[row];
@@ -206,8 +204,9 @@ window.TB = {
     });
   },
   mainLoop: function(timestamp) {
-    TB.board.draw();
+    TB.board.drawFirst();
     TB.actions.draw();
+    TB.board.drawSecond();
     return TB.drawCursor();
   },
   drawCursor: function() {
@@ -215,7 +214,6 @@ window.TB = {
     cursorSize = TB.camera.zoomedGridSize;
     screenX = TB.camera.worldColToScreenPosX(TB.activeSquare.col);
     screenY = TB.camera.worldRowToScreenPosY(TB.activeSquare.row);
-    console.log(screenX + ' ' + screenY);
     TB.ctx.save();
     TB.ctx.strokeStyle = 'black';
     TB.ctx.fillStyle = 'black';

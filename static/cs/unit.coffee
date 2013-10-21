@@ -27,5 +27,5 @@ class Unit
         TB.ctx.fill()
         TB.ctx.stroke()
         TB.ctx.textAlign = 'center'
-        TB.fillOutlinedText(@amount, textX, textY)
+        TB.fillOutlinedText("#{@amount}", textX, textY)
         TB.ctx.restore()

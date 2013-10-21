@@ -280,61 +280,6 @@ input[type="password"] {
 .btn.btn-yellow:hover {
   background-color: #f0ad4e;
 }
-.game-toolbar {
-  float: left;
-  margin-top: 5px;
-  width: 110px;
-  padding: 0 3px;
-}
-.btn-action {
-  width: 100%;
-  margin: 0;
-  margin-bottom: 5px;
-  padding: 4px;
-  height: 52px;
-}
-.btn-action .icon {
-  background-image: url(/static/images/action-icons.png);
-  width: 32px;
-  height: 32px;
-  margin-top: 6px;
-  margin-left: 2px;
-  display: block;
-  float: left;
-}
-.btn-action.btn-move .icon {
-  background-position: 0    0;
-}
-.btn-action.btn-road .icon {
-  background-position: -32px 0;
-}
-.btn-action.btn-city .icon {
-  background-position: -64px 0;
-}
-.btn-action.btn-recruit .icon {
-  background-position: -96px 0;
-}
-.btn-action.btn-scavenge .icon {
-  background-position: -128px 0;
-}
-.btn-action.btn-tree .icon {
-  background-position: -160px 0;
-}
-.btn-action.btn-mine .icon {
-  background-position: -192px 0;
-}
-.btn-action.btn-plant .icon {
-  background-position: -224px 0;
-}
-.btn-action.btn-undo .icon {
-  background-position: -256px 0;
-}
-.btn-action.btn-attack .icon {
-  background-position: -288px 0;
-}
-.btn-action.btn-initial .icon {
-  background-position: -320px 0;
-}
 .header {
   height: 35px;
   width: 100%;
@@ -344,7 +289,7 @@ input[type="password"] {
 .header .right-menu {
   line-height: 35px;
   margin-right: 5px;
-  margin-left: 5px;
+  margin-left: 10px;
 }
 .header .left-menu li,
 .header .right-menu li {
@@ -386,14 +331,15 @@ input[type="password"] {
   padding: 40px;
 }
 .board {
-  cursor: crosshair;
   display: block;
-  float: left;
+  margin-left: 1px;
   position: relative;
   font-size: 16px;
-  margin-left: 2px;
-  box-shadow: 0 8px 8px black;
   overflow: hidden;
+}
+.board .board-canvas {
+  cursor: crosshair;
+  display: block;
 }
 .arrow-controls {
   width: 150px;
@@ -550,11 +496,10 @@ body.messages .accordion {
   position: relative;
   float: left;
   height: 26px;
-  width: 200px;
+  width: 100%;
   background-color: #222;
   box-shadow: inset 0px 1px 0px 0px #888;
   margin-top: 5px;
-  margin-left: 2px;
   color: white;
   font-size: 14px;
   border-top-left-radius: 6px;
@@ -577,4 +522,114 @@ body.messages .accordion {
   position: absolute;
   left: 50%;
   margin-left: -60px;
+}
+.action-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -103.5px;
+  margin-top: -103.5px;
+  width: 207px;
+  height: 207px;
+  z-index: 200;
+  border-radius: 103.5px;
+  border: 16px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 10px black;
+  text-align: center;
+}
+.action-ring .inner {
+  box-shadow: inset 0 0 50px black;
+  width: 100%;
+  height: 100%;
+  border-radius: 86px;
+}
+.action-ring .btn-action {
+  font-size: 14px;
+  border-radius: 39px;
+  line-height: 14px;
+  width: 75px;
+  margin: 0;
+  padding: 4px;
+  height: 75px;
+  position: absolute;
+  border-width: 2px;
+}
+.action-ring .btn-action:hover {
+  cursor: pointer;
+}
+.action-ring .btn-action .icon {
+  background-image: url(/static/images/action-icons.png);
+  width: 32px;
+  height: 32px;
+  display: block;
+  margin: 0 auto;
+}
+.action-ring .btn-action.btn-move {
+  top: -70px;
+  left: 50.00000000000001px;
+}
+.action-ring .btn-action.btn-road {
+  top: -41.925333174277355px;
+  left: 127.13451316238472px;
+}
+.action-ring .btn-action.btn-city {
+  top: 29.16221867996836px;
+  left: 168.17693036146497px;
+}
+.action-ring .btn-action.btn-recruit {
+  top: 109.99999999999997px;
+  left: 153.92304845413264px;
+}
+.action-ring .btn-action.btn-scavenge {
+  top: 162.76311449430898px;
+  left: 91.04241719908026px;
+}
+.action-ring .btn-action.btn-tree {
+  top: 162.763114494309px;
+  left: 8.957582800919752px;
+}
+.action-ring .btn-action.btn-mine {
+  top: 110.00000000000004px;
+  left: -53.92304845413261px;
+}
+.action-ring .btn-action.btn-plant {
+  top: 29.162218679968397px;
+  left: -68.17693036146497px;
+}
+.action-ring .btn-action.btn-attack {
+  top: -41.92533317427734px;
+  left: -27.134513162384735px;
+}
+.action-ring .btn-action.btn-move .icon {
+  background-position: 0    0;
+}
+.action-ring .btn-action.btn-road .icon {
+  background-position: -32px 0;
+}
+.action-ring .btn-action.btn-city .icon {
+  background-position: -64px 0;
+}
+.action-ring .btn-action.btn-recruit .icon {
+  background-position: -96px 0;
+}
+.action-ring .btn-action.btn-scavenge .icon {
+  background-position: -128px 0;
+}
+.action-ring .btn-action.btn-tree .icon {
+  background-position: -160px 0;
+}
+.action-ring .btn-action.btn-mine .icon {
+  background-position: -192px 0;
+}
+.action-ring .btn-action.btn-plant .icon {
+  background-position: -224px 0;
+}
+.action-ring .btn-action.btn-undo .icon {
+  background-position: -256px 0;
+}
+.action-ring .btn-action.btn-attack .icon {
+  background-position: -288px 0;
+}
+.action-ring .btn-action.btn-initial .icon {
+  background-position: -320px 0;
 }

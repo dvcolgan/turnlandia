@@ -6,10 +6,6 @@ Board = (function() {
     this.squares = new util.Hash2D();
     this.units = new util.Hash2D();
     this.unfinalizedSquares = new util.Hash2D();
-    this.roadOverlay = new util.Hash2D();
-    this.showRoadOverlay = false;
-    this.clearForestOverlay = new util.Hash2D();
-    this.showClearForestOverlay = false;
   }
 
   Board.prototype.getSubtiles = function(col, row) {
@@ -189,64 +185,9 @@ Board = (function() {
   };
 
   Board.prototype.addUnit = function(col, row, ownerID, amount) {
-    var i, unit, _i, _j, _results,
-      _this = this;
+    var unit;
     unit = new Unit(col, row, ownerID, amount);
-    this.units.set(col, row, unit);
-    this.roadOverlay.set(unit.col, unit.row, 0);
-    for (i = _i = 1; _i <= 6; i = ++_i) {
-      this.roadOverlay.iterateIntKeys(function(thisCol, thisRow, dist) {
-        var east, north, south, west;
-        if (dist === i - 1) {
-          east = TB.board.isPassable(thisCol + 1, thisRow);
-          west = TB.board.isPassable(thisCol - 1, thisRow);
-          south = TB.board.isPassable(thisCol, thisRow + 1);
-          north = TB.board.isPassable(thisCol, thisRow - 1);
-          if (east) {
-            _this.roadOverlay.set(thisCol + 1, thisRow, i);
-          }
-          if (west) {
-            _this.roadOverlay.set(thisCol - 1, thisRow, i);
-          }
-          if (south) {
-            _this.roadOverlay.set(thisCol, thisRow + 1, i);
-          }
-          if (north) {
-            return _this.roadOverlay.set(thisCol, thisRow - 1, i);
-          }
-        }
-      });
-    }
-    this.clearForestOverlay.set(unit.col, unit.row, 0);
-    _results = [];
-    for (i = _j = 1; _j <= 6; i = ++_j) {
-      _results.push(this.clearForestOverlay.iterateIntKeys(function(thisCol, thisRow, dist) {
-        var east, eastTerrain, north, northTerrain, south, southTerrain, west, westTerrain;
-        if (dist === i - 1) {
-          eastTerrain = TB.board.getTerrainType(thisCol + 1, thisRow);
-          westTerrain = TB.board.getTerrainType(thisCol - 1, thisRow);
-          southTerrain = TB.board.getTerrainType(thisCol, thisRow + 1);
-          northTerrain = TB.board.getTerrainType(thisCol, thisRow - 1);
-          east = eastTerrain === 'plains' || eastTerrain === 'forest';
-          west = westTerrain === 'plains' || westTerrain === 'forest';
-          south = southTerrain === 'plains' || southTerrain === 'forest';
-          north = northTerrain === 'plains' || northTerrain === 'forest';
-          if (east) {
-            _this.clearForestOverlay.set(thisCol + 1, thisRow, i);
-          }
-          if (west) {
-            _this.clearForestOverlay.set(thisCol - 1, thisRow, i);
-          }
-          if (south) {
-            _this.clearForestOverlay.set(thisCol, thisRow + 1, i);
-          }
-          if (north) {
-            return _this.clearForestOverlay.set(thisCol, thisRow - 1, i);
-          }
-        }
-      }));
-    }
-    return _results;
+    return this.units.set(col, row, unit);
   };
 
   Board.prototype.isPassable = function(col, row) {
@@ -306,12 +247,42 @@ Board = (function() {
     }
   };
 
-  Board.prototype.draw = function() {
-    var col, endCol, endRow, row, screenX, screenY, startCol, startRow, thisSquare, thisUnit, _i, _results;
+  Board.prototype.drawFirst = function() {
+    var col, endCol, endRow, row, startCol, startRow, thisSquare, _i, _j, _k, _results;
     TB.ctx.textAlign = 'center';
     TB.ctx.fillStyle = '#148743';
     TB.ctx.fillRect(0, 0, TB.camera.width, TB.camera.height);
     TB.ctx.lineWidth = 1;
+    startCol = Math.floor(TB.camera.x / TB.camera.zoomedGridSize);
+    startRow = Math.floor(TB.camera.y / TB.camera.zoomedGridSize);
+    endCol = startCol + Math.ceil(TB.camera.width / TB.camera.zoomedGridSize);
+    endRow = startRow + Math.ceil(TB.camera.height / TB.camera.zoomedGridSize);
+    for (row = _i = startRow; startRow <= endRow ? _i <= endRow : _i >= endRow; row = startRow <= endRow ? ++_i : --_i) {
+      for (col = _j = startCol; startCol <= endCol ? _j <= endCol : _j >= endCol; col = startCol <= endCol ? ++_j : --_j) {
+        thisSquare = this.squares.get(col, row);
+        if (thisSquare) {
+          thisSquare.draw();
+        }
+      }
+    }
+    if (TB.actions.overlay) {
+      _results = [];
+      for (row = _k = startRow; startRow <= endRow ? _k <= endRow : _k >= endRow; row = startRow <= endRow ? ++_k : --_k) {
+        _results.push((function() {
+          var _l, _results1;
+          _results1 = [];
+          for (col = _l = startCol; startCol <= endCol ? _l <= endCol : _l >= endCol; col = startCol <= endCol ? ++_l : --_l) {
+            _results1.push(TB.actions.overlay.draw(col, row));
+          }
+          return _results1;
+        })());
+      }
+      return _results;
+    }
+  };
+
+  Board.prototype.drawSecond = function() {
+    var col, endCol, endRow, row, startCol, startRow, thisUnit, _i, _results;
     startCol = Math.floor(TB.camera.x / TB.camera.zoomedGridSize);
     startRow = Math.floor(TB.camera.y / TB.camera.zoomedGridSize);
     endCol = startCol + Math.ceil(TB.camera.width / TB.camera.zoomedGridSize);
@@ -322,29 +293,9 @@ Board = (function() {
         var _j, _results1;
         _results1 = [];
         for (col = _j = startCol; startCol <= endCol ? _j <= endCol : _j >= endCol; col = startCol <= endCol ? ++_j : --_j) {
-          thisSquare = this.squares.get(col, row);
-          if (thisSquare) {
-            thisSquare.draw();
-          }
           thisUnit = this.units.get(col, row);
           if (thisUnit) {
-            thisUnit.draw();
-          }
-          if (this.showRoadOverlay && this.roadOverlay.get(col, row) !== null && this.getTerrainType(col, row) === 'plains') {
-            screenX = TB.camera.worldColToScreenPosX(col);
-            screenY = TB.camera.worldRowToScreenPosY(row);
-            TB.ctx.save();
-            TB.ctx.fillStyle = 'rgba(119,65,27,0.3)';
-            TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize);
-            TB.ctx.restore();
-          }
-          if (this.showClearForestOverlay && this.clearForestOverlay.get(col, row) !== null && this.getTerrainType(col, row) === 'forest') {
-            screenX = TB.camera.worldColToScreenPosX(col);
-            screenY = TB.camera.worldRowToScreenPosY(row);
-            TB.ctx.save();
-            TB.ctx.fillStyle = 'rgba(0,255,0,0.3)';
-            TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize);
-            _results1.push(TB.ctx.restore());
+            _results1.push(thisUnit.draw());
           } else {
             _results1.push(void 0);
           }

@@ -11,14 +11,15 @@ class Account
 window.TB =
     players: {}
 
-    currentAction: 'move'
+    currentAction: null
+    currentUnit: null
 
     dragging: false
     lastMouse: { x: 0, y: 0 }
     lastScroll: { x: 0, y: 0 }
     activeSquare: { col: 0, row: 0 }
 
-    unitSize: 32
+    unitSize: 38
     gridSize: 48
     sectorSize: 50
     myAccount: null
@@ -35,27 +36,21 @@ window.TB =
         roadTiles: $('#road-tiles').get(0)
         cityTiles: $('#city-tiles').get(0)
 
-    init: ->
-        TB.ctx = $('.board').get(0).getContext('2d')
+    initialize: ->
+        TB.ctx = $('.board-canvas').get(0).getContext('2d')
 
         TB.camera = new Camera()
 
         TB.board = new Board()
         TB.actions = new ActionManager()
+        $('.action-ring').hide()
 
         TB.fetcher = new DataFetcher()
         TB.fetcher.loadInitialData (data) ->
             TB.registerEventHandlers()
             TB.isInitialPlacement = data.isInitialPlacement
 
-            if TB.isInitialPlacement
-                $('.game-toolbar').find('.btn-action').not('.btn-initial').not('.btn-undo').hide()
-                $('.btn-initial').trigger('click')
-            else
-                $('.game-toolbar').find('.btn-initial').hide()
-                $('.btn-move').trigger('click')
-
-            TB.fpsCounter = util.makeFPSCounter(20)
+            #TB.fpsCounter = util.makeFPSCounter(20)
             TB.myAccount = data.account
 
             $('#total-unit-display').text(data.totalUnits)
@@ -78,32 +73,8 @@ window.TB =
 
     registerEventHandlers: ->
 
-        $('.btn-action').click (event) ->
-            kind = $(@).data('action')
-            if kind == 'undo'
-                TB.actions.undo()
-                requestAnimationFrame(TB.mainLoop)
-            else if kind == 'move' and $(@).hasClass('btn-yellow')
-                TB.actions.cancelMove()
-            else
-                TB.currentAction = kind
-                $('.btn-action').removeClass('active')
-                $(@).addClass('active')
-
-                if kind == 'road'
-                    TB.board.showRoadOverlay = true
-                    TB.board.showClearForestOverlay = false
-                else if kind == 'tree'
-                    TB.board.showRoadOverlay = false
-                    TB.board.showClearForestOverlay = true
-                else
-                    TB.board.showRoadOverlay = false
-                    TB.board.showClearForestOverlay = false
-
-            requestAnimationFrame(TB.mainLoop)
-
-
-        $('.board').mousedown (event) =>
+        $('.board-canvas').mousedown (event) =>
+            $('.action-ring').hide()
             event.preventDefault()
             [offsetX, offsetY] = util.getMouseOffset(event)
             TB.lastMouse = { x: offsetX, y: offsetY }
@@ -112,7 +83,7 @@ window.TB =
             TB.dragging = true
             requestAnimationFrame(TB.mainLoop)
 
-        $('.board').mousemove(( ->
+        $('.board-canvas').mousemove(( ->
             lastX = null
             lastY = null
             (event) =>
@@ -128,7 +99,7 @@ window.TB =
                 if TB.dragging
                     event.preventDefault()
                     TB.camera.moveTo(
-                        TB.lastScroll.x - (offsetX - TB.lastMouse.x),
+                        TB.lastScroll.x - (offsetX - TB.lastMouse.x)
                         TB.lastScroll.y - (offsetY - TB.lastMouse.y)
                     )
 
@@ -137,32 +108,57 @@ window.TB =
                 requestAnimationFrame(TB.mainLoop)
         )())
 
-        $('.board').mouseup (event) =>
+        $('.board-canvas').mouseup (event) =>
             [offsetX, offsetY] = util.getMouseOffset(event)
             TB.dragging = false
             if Math.abs(TB.camera.x - TB.lastScroll.x) < 5 and Math.abs(TB.camera.y - TB.lastScroll.y) < 5
-                TB.actions.handleAction(
-                    TB.currentAction
-                    TB.camera.mouseXToCol(offsetX)
-                    TB.camera.mouseYToRow(offsetY)
-                )
+                col = TB.camera.mouseXToCol(offsetX)
+                row = TB.camera.mouseYToRow(offsetY)
+                if TB.currentAction == null
+                    unit = TB.board.units.get(col, row)
+                    if unit != null and unit.ownerID == TB.myAccount.id
+                        #TB.camera.centerOnCoords(col, row)
+                        TB.currentUnit = unit
+
+                        $('.action-ring').show()
+                        $('.action-ring')
+                            .css('left', TB.camera.worldColToScreenPosX(col) + TB.camera.zoomedGridSize/2)
+                            .css('top', TB.camera.worldRowToScreenPosY(row) + TB.camera.zoomedGridSize/2)
+                else # Do the action
+                    valid = TB.actions.handleAction(TB.currentAction, col, row)
+                    if not valid
+                        TB.actions.overlay = null
+                        TB.currentUnit = null
+                        TB.currentAction = null
+
             requestAnimationFrame(TB.mainLoop)
 
-        $('.board').mouseleave (event) =>
+        $('.btn-undo').click (event) ->
+            TB.actions.undo()
+            requestAnimationFrame(TB.mainLoop)
+
+        $('.btn-action').click (event) ->
+            kind = $(@).data('action')
+            TB.currentAction = kind
+            $('.action-ring').hide()
+            TB.actions.createOverlay(TB.currentUnit, kind)
+            requestAnimationFrame(TB.mainLoop)
+
+        $('.board-canvas').mouseleave (event) =>
             TB.dragging = false
             requestAnimationFrame(TB.mainLoop)
 
-
-        $('.board').mousewheel (event, delta, deltaX, deltaY) =>
+        $('.board-canvas').mousewheel (event, delta, deltaX, deltaY) =>
             [offsetX, offsetY] = util.getMouseOffset(event)
             TB.camera.zoom(offsetX, offsetY, delta)
             requestAnimationFrame(TB.mainLoop)
 
         $(window).resize ->
             TB.camera.resize()
-            $('.board').attr('width', TB.camera.width).attr('height', TB.camera.height)
+            $('.board').css('width', TB.camera.width).css('height', TB.camera.height)
+            $('.board-canvas').attr('width', TB.camera.width).attr('height', TB.camera.height)
             $('.stats-bar').css('width', TB.camera.width)
-            TB.ctx = $('.board').get(0).getContext('2d')
+            TB.ctx = $('.board-canvas').get(0).getContext('2d')
             requestAnimationFrame(TB.mainLoop)
         $(window).trigger('resize')
 
@@ -174,7 +170,6 @@ window.TB =
                 if squareData
                     startCol = event.sectorX * TB.sectorSize
                     startRow = event.sectorY * TB.sectorSize
-                    console.log startCol + ' ' + startRow
                     for rowData, row in squareData.split('\n')
                         for terrainType, col in rowData.split(',')
                             TB.board.addSquare(startCol + col, startRow + row, parseInt(terrainType))
@@ -194,8 +189,9 @@ window.TB =
 
     mainLoop: (timestamp) ->
 
-        TB.board.draw()
+        TB.board.drawFirst()
         TB.actions.draw()
+        TB.board.drawSecond()
         TB.drawCursor()
         #fps = TB.fpsCounter(timestamp)
         #TB.fillOutlinedText(fps + ' FPS', 30, 30)
@@ -206,7 +202,6 @@ window.TB =
 
         screenX = TB.camera.worldColToScreenPosX(TB.activeSquare.col)
         screenY = TB.camera.worldRowToScreenPosY(TB.activeSquare.row)
-        console.log screenX + ' ' + screenY
 
         TB.ctx.save()
         TB.ctx.strokeStyle = 'black'

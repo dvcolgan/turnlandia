@@ -162,8 +162,8 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'util',
     'game',
-    'django_nose',
     'south',
+    'django_nose',
 )
 
 REST_FRAMEWORK = {
@@ -214,10 +214,10 @@ warnings.filterwarnings("ignore", category=exceptions.RuntimeWarning, module='dj
 
 import sys
 if 'test' in sys.argv:
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'turnbased_test'
-    }
+    #DATABASES['default'] = {
+    #    'ENGINE': 'django.db.backends.sqlite3',
+    #    'NAME': 'turnbased_test'
+    #}
     # Greatly speed up password hashing
     PASSWORD_HASHERS = (
         'django.contrib.auth.hashers.MD5PasswordHasher',

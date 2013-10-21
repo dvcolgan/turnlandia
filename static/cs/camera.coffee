@@ -33,9 +33,14 @@ class Camera
     mouseXToCol: (mouseX) -> @pixelToSquareCoord(mouseX + @x)
     mouseYToRow: (mouseY) -> @pixelToSquareCoord(mouseY + @y)
 
+    centerOnCoords: (col, row) ->
+        @x = parseInt((col * @zoomedGridSize + (@zoomedUnitSize/2)) - @width/2)
+        @y = parseInt((row * @zoomedGridSize + (@zoomedUnitSize/2)) - @height/2)
+
+
     resize: ->
-        @width = $(window).width() - 120
-        @height = $(window).height() - 71
+        @width = $(window).width() - 2
+        @height = $(window).height() - 67
 
     zoom: (x, y, delta) ->
         #previousCol = TB.worldToScreenPosX(TB.pixelToSectorCoord(x))

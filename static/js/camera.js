@@ -63,9 +63,14 @@ Camera = (function() {
     return this.pixelToSquareCoord(mouseY + this.y);
   };
 
+  Camera.prototype.centerOnCoords = function(col, row) {
+    this.x = parseInt((col * this.zoomedGridSize + (this.zoomedUnitSize / 2)) - this.width / 2);
+    return this.y = parseInt((row * this.zoomedGridSize + (this.zoomedUnitSize / 2)) - this.height / 2);
+  };
+
   Camera.prototype.resize = function() {
-    this.width = $(window).width() - 120;
-    return this.height = $(window).height() - 71;
+    this.width = $(window).width() - 2;
+    return this.height = $(window).height() - 67;
   };
 
   Camera.prototype.zoom = function(x, y, delta) {

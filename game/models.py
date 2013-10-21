@@ -54,7 +54,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
             validators.RegexValidator(re.compile('^[\w.@+-]+$'), 'Usernames can be at most 25 characters and include letters, numbers and @ . + - _', 'invalid')
         ]
     )
-    email = models.EmailField(blank=True)
+    email = models.EmailField()
     color = models.CharField(max_length=10, blank=True, validators=[
         validators.RegexValidator(re.compile('^#[0-9a-fA-F]{6}$'), 'Enter a valid color.', 'invalid')
     ])
@@ -115,16 +115,20 @@ class TrophyAwarding(models.Model):
 
 class SquareManager(models.Manager):
 
-    def initialize(self):
+    def initialize(self, width, height, superflat=False):
         batch = []
-        for this_row in range(-100, 100):
+        for this_row in range(-height/2, height/2):
             print 'Added 200 squares to the batch', this_row
-            for this_col in range(-100, 100):
+            for this_col in range(-width/2, width/2):
                 if get_object_or_None(self.model, col=this_col, row=this_row) == None:
+                    if superflat:
+                        terrain_type = PLAINS
+                    else:
+                        terrain_type = self.terrain_type_for_square(this_col, this_row)
                     new_square = self.model(
                         col=this_col,
                         row=this_row,
-                        terrain_type=self.terrain_type_for_square(this_col, this_row)
+                        terrain_type=terrain_type
                     )
                     batch.append(new_square)
         print 'Bulk creating squares'
@@ -320,6 +324,11 @@ class SettingManager(models.Manager):
     def get_string(self, name):
         return Setting.objects.get(name=name).value
 
+    def set(self, name, value):
+        s = self.get(name=name)
+        s.value = str(value)
+        s.save()
+
 
 class Setting(models.Model):
     name = models.CharField(max_length=255)
@@ -337,6 +346,86 @@ class Message(models.Model):
     subject = models.CharField(max_length=255)
     body = models.TextField()
     time_sent = models.DateTimeField(auto_now=True)
+
+
+def parse_move(move_path):
+    moves = [step.split(',') for step in move_path.split('|')]
+    for move in moves:
+        move[0] = int(move[0])
+        move[1] = int(move[1])
+    return moves
+
+class ActionManager(models.Manager):
+    def resolve_initial_placements(self, current_turn):
+        for action in self.filter(turn=current_turn, kind='initial'):
+            unit = get_object_or_None(Unit, col=action.col, row=action.row, owner=action.player)
+            if unit == None:
+                Unit.objects.create(
+                    col=action.col,
+                    row=action.row,
+                    owner=action.player,
+                    amount=1
+                )
+            else:
+                unit.amount += 1
+                unit.save()
+
+
+    def resolve_move_units(self, current_turn):
+        actions = self.filter(turn=current_turn, kind='move')
+        moves = []
+        for action in actions:
+            if action.move_path != '':
+                # Sometime figure out what to do if we have an invalid move here
+                units = Unit.objects.filter(col=action.col, row=action.row, owner=action.player)
+                for unit in units:
+                    col, row = parse_move(action.move_path)[-1]
+                    unit.col = col
+                    unit.row = row
+                    unit.save()
+
+        # Merge any units that have moved onto the same square
+        for account in Account.objects.all().prefetch_related('units'):
+            unit_counts = {}
+            for unit in account.units.all():
+                location = (unit.col, unit.row)
+                if location in unit_counts:
+                    unit_counts[location] += 1
+                else:
+                    unit_counts[location] = 1
+            for (col, row), count in unit_counts.iteritems():
+                if count > 1:
+                    units = Unit.objects.filter(col=col, row=row, owner=account)
+                    first_unit = units[0]
+                    for i in range(count):
+                        if i == 0: continue
+                        first_unit.amount += units[i].amount
+                        units[i].delete()
+                    first_unit.save()
+
+    def resolve_build_roads(self, current_turn):
+        actions = self.filter(turn=current_turn, kind='road')
+        for action in actions:
+            square = Square.objects.get(col=action.col, row=action.row)
+            square.terrain_type = ROAD
+            square.save()
+
+    def resolve_clear_forests(self, current_turn):
+        actions = self.filter(turn=current_turn, kind='tree')
+        for action in actions:
+            square = Square.objects.get(col=action.col, row=action.row)
+            square.terrain_type = PLAINS
+            action.player.wood += 1
+            action.player.save()
+            square.save()
+
+    def resolve_recruit_units(self, current_turn):
+        actions = self.filter(turn=current_turn, kind='recruit')
+        for action in actions:
+            print action.col, action.row, action.kind
+            unit = Unit.objects.get(col=action.col, row=action.row, owner=action.player)
+            unit.amount += 1
+            unit.save()
 
 
 ACTION_KINDS = (
@@ -360,6 +449,8 @@ class Action(models.Model):
     move_path = models.CharField(max_length=255, blank=True)
 
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    objects = ActionManager()
 
     def __unicode__(self):
         return self.kind + ' ' + self.move_path

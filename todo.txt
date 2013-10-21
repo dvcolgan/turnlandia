@@ -63,6 +63,7 @@ well trodden paths turn into dirt roads, cobble must be built
 
 
 
+add select_related liberally to the resolve command
 
 
 
@@ -71,6 +72,7 @@ well trodden paths turn into dirt roads, cobble must be built
 
 
 
+have a fixed 10-30 minute window of downtime at 12:00 right after the turn resolves
 wrap the entire resolve command in a transaction
 
 consider using this captcha: http://areyouahuman.com/about-playthru/
@@ -493,8 +495,12 @@ JordanFitz:
 Drake07600:
     Sweet action icons
 
+Bekey2nd:
+    Best nerd to not want to be one
 switch sqlite to postgres for improved performance
 
+Phildo3:
+    Djykstra's Algorithm Masta
 
 
 

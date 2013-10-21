@@ -31,7 +31,7 @@ class CreateAccountForm(forms.ModelForm):
 class SettingsForm(forms.ModelForm):
     class Meta:
         model = Account
-        fields = ('color', 'leader_name', 'people_name')
+        fields = ('color', 'leader_name', 'people_name', 'country_name')
 
 
 class SendMessageForm(forms.ModelForm):

@@ -92,6 +92,19 @@ util =
                 for y, val of yData
                     callback(parseInt(x), parseInt(y), val)
 
+        # Check out all my priority queues
+        iterateIntKeysSorted: (callback) ->
+            for i in [0...@size()]
+                smallest = { x: null, y: null, val: null }
+                for x, yData of @hash
+                    for y, val of yData
+                        if smallest.val == null or val < smallest.val
+                            smallest.x = x
+                            smallest.y = y
+                            smallest.val = val
+                @delete(smallest.x, smallest.y)
+                callback(parseInt(smallest.x), parseInt(smallest.y), smallest.val)
+
         push: (x, y, val) ->
             cur = @get(x, y)
             if $.isArray(cur)

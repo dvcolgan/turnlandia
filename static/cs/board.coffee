@@ -1,15 +1,9 @@
-
-
 class Board
 
     constructor: ->
         @squares = new util.Hash2D()
         @units = new util.Hash2D()
         @unfinalizedSquares = new util.Hash2D()
-        @roadOverlay = new util.Hash2D()
-        @showRoadOverlay = false
-        @clearForestOverlay = new util.Hash2D()
-        @showClearForestOverlay = false
 
     # when a square is first loaded
     #   check all 8 of its neighbors
@@ -104,41 +98,6 @@ class Board
         unit = new Unit(col, row, ownerID, amount)
         @units.set(col, row, unit)
 
-        @roadOverlay.set(unit.col, unit.row, 0)
-
-        for i in [1..6]
-            @roadOverlay.iterateIntKeys (thisCol, thisRow, dist) =>
-                if dist == i-1
-                    east = TB.board.isPassable(thisCol+1, thisRow)
-                    west = TB.board.isPassable(thisCol-1, thisRow)
-                    south = TB.board.isPassable(thisCol, thisRow+1)
-                    north = TB.board.isPassable(thisCol, thisRow-1)
-                    if east then @roadOverlay.set(thisCol+1, thisRow, i)
-                    if west then @roadOverlay.set(thisCol-1, thisRow, i)
-                    if south then @roadOverlay.set(thisCol, thisRow+1, i)
-                    if north then @roadOverlay.set(thisCol, thisRow-1, i)
-
-        @clearForestOverlay.set(unit.col, unit.row, 0)
-
-        for i in [1..6]
-            @clearForestOverlay.iterateIntKeys (thisCol, thisRow, dist) =>
-                if dist == i-1
-                    eastTerrain = TB.board.getTerrainType(thisCol+1, thisRow)
-                    westTerrain = TB.board.getTerrainType(thisCol-1, thisRow)
-                    southTerrain = TB.board.getTerrainType(thisCol, thisRow+1)
-                    northTerrain = TB.board.getTerrainType(thisCol, thisRow-1)
-
-                    east = eastTerrain == 'plains' or eastTerrain == 'forest'
-                    west = westTerrain == 'plains' or westTerrain == 'forest'
-                    south = southTerrain == 'plains' or southTerrain == 'forest'
-                    north = northTerrain == 'plains' or northTerrain == 'forest'
-
-                    if east then @clearForestOverlay.set(thisCol+1, thisRow, i)
-                    if west then @clearForestOverlay.set(thisCol-1, thisRow, i)
-                    if south then @clearForestOverlay.set(thisCol, thisRow+1, i)
-                    if north then @clearForestOverlay.set(thisCol, thisRow-1, i)
-
-
 
     isPassable: (col, row) ->
         terrainType = @getTerrainType(col, row)
@@ -174,7 +133,7 @@ class Board
             return 0
 
 
-    draw: ->
+    drawFirst: ->
         #tilesWide = Math.ceil(TB.camera.width / TB.images.grassImage.width)
         #tilesHigh = Math.ceil(TB.camera.height / TB.images.grassImage.height)
         #xOffset = TB.camera.x
@@ -202,22 +161,23 @@ class Board
                 thisSquare = @squares.get(col, row)
                 if thisSquare
                     thisSquare.draw()
+
+        if TB.actions.overlay
+            for row in [startRow..endRow]
+                for col in [startCol..endCol]
+                    TB.actions.overlay.draw(col, row)
+
+    drawSecond: ->
+        startCol = Math.floor(TB.camera.x/TB.camera.zoomedGridSize)
+        startRow = Math.floor(TB.camera.y/TB.camera.zoomedGridSize)
+
+        endCol = startCol + Math.ceil(TB.camera.width/TB.camera.zoomedGridSize)
+        endRow = startRow + Math.ceil(TB.camera.height/TB.camera.zoomedGridSize)
+
+        for row in [startRow..endRow]
+            for col in [startCol..endCol]
                 thisUnit = @units.get(col, row)
                 if thisUnit
                     thisUnit.draw()
-                if @showRoadOverlay and @roadOverlay.get(col, row) != null and @getTerrainType(col, row) == 'plains'
-                    screenX = TB.camera.worldColToScreenPosX(col)
-                    screenY = TB.camera.worldRowToScreenPosY(row)
-                    TB.ctx.save()
-                    TB.ctx.fillStyle = 'rgba(119,65,27,0.3)'
-                    TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize)
-                    TB.ctx.restore()
 
-                if @showClearForestOverlay and @clearForestOverlay.get(col, row) != null and @getTerrainType(col, row) == 'forest'
-                    screenX = TB.camera.worldColToScreenPosX(col)
-                    screenY = TB.camera.worldRowToScreenPosY(row)
-                    TB.ctx.save()
-                    TB.ctx.fillStyle = 'rgba(0,255,0,0.3)'
-                    TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize)
-                    TB.ctx.restore()
 

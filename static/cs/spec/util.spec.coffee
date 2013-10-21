@@ -56,3 +56,19 @@ describe "the exciting and glorious 2D hash table", ->
                 [7,8,9]
             ]
         )
+
+    it "should prioritize smallest values first when iterating sorted", ->
+        hash = new util.Hash2D()
+
+        hash.set(1, 0, 4)
+        hash.set(2, 1, 8)
+        hash.set(1, 1, 5)
+        hash.set(0, 1, 2)
+        hash.set(2, 2, 9)
+
+        all = []
+        hash.iterateIntKeysSorted (x, y, val) ->
+            all.push [x, y, val]
+
+        expect(all).toEqual([[0,1,2],[1,0,4],[1,1,5],[2,1,8],[2,2,9]])
+

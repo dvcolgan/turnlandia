@@ -34,7 +34,7 @@ describe("the exciting and glorious 2D hash table", function() {
     });
     return expect(all).toEqual([['1', '2', 1], ['2', '3', 1], ['3', '4', 1], ['4', '5', 1]]);
   });
-  return it("should return a properly formed 2D array when I call values2D", function() {
+  it("should return a properly formed 2D array when I call values2D", function() {
     var hash;
     hash = new util.Hash2D();
     hash.set(0, 0, 1);
@@ -47,5 +47,19 @@ describe("the exciting and glorious 2D hash table", function() {
     hash.set(2, 1, 8);
     hash.set(2, 2, 9);
     return expect(hash.values2D()).toEqual([[1, 2, 3], [4, 5, 6], [7, 8, 9]]);
+  });
+  return it("should prioritize smallest values first when iterating sorted", function() {
+    var all, hash;
+    hash = new util.Hash2D();
+    hash.set(1, 0, 4);
+    hash.set(2, 1, 8);
+    hash.set(1, 1, 5);
+    hash.set(0, 1, 2);
+    hash.set(2, 2, 9);
+    all = [];
+    hash.iterateIntKeysSorted(function(x, y, val) {
+      return all.push([x, y, val]);
+    });
+    return expect(all).toEqual([[0, 1, 2], [1, 0, 4], [1, 1, 5], [2, 1, 8], [2, 2, 9]]);
   });
 });

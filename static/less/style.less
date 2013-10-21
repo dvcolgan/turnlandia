@@ -153,39 +153,6 @@ input[type="text"], input[type="password"] {
         }
     }
 }
-.game-toolbar {
-    float: left;
-    margin-top: 5px;
-    width: 110px;
-    padding: 0 3px;
-}
-.btn-action {
-    width: 100%;
-    margin: 0;
-    margin-bottom: 5px;
-    padding: 4px;
-    height: 52px;
-    .icon {
-        background-image: url(/static/images/action-icons.png);
-        width: 32px;
-        height: 32px;
-        margin-top: 6px;
-        margin-left: 2px;
-        display: block;
-        float: left;
-    }
-    &.btn-move     .icon { background-position:   0    0; }
-    &.btn-road     .icon { background-position: -32px  0; }
-    &.btn-city     .icon { background-position: -64px  0; }
-    &.btn-recruit  .icon { background-position: -96px  0; }
-    &.btn-scavenge .icon { background-position: -128px 0; }
-    &.btn-tree     .icon { background-position: -160px 0; }
-    &.btn-mine     .icon { background-position: -192px 0; }
-    &.btn-plant    .icon { background-position: -224px 0; }
-    &.btn-undo     .icon { background-position: -256px 0; }
-    &.btn-attack   .icon { background-position: -288px 0; }
-    &.btn-initial  .icon { background-position: -320px 0; }
-}
 
 .header {
     height: 35px;
@@ -195,7 +162,7 @@ input[type="text"], input[type="password"] {
     .left-menu, .right-menu {
         line-height: 35px;
         margin-right: 5px;
-        margin-left: 5px;
+        margin-left: 10px;
         li {
             a {
                 color: white;
@@ -242,14 +209,15 @@ input[type="text"], input[type="password"] {
 
 
 .board {
-    cursor: crosshair;
     display: block;
-    float: left;
+    margin-left:1px;
     position: relative;
     font-size: 16px;
-    margin-left: 2px;
-    box-shadow: 0 8px 8px black;
     overflow: hidden;
+    .board-canvas {
+        cursor: crosshair;
+        display: block;
+    }
 }
 
 
@@ -416,11 +384,10 @@ body.messages {
     position: relative;
     float: left;
     height: 26px;
-    width: 200px;
+    width: 100%;
     background-color: #222;
     box-shadow:inset 0px 1px 0px 0px #888;
     margin-top: 5px;
-    margin-left: 2px;
     color: white;
     font-size: 14px;
     border-top-left-radius: 6px;
@@ -444,5 +411,75 @@ body.messages {
         }
         &:last-child {
         }
+    }
+}
+
+.action-ring {
+    @ring-size: 207px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -207px/2;
+    margin-top: -207px/2;
+    width: @ring-size;
+    height: @ring-size;
+    z-index: 200;
+    border-radius: @ring-size/2;
+    border: 16px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 0 10px black;
+    text-align: center;
+    .inner {
+        box-shadow: inset 0 0 50px black;
+        width: 100%;
+        height: 100%;
+        border-radius: 86px;
+    }
+    .btn-action {
+        font-size: 14px;
+        border-radius: 39px;
+        line-height: 14px;
+        width: 75px;
+        margin: 0;
+        padding: 4px;
+        height: 75px;
+        position: absolute;
+        border-width: 2px;
+        &:hover {
+            cursor: pointer;
+        }
+        .icon {
+            background-image: url(/static/images/action-icons.png);
+            width: 32px;
+            height: 32px;
+            display: block;
+            margin: 0 auto;
+        }
+        @offset: 50px;
+        @radius: 120px;
+        .btn-position (@index, @count) {
+            top:  sin(@index * (360/@count) * (pi()/180) - pi()/2) * @radius + @offset;
+            left: cos(@index * (360/@count) * (pi()/180) - pi()/2) * @radius + @offset;
+        }
+        &.btn-move     { .btn-position(0, 9); }
+        &.btn-road     { .btn-position(1, 9); }
+        &.btn-city     { .btn-position(2, 9); }
+        &.btn-recruit  { .btn-position(3, 9); }
+        &.btn-scavenge { .btn-position(4, 9); }
+        &.btn-tree     { .btn-position(5, 9); }
+        &.btn-mine     { .btn-position(6, 9); }
+        &.btn-plant    { .btn-position(7, 9); }
+        &.btn-attack   { .btn-position(8, 9); }
+
+        &.btn-move     .icon { background-position:   0    0; }
+        &.btn-road     .icon { background-position: -32px  0; }
+        &.btn-city     .icon { background-position: -64px  0; }
+        &.btn-recruit  .icon { background-position: -96px  0; }
+        &.btn-scavenge .icon { background-position: -128px 0; }
+        &.btn-tree     .icon { background-position: -160px 0; }
+        &.btn-mine     .icon { background-position: -192px 0; }
+        &.btn-plant    .icon { background-position: -224px 0; }
+        &.btn-undo     .icon { background-position: -256px 0; }
+        &.btn-attack   .icon { background-position: -288px 0; }
+        &.btn-initial  .icon { background-position: -320px 0; }
     }
 }

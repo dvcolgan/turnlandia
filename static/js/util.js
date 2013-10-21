@@ -148,6 +148,33 @@ util = {
       return _results;
     };
 
+    Hash2D.prototype.iterateIntKeysSorted = function(callback) {
+      var i, smallest, val, x, y, yData, _i, _ref, _ref1, _results;
+      _results = [];
+      for (i = _i = 0, _ref = this.size(); 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        smallest = {
+          x: null,
+          y: null,
+          val: null
+        };
+        _ref1 = this.hash;
+        for (x in _ref1) {
+          yData = _ref1[x];
+          for (y in yData) {
+            val = yData[y];
+            if (smallest.val === null || val < smallest.val) {
+              smallest.x = x;
+              smallest.y = y;
+              smallest.val = val;
+            }
+          }
+        }
+        this["delete"](smallest.x, smallest.y);
+        _results.push(callback(parseInt(smallest.x), parseInt(smallest.y), smallest.val));
+      }
+      return _results;
+    };
+
     Hash2D.prototype.push = function(x, y, val) {
       var cur;
       cur = this.get(x, y);

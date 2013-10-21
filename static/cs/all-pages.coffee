@@ -11,50 +11,6 @@ getParameterByName = (name) ->
 
 
 ALL_PAGES =
-    world_names: [
-        'Atlantis',
-        'Azeroth',
-        'Camelot',
-        'Narnia',
-        'Hyrule',
-        'Middle-earth',
-        'The Neverhood',
-        'Rapture',
-        'Terabithia',
-        'Kanto',
-        'The Grand Line',
-        'Tatooine',
-        'Naboo',
-        'Pandora',
-        'Corneria',
-        'Termina',
-        'Xen',
-        'City 17',
-        'Tokyo',
-        'Ithica',
-        'Peru',
-    ]
-    player_names: [
-        ['Frodo Baggins', 'Shire Hobbits'],
-        ['Elrond', 'Mirkwood Elves'],
-        ['Durin Darkhammer', 'Moria Dwarves'],
-        ['Ness', 'Eagleland'],
-        ['Daphnes Nohansen Hyrule', 'Hylians'],
-        ['Aragorn son of Arathorn', 'Gondorians'],
-        ['Strong Bad', 'Strongbadia'],
-        ['Captain Homestar', 'The Team'],
-        ['T-Rex', 'Dinosaurs'],
-        ['Refrigerator', 'Kitchen Appliances'],
-        ['The Burger King', 'Fast Foodies'],
-        ['Larry King Live', 'Interviewees'],
-        ['King', 'Mimigas'],
-        ['Luke Skywalker', 'The Rebel Alliance'],
-        ['Darth Vader', 'The Empire'],
-        ['Jean-Luc Picard', 'The Enterprise'],
-        ['The Borg Queen', 'The Borg'],
-        ['Bowser', 'Koopas'],
-    ]
-
     home: ->
 
     create_account: ->
@@ -66,6 +22,7 @@ ALL_PAGES =
             vm = @
             vm.leaderName = ko.observable($('#id_leader_name').val())
             vm.peopleName = ko.observable($('#id_people_name').val())
+            vm.countryName = ko.observable($('#id_country_name').val())
             null
 
         ko.applyBindings(new settingsViewModel)
@@ -96,7 +53,7 @@ ALL_PAGES =
             
 
     game: ->
-        TB.init('.board')
+        TB.initialize()
 
 
 

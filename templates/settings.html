@@ -32,12 +32,25 @@
         </div>
 
         <div class="form-group">
+            <label class="control-label">Your Country's Name? <small><em>What do you call the land you hail from?</em></small></label>
+            {{ form.country_name|attr:'placeholder: Hyrule, Free Country USA, Tatooine, Pylea, etc'|add_class:"form-control"|attr:'data-bind: value: countryName, valueUpdate: "keyup"' }}
+            {{ form.country_name.errors }}
+        </div>
+
+        <div class="form-group">
             <label class="control-label">Your People Name? <small><em>What do you call the people of your country?</em></small></label>
             {{ form.people_name|attr:'placeholder: Hylians, Hobbits, Koopas, etc'|add_class:"form-control"|attr:'data-bind: value: peopleName, valueUpdate: "keyup"' }}
             {{ form.people_name.errors }}
         </div>
 
-        <p><span data-bind="visible: leaderName()">Hail</span> <span data-bind="text: leaderName"></span><span data-bind="visible: leaderName() && peopleName()">, leader of the <span data-bind="text: peopleName"></span></span><span data-bind="visible: leaderName()">!</span></p>
+        <p>
+            <span data-bind="visible: leaderName()">Hail</span>
+            <span data-bind="text: leaderName"></span><span data-bind="visible: leaderName() && peopleName()">, 
+                leader of the 
+                    <span data-bind="text: peopleName">
+                    </span></span>
+                    <span data-bind="visible: countryName"> of <span data-bind="text: countryName"></span><span
+                        data-bind="visible: leaderName">!</span></p>
 
 
 

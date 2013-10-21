@@ -32,7 +32,7 @@ Unit = (function() {
     TB.ctx.fill();
     TB.ctx.stroke();
     TB.ctx.textAlign = 'center';
-    TB.fillOutlinedText(this.amount, textX, textY);
+    TB.fillOutlinedText("" + this.amount, textX, textY);
     return TB.ctx.restore();
   };
 

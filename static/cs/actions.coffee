@@ -1,4 +1,6 @@
 
+
+
 class Action
     isValid: ->
         return false
@@ -52,7 +54,6 @@ class MoveAction extends Action
             @moves = []
             @started = false
             @finished = false
-            $('.btn-move').addClass('btn-yellow').find('span').text('Move To?')
 
             @possibleMoves = new util.Hash2D()
             @squareTraversalCosts = new util.Hash2D()
@@ -79,7 +80,6 @@ class MoveAction extends Action
         if @started == false
             @started = true
         else if @finished == false
-            $('.btn-move').removeClass('btn-yellow').find('span').html('Move<br/>Unit')
             @finished = true
             @movePath = @moves.join('|')
             super()
@@ -234,19 +234,11 @@ class BuildRoadAction extends Action
 
     isValid: ->
         for action in TB.actions.actions
-            if action.col == @col and action.row == @row and action.kind == 'road'
-                console.log 'road already going to be built there'
-                return false
+            if action.col == @col and action.row == @row and action.kind == 'road' then return false
         terrainType = TB.board.getTerrainType(@col, @row)
-        if terrainType != 'plains'
-            console.log 'terrain not plains'
-            return false
-        if TB.myAccount.wood < 10
-            console.log 'not enough wood'
-            return false
-        if TB.board.roadOverlay.get(@col, @row) == null
-            console.log 'square not in overlay'
-            return false
+        if terrainType != 'plains' then return false
+        if TB.myAccount.wood < 10 then return false
+        if TB.actions.overlay.positions.get(@col, @row) == null then return false
         return true
 
     draw: ->
@@ -268,7 +260,7 @@ class ClearForestAction extends Action
             if action.col == @col and action.row == @row and action.kind == 'tree' then return false
         terrainType = TB.board.getTerrainType(@col, @row)
         if terrainType != 'forest' then return false
-        if TB.board.clearForestOverlay.get(@col, @row) == null then return false
+        if TB.actions.overlay.positions.get(@col, @row) == null then return false
         return true
 
     draw: ->
@@ -298,6 +290,44 @@ class BuildCityAction extends Action
     draw: ->
 
 
+class Overlay
+    constructor: (unit, validationFn) ->
+        @positions = new util.Hash2D()
+
+        possibleMovements = new util.Hash2D()
+        lastSquares = new util.Hash2D()
+        lastSquares.set(unit.col, unit.row, 0)
+
+        uncheckedSquares = new util.Hash2D()
+        for i in [1..6]
+            lastSquares.iterateIntKeysSorted (col, row, dist) =>
+                for [thisCol, thisRow] in [[col+1,row], [col-1,row], [col,row+1], [col,row-1]]
+
+                    if possibleMovements.get(thisCol, thisRow) == null and TB.board.isPassable(thisCol, thisRow)
+                        traversalCost = TB.board.traversalCost(thisCol, thisRow)
+                        prevDist = uncheckedSquares.get(thisCol, thisRow, dist + traversalCost)
+                        if prevDist == null or prevDist > dist + traversalCost
+                            uncheckedSquares.set(thisCol, thisRow, dist + traversalCost)
+
+            possibleMovements.concat(uncheckedSquares)
+            lastSquares = uncheckedSquares
+            uncheckedSquares = new util.Hash2D()
+
+        possibleMovements.iterateIntKeys (thisCol, thisRow, dist) =>
+            console.log thisCol + ' ' + thisRow + ' ' + dist
+            if validationFn(thisCol, thisRow) and dist <= 6
+                @positions.set(thisCol, thisRow, dist)
+
+    draw: (col, row) ->
+        if @positions.get(col, row) != null
+            screenX = TB.camera.worldColToScreenPosX(col)
+            screenY = TB.camera.worldRowToScreenPosY(row)
+            TB.ctx.save()
+            TB.ctx.fillStyle = 'rgba(255,255,255,0.3)'
+            TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize)
+            TB.ctx.restore()
+
+
 
 
 
@@ -305,6 +335,16 @@ class BuildCityAction extends Action
 class ActionManager
     constructor: ->
         @actions = []
+        @overlay = null
+
+    createOverlay: (unit, kind) ->
+        fn = if kind == 'move'
+            (col, row) -> TB.board.isPassable(col, row)
+        else if kind == 'tree'
+            (col, row) -> TB.board.getTerrainType(col, row) == 'forest'
+        else if kind == 'road'
+            (col, row) -> TB.board.getTerrainType(col, row) == 'plains'
+        if fn then @overlay = new Overlay unit, fn
 
     undo: ->
         @actions.pop()
@@ -322,7 +362,6 @@ class ActionManager
         if action.kind == 'move' and not action.finished
             console.log 'canceling'
             @actions.pop()
-            $('.btn-move').removeClass('btn-yellow').find('span').html('Move<br/>Unit')
         else
             console.log action.kind + ' ' + action.finished
 
@@ -372,8 +411,9 @@ class ActionManager
         if action.isValid()
             action.save()
             @actions.push(action)
+            return true
         else
-            console.log 'invalid move'
+            return false
 
 
     count: -> @actions.length

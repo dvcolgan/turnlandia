@@ -18,25 +18,6 @@
 
 {% block content %}
 
-
-<div class="game-toolbar">
-    <button class="btn btn-blue btn-action btn-initial"  data-action="initial"  type="button"><i class="icon"></i>Initial<br/>Camps</button>
-    
-    <button class="btn btn-blue btn-action btn-move"     data-action="move"     type="button"><i class="icon"></i><span>Move<br/>Unit</span></button>
-    <button class="btn btn-blue btn-action btn-attack"     data-action="attack"     type="button"><i class="icon"></i><div style="margin-top: 8px">Attack</div></button>
-    <button class="btn btn-blue btn-action btn-road"     data-action="road"     type="button"><i class="icon"></i>Build<br/>Road</button>
-    <button class="btn btn-blue btn-action btn-city"     data-action="city"     type="button"><i class="icon"></i>Build<br/>City</button>
-
-    <button class="btn btn-blue btn-action btn-recruit"  data-action="recruit"  type="button"><i class="icon"></i>Recruit<br/>Unit</button>
-    <button class="btn btn-blue btn-action btn-scavenge" data-action="scavenge" type="button"><i class="icon"></i>Find<br/>Food</button>
-    <button class="btn btn-blue btn-action btn-tree"     data-action="tree"     type="button"><i class="icon"></i>Clear<br/>Forest</button>
-    <button class="btn btn-blue btn-action btn-mine"     data-action="mine"     type="button"><i class="icon"></i>Mine<br/>Ore</button>
-
-    <button class="btn btn-blue btn-action btn-plant"    data-action="plant"    type="button"><i class="icon"></i>Plant<br/>Forest</button>
-    <button class="btn btn-blue btn-action btn-undo"     data-action="undo"     type="button"><i class="icon"></i><div style="margin-top: 8px">Undo</div></button>
-
-</div>
-
 <div class="stats-bar">
     <div class="stat-box pull-left">Total Units: <span id="total-unit-display"></span></div>
     <div class="stat-box pull-left">Wood: <span id="wood-display">100</span></div>
@@ -45,7 +26,29 @@
     <div class="stat-box pull-left">Money: <span id="money-display">100</span></div>
     <div class="stat-box pull-left">Turn: {{ day_counter }}</div>
 </div>
-<canvas class="board"></canvas>
+
+<div class="board">
+    <div class="action-ring">
+        <div class="inner">
+
+            <button class="btn btn-action btn-move"     data-action="move"     type="button"><i class="icon"></i><span>Move<br/>Unit</span></button>
+            <button class="btn btn-action btn-attack"   data-action="attack"   type="button"><i class="icon"></i>Attack<br/>Unit</button>
+            <button class="btn btn-action btn-road"     data-action="road"     type="button"><i class="icon"></i>Build<br/>Road</button>
+            <button class="btn btn-action btn-city"     data-action="city"     type="button"><i class="icon"></i>Build<br/>City</button>
+
+            <button class="btn btn-action btn-recruit"  data-action="recruit"  type="button"><i class="icon"></i>Recruit<br/>Unit</button>
+            <button class="btn btn-action btn-scavenge" data-action="scavenge" type="button"><i class="icon"></i>Find<br/>Food</button>
+            <button class="btn btn-action btn-tree"     data-action="tree"     type="button"><i class="icon"></i>Clear<br/>Forest</button>
+            <button class="btn btn-action btn-mine"     data-action="mine"     type="button"><i class="icon"></i>Mine<br/>Ore</button>
+
+            <button class="btn btn-action btn-plant"    data-action="plant"    type="button"><i class="icon"></i>Plant<br/>Forest</button>
+        </div>
+    </div>
+    {% comment %}
+                <button class="btn btn-action btn-undo"     data-action="undo"     type="button"><i class="icon"></i>Undo</button>
+                {% endcomment %}
+    <canvas class="board-canvas"></canvas>
+</div>
 
 <div id="preload">
     <img id="othertiles-image" src="{{ STATIC_URL }}images/newtiles.png" />
@@ -55,7 +58,6 @@
     <img id="mountains-tiles" src="{{ STATIC_URL }}images/mountains-tiles.png" />
     <img id="road-tiles" src="{{ STATIC_URL }}images/dirtroad-tiles.png" />
     <img id="city-tiles" src="{{ STATIC_URL }}images/city-tiles.png" />
-
 </div>
 
 {% endblock %}
