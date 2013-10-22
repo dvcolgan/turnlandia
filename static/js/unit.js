@@ -12,6 +12,7 @@ Unit = (function() {
 
   Unit.prototype.draw = function() {
     var rgb, screenX, screenY, textX, textY, unitRadius, unitX, unitY;
+    console.log(this.col + ' ' + this.row + ' ' + this.ownerColor);
     screenX = TB.camera.worldToScreenPosX(this.col * TB.gridSize);
     screenY = TB.camera.worldToScreenPosY(this.row * TB.gridSize);
     unitX = screenX + TB.camera.zoomedGridSize / 2;

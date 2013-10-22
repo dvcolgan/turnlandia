@@ -93,7 +93,7 @@ util =
                     callback(parseInt(x), parseInt(y), val)
 
         # Check out all my priority queues
-        iterateIntKeysSorted: (callback) ->
+        priorityPopAllIntKeys: (callback) ->
             for i in [0...@size()]
                 smallest = { x: null, y: null, val: null }
                 for x, yData of @hash

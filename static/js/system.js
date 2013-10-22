@@ -139,12 +139,15 @@ window.TB = {
       TB.actions.undo();
       return requestAnimationFrame(TB.mainLoop);
     });
-    $('.btn-action').click(function(event) {
+    $('.btn-action').not('.btn-undo').click(function(event) {
       var kind;
       kind = $(this).data('action');
       TB.currentAction = kind;
       $('.action-ring').hide();
       TB.actions.createOverlay(TB.currentUnit, kind);
+      if (kind === 'move') {
+        TB.actions.beginMove(TB.currentUnit.col, TB.currentUnit.row);
+      }
       return requestAnimationFrame(TB.mainLoop);
     });
     $('.board-canvas').mouseleave(function(event) {

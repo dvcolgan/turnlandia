@@ -1,3 +1,24 @@
+Categories of actions:
+Ones that simply take an action point:
+    Recruit unit
+    find food
+
+Ones that change the terrain:
+    Build road
+    Build city
+    Clear forest
+    Mine ore
+    Plant forest
+
+Move
+Attack
+
+
+surrender units button
+
+turnlandia ai contest
+
+
 Instead of moving a unit on top a thing and directly building the thing with the unit, units are camps of units that can build things inside of their sphere of influence
 
 Each unit is now called a camp

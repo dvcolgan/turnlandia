@@ -355,6 +355,36 @@ def parse_move(move_path):
         move[1] = int(move[1])
     return moves
 
+
+
+
+class UnitManager(models.Manager):
+
+    def get_region(self, col, row, width, height):
+        upper_col = int(col + width)
+        lower_col = int(col)
+        upper_row = int(row + height)
+        lower_row = int(row)
+
+        return (self.model.objects.filter(col__lt=upper_col)
+                                  .filter(col__gte=lower_col)
+                                  .filter(row__lt=upper_row)
+                                  .filter(row__gte=lower_row)
+                                  .order_by('row', 'col'))
+
+class Unit(models.Model):
+    col = models.IntegerField()
+    row = models.IntegerField()
+    owner = models.ForeignKey(Account, related_name='units')
+    amount = models.IntegerField(default=0)
+
+    objects = UnitManager()
+
+    def __unicode__(self):
+        return "(%d, %d) %s (%d)" % (self.col, self.row, self.owner, self.amount)
+
+
+
 class ActionManager(models.Manager):
     def resolve_initial_placements(self, current_turn):
         for action in self.filter(turn=current_turn, kind='initial'):
@@ -426,8 +456,6 @@ class ActionManager(models.Manager):
             unit = Unit.objects.get(col=action.col, row=action.row, owner=action.player)
             unit.amount += 1
             unit.save()
-
-
 ACTION_KINDS = (
     ('initial', 'Initial Placement'),
     ('move', 'Move Units'),
@@ -440,6 +468,7 @@ ACTION_KINDS = (
 # Squares are more or less read only until the turn resolves, before that we deal with actions
 class Action(models.Model):
     player = models.ForeignKey(Account, related_name='actions')
+    unit = models.ForeignKey(Unit, related_name='actions', null=True, blank=True)
     turn = models.IntegerField()
 
     kind = models.CharField(max_length=30, choices=ACTION_KINDS)
@@ -481,32 +510,6 @@ class Action(models.Model):
 
 
 
-
-
-class UnitManager(models.Manager):
-
-    def get_region(self, col, row, width, height):
-        upper_col = int(col + width)
-        lower_col = int(col)
-        upper_row = int(row + height)
-        lower_row = int(row)
-
-        return (self.model.objects.filter(col__lt=upper_col)
-                                  .filter(col__gte=lower_col)
-                                  .filter(row__lt=upper_row)
-                                  .filter(row__gte=lower_row)
-                                  .order_by('row', 'col'))
-
-class Unit(models.Model):
-    col = models.IntegerField()
-    row = models.IntegerField()
-    owner = models.ForeignKey(Account, related_name='units')
-    amount = models.IntegerField(default=0)
-
-    objects = UnitManager()
-
-    def __unicode__(self):
-        return "(%d, %d) %s (%d)" % (self.col, self.row, self.owner, self.amount)
 
 
 

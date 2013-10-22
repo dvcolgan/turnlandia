@@ -3,6 +3,7 @@ class Unit
         @ownerColor = TB.accounts[@ownerID].color
 
     draw: ->
+        console.log @col + ' ' + @row + ' ' + @ownerColor
         screenX = TB.camera.worldToScreenPosX(@col * TB.gridSize)
         screenY = TB.camera.worldToScreenPosY(@row * TB.gridSize)
 

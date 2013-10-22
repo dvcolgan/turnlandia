@@ -584,15 +584,15 @@ body.messages .accordion {
   top: 162.76311449430898px;
   left: 91.04241719908026px;
 }
-.action-ring .btn-action.btn-tree {
+.action-ring .btn-action.btn-undo {
   top: 162.763114494309px;
   left: 8.957582800919752px;
 }
-.action-ring .btn-action.btn-mine {
+.action-ring .btn-action.btn-tree {
   top: 110.00000000000004px;
   left: -53.92304845413261px;
 }
-.action-ring .btn-action.btn-plant {
+.action-ring .btn-action.btn-mine {
   top: 29.162218679968397px;
   left: -68.17693036146497px;
 }

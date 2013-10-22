@@ -15,8 +15,13 @@
     <p>Compete with more than <strong>{{ player_count }}</strong> other players to control the most territory on an infinite board.</p>
 
     <div class="home-btn-container cf">
-        <a href="{% url 'create-account' %}" class="btn btn-green pull-left">Sign Up Now for Free!</a>
-        <a href="{% url 'login' %}" class="btn btn-blue pull-right">Log In!</a>
+        <div class="cf">
+            <a href="{% url 'create-account' %}" class="btn btn-green pull-left">Sign Up Now for Free!</a>
+            <a href="{% url 'login' %}" class="btn btn-blue pull-right">Log In!</a>
+        </div>
+
+        <p>Turnlandia has been development almost entirely before a live studio audience on Twitch.tv.  Tune in almost every day to see the new developments.</p>
+        <object type="application/x-shockwave-flash" height="321" width="520" id="live_embed_player_flash" data="http://www.twitch.tv/widgets/live_embed_player.swf?channel=dvcolgan" bgcolor="#000000"><param name="allowFullScreen" value="true" /><param name="allowScriptAccess" value="always" /><param name="allowNetworking" value="all" /><param name="movie" value="http://www.twitch.tv/widgets/live_embed_player.swf" /><param name="flashvars" value="hostname=www.twitch.tv&channel=dvcolgan&auto_play=true&start_volume=25" /></object><a href="http://www.twitch.tv/dvcolgan" class="trk" style="padding:2px 0px 4px; display:block; width:345px; font-weight:normal; font-size:10px; text-decoration:underline; text-align:center;">Watch live video from dvcolgan on www.twitch.tv</a>
     </div>
 
 </div>

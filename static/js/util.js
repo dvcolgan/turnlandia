@@ -148,7 +148,7 @@ util = {
       return _results;
     };
 
-    Hash2D.prototype.iterateIntKeysSorted = function(callback) {
+    Hash2D.prototype.priorityPopAllIntKeys = function(callback) {
       var i, smallest, val, x, y, yData, _i, _ref, _ref1, _results;
       _results = [];
       for (i = _i = 0, _ref = this.size(); 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {

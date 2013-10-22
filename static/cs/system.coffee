@@ -137,11 +137,14 @@ window.TB =
             TB.actions.undo()
             requestAnimationFrame(TB.mainLoop)
 
-        $('.btn-action').click (event) ->
+        $('.btn-action').not('.btn-undo').click (event) ->
             kind = $(@).data('action')
             TB.currentAction = kind
             $('.action-ring').hide()
             TB.actions.createOverlay(TB.currentUnit, kind)
+            if kind == 'move'
+                TB.actions.beginMove(TB.currentUnit.col, TB.currentUnit.row)
+
             requestAnimationFrame(TB.mainLoop)
 
         $('.board-canvas').mouseleave (event) =>

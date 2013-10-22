@@ -1,12 +1,11 @@
-
-
-
 class Action
     isValid: ->
         return false
 
     save: ->
         actionData =
+            unitCol: @unit.col
+            unitRow: @unit.row
             kind: @kind
             col: @col
             row: @row
@@ -46,101 +45,56 @@ class MoveAction extends Action
     constructor: (@col, @row, @movePath) ->
         @kind = 'move'
         @name = 'Move'
-        if @movePath
-            @started = true
+        if @movePath == undefined
+            @finished = false
+            @moves = []
+        else
             @finished = true
             @moves = @parseMovePath(@movePath)
-        else
-            @moves = []
-            @started = false
-            @finished = false
-
-            @possibleMoves = new util.Hash2D()
-            @squareTraversalCosts = new util.Hash2D()
-            
-            @possibleMoves.set(@col, @row, 0)
-            for i in [1..6]
-                @possibleMoves.iterateIntKeys (col, row, dist) =>
-                    if dist == i-1
-                        east = TB.board.isPassable(col+1, row)
-                        west = TB.board.isPassable(col-1, row)
-                        south = TB.board.isPassable(col, row+1)
-                        north = TB.board.isPassable(col, row-1)
-                        if east then @possibleMoves.set(col+1, row, i)
-                        if west then @possibleMoves.set(col-1, row, i)
-                        if south then @possibleMoves.set(col, row+1, i)
-                        if north then @possibleMoves.set(col, row-1, i)
-
-            @possibleMoves.delete(@col, @row)
-            @possibleMoves.iterateIntKeys (col, row, dist) =>
-                @squareTraversalCosts.set(col, row, TB.board.traversalCost(col, row))
-
 
     save: ->
-        if @started == false
-            @started = true
-        else if @finished == false
-            @finished = true
-            @movePath = @moves.join('|')
-            super()
-
+        @finished = true
+        @movePath = @moves.join('|')
+        super()
 
     isValid: ->
-        return TB.board.units.get(@col, @row) and
-               TB.board.units.get(@col, @row).amount > 0 and
-               TB.board.units.get(@col, @row).ownerID == TB.myAccount.id
+        true
 
-    update: (mouseX, mouseY) ->
-        TB.mouse.x
-        for action in @actions
-            if action.type == 'move'
-                action.update(mouseX, mouseY)
-
+    finish: (endCol, endRow) ->
+        
     draw: ->
-        if not @finished
-            @possibleMoves.iterate (col, row) =>
-
-                screenX = TB.camera.worldColToScreenPosX(col)
-                screenY = TB.camera.worldRowToScreenPosY(row)
-                TB.ctx.save()
-                TB.ctx.fillStyle = 'rgba(255,255,255,0.3)'
-                TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize)
-                TB.ctx.restore()
-                
-
+        
         # Calculate the move on the fly from the unit to the cursor
         if not @finished
-            try
-                centerCol = @col
-                centerRow = @row
-                mouseColDiff = TB.activeSquare.col - centerCol
-                mouseRowDiff = TB.activeSquare.row - centerRow
+            centerCol = @col
+            centerRow = @row
+            mouseColDiff = TB.activeSquare.col - centerCol
+            mouseRowDiff = TB.activeSquare.row - centerRow
 
-                matrix = [[0,0,0,0,0,0,0,0,0,0,0,0,0]
-                          [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                          [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                          [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                          [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                          [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                          [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                          [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                          [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                          [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                          [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                          [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                          [0,0,0,0,0,0,0,0,0,0,0,0,0]]
+            matrix = [[0,0,0,0,0,0,0,0,0,0,0,0,0]
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                      [0,0,0,0,0,0,0,0,0,0,0,0,0]]
 
-                @squareTraversalCosts.iterateIntKeys (col, row, cost) =>
-                    matrix[6 + (col - centerCol)][6 + (row - centerRow)] = cost
-                graph = new Graph(matrix)
+            TB.actions.overlay.terrainCosts.iterateIntKeys (col, row, cost) =>
+                matrix[6 + (col - centerCol)][6 + (row - centerRow)] = cost
 
-                path = astar.search(graph.nodes, graph.nodes[6][6], graph.nodes[6+mouseColDiff][6+mouseRowDiff])
-                @moves = []
-                for node in path
-                    @moves.push [node.x - 6 + centerCol, node.y - 6 + centerRow]
-            catch err
-                #@moves = []
+            graph = new Graph(matrix)
 
+            path = astar.search(graph.nodes, graph.nodes[6][6], graph.nodes[6+mouseColDiff][6+mouseRowDiff])
+            @moves = []
+            for node in path
+                @moves.push [node.x - 6 + centerCol, node.y - 6 + centerRow]
+            #@moves = []
 
         # Draw the arrows for the move
         prev = 'start'
@@ -202,7 +156,6 @@ class MoveAction extends Action
         if dir1 == 'north' and dir2 == 'south' or dir1 == 'south' and dir2 == 'north' then return [parseInt(TB.gridSize*2), parseInt(TB.gridSize*3)]
 
 
-
 class RecruitUnitAction extends Action
 
     constructor: (@col, @row) ->
@@ -249,6 +202,7 @@ class BuildRoadAction extends Action
         TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize)
         TB.ctx.restore()
 
+
 class ClearForestAction extends Action
 
     constructor: (@col, @row) ->
@@ -293,6 +247,7 @@ class BuildCityAction extends Action
 class Overlay
     constructor: (unit, validationFn) ->
         @positions = new util.Hash2D()
+        @terrainCosts = new util.Hash2D()
 
         possibleMovements = new util.Hash2D()
         lastSquares = new util.Hash2D()
@@ -300,7 +255,7 @@ class Overlay
 
         uncheckedSquares = new util.Hash2D()
         for i in [1..6]
-            lastSquares.iterateIntKeysSorted (col, row, dist) =>
+            lastSquares.priorityPopAllIntKeys (col, row, dist) =>
                 for [thisCol, thisRow] in [[col+1,row], [col-1,row], [col,row+1], [col,row-1]]
 
                     if possibleMovements.get(thisCol, thisRow) == null and TB.board.isPassable(thisCol, thisRow)
@@ -314,9 +269,10 @@ class Overlay
             uncheckedSquares = new util.Hash2D()
 
         possibleMovements.iterateIntKeys (thisCol, thisRow, dist) =>
-            console.log thisCol + ' ' + thisRow + ' ' + dist
             if validationFn(thisCol, thisRow) and dist <= 6
                 @positions.set(thisCol, thisRow, dist)
+                @terrainCosts.set(thisCol, thisRow, TB.board.traversalCost(thisCol, thisRow))
+
 
     draw: (col, row) ->
         if @positions.get(col, row) != null
@@ -336,6 +292,7 @@ class ActionManager
     constructor: ->
         @actions = []
         @overlay = null
+        @moveInProgress = null
 
     createOverlay: (unit, kind) ->
         fn = if kind == 'move'
@@ -357,13 +314,9 @@ class ActionManager
             error: (response) ->
                 $('html').text("Error undoing move.  Please check your internet connection and try again: #{JSON.stringify(response)}")
 
-    cancelMove: ->
-        action = _.last(@actions)
-        if action.kind == 'move' and not action.finished
-            console.log 'canceling'
-            @actions.pop()
-        else
-            console.log action.kind + ' ' + action.finished
+
+    beginMove: (col, row) ->
+        @moveInProgress = new MoveAction(col, row)
 
     loadFromJSON: (json) ->
         for action in json
@@ -380,57 +333,43 @@ class ActionManager
 
 
     handleAction: (kind, col, row) ->
-        console.log kind
         if kind == 'initial'
             action = new InitialPlacementAction(col, row)
         if kind == 'move'
-            action = _.last(@actions)
-            if action # If there are previous actions
-                if action.kind == 'move' # then we need to pop this off and readd it
-                    action = @actions.pop()
-                    if action.finished
-                        @actions.push(action)
-                        action = new MoveAction(col, row)
-
-                else
-                    # If the last action was not a move, make a new one
-                    action = new MoveAction(col, row)
-            else
-                # If there are no previous actions then just make a new move
-                action = new MoveAction(col, row)
+            action = @moveInProgress
+            action.col = TB.currentUnit.col
+            action.row = TB.currentUnit.row
         if kind == 'road'
             action = new BuildRoadAction(col, row)
         if kind == 'city'
             action = new BuildCityAction(col, row)
         if kind == 'tree'
             action = new ClearForestAction(col, row)
-        if kind == 'recruit'
-            action = new RecruitUnitAction(col, row)
+            #if kind == 'recruit'
+            #    action = new RecruitUnitAction(col, row)
 
+        action.unit = TB.currentUnit
 
         if action.isValid()
             action.save()
             @actions.push(action)
-            return true
-        else
             return false
+        else
+            return true
 
 
     count: -> @actions.length
 
 
     draw: ->
-        TB.ctx.textAlign = 'right'
-        TB.fillOutlinedText("This Turn's Actions", TB.camera.width - 16, 24)
         initialPlacements = new util.Hash2D()
-
 
         if not TB.isInitialPlacement
             for action, i in @actions
-                TB.fillOutlinedText(action.name, TB.camera.width - 16, 24 + i*24 + 24)
                 action.draw()
+            if @moveInProgress
+                @moveInProgress.draw()
         else
-            console.log 'is initial placement'
             for action, i in @actions
                 TB.fillOutlinedText(action.name, TB.camera.width - 16, 24 + i*24 + 24)
 
