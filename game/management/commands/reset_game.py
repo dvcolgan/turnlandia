@@ -8,7 +8,7 @@ class Command(BaseCommand):
     help = 'Run this command when the game starts and whenever the turn is over.'
 
     def handle(self, *args, **options):
-        print 'ARE YOU SURE YOU WANT TO DELETE THE GAME?'
+        print 'ARE YOU SURE YOU WANT TO DESTRUCTIONIFICATIONIZE THE GAME?'
         time.sleep(1)
         print "I'm going to wait 10 seconds before doing so."
         for i in range(10):
@@ -23,6 +23,6 @@ class Command(BaseCommand):
 
         print 'Setting up new game...'
         Setting.objects.create(name='turn', value='1')
-        Square.objects.initialize()
+        Square.objects.initialize(100, 100)
         print 'Done!'
 
