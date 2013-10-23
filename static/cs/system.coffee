@@ -114,6 +114,7 @@ window.TB =
             if Math.abs(TB.camera.x - TB.lastScroll.x) < 5 and Math.abs(TB.camera.y - TB.lastScroll.y) < 5
                 col = TB.camera.mouseXToCol(offsetX)
                 row = TB.camera.mouseYToRow(offsetY)
+                if TB.isInitialPlacement then TB.currentAction = 'initial'
                 if TB.currentAction == null
                     unit = TB.board.units.get(col, row)
                     if unit != null and unit.ownerID == TB.myAccount.id
@@ -125,9 +126,9 @@ window.TB =
                             .css('left', TB.camera.worldColToScreenPosX(col) + TB.camera.zoomedGridSize/2)
                             .css('top', TB.camera.worldRowToScreenPosY(row) + TB.camera.zoomedGridSize/2)
                 else # Do the action
+                    console.log 'doing action'
                     valid = TB.actions.handleAction(TB.currentAction, col, row)
                     if not valid
-                        TB.actions.overlay = null
                         TB.currentUnit = null
                         TB.currentAction = null
 

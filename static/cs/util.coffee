@@ -1,8 +1,8 @@
 util =
-    calculate_distance: (x1, y1, x2, y2) ->
+    calculateDistance: (x1, y1, x2, y2) ->
         Math.sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1))
 
-    random_choice: (collection) ->
+    randomChoice: (collection) ->
         collection[Math.floor(Math.random()*collection.length)]
 
     sum: (arr) -> _.reduce(arr, (sum, num) -> sum + num)
@@ -146,6 +146,11 @@ util =
 
         clear: ->
             @hash = {}
+
+        clone: ->
+            clone = new util.Hash2D()
+            clone.hash = @hash
+            return 
 
 
 

@@ -2,10 +2,10 @@
 var Hash2D, util;
 
 util = {
-  calculate_distance: function(x1, y1, x2, y2) {
+  calculateDistance: function(x1, y1, x2, y2) {
     return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
   },
-  random_choice: function(collection) {
+  randomChoice: function(collection) {
     return collection[Math.floor(Math.random() * collection.length)];
   },
   sum: function(arr) {
@@ -247,6 +247,12 @@ util = {
 
     Hash2D.prototype.clear = function() {
       return this.hash = {};
+    };
+
+    Hash2D.prototype.clone = function() {
+      var clone;
+      clone = new util.Hash2D();
+      clone.hash = this.hash;
     };
 
     return Hash2D;

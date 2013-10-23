@@ -18,6 +18,7 @@ surrender units button
 
 turnlandia ai contest
 
+add signs
 
 Instead of moving a unit on top a thing and directly building the thing with the unit, units are camps of units that can build things inside of their sphere of influence
 

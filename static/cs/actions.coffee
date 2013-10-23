@@ -1,11 +1,10 @@
 class Action
+
     isValid: ->
         return false
 
     save: ->
         actionData =
-            unitCol: @unit.col
-            unitRow: @unit.row
             kind: @kind
             col: @col
             row: @row
@@ -58,12 +57,9 @@ class MoveAction extends Action
         super()
 
     isValid: ->
-        true
-
-    finish: (endCol, endRow) ->
+        @moves.length > 0
         
     draw: ->
-        
         # Calculate the move on the fly from the unit to the cursor
         if not @finished
             centerCol = @col
@@ -289,6 +285,12 @@ class Overlay
 
 
 class ActionManager
+    @MAPPINGS:
+        'initial': InitialPlacementAction
+        'move': MoveAction
+        'road': BuildRoadAction
+        'tree': ClearForestAction
+        'recruit': RecruitUnitAction
     constructor: ->
         @actions = []
         @overlay = null
@@ -315,47 +317,31 @@ class ActionManager
                 $('html').text("Error undoing move.  Please check your internet connection and try again: #{JSON.stringify(response)}")
 
 
-    beginMove: (col, row) ->
-        @moveInProgress = new MoveAction(col, row)
+    beginMove: (col, row) -> @moveInProgress = new MoveAction(col, row)
 
     loadFromJSON: (json) ->
-        for action in json
-            if action.kind == 'initial'
-                @actions.push(new InitialPlacementAction(action.col, action.row))
-            if action.kind == 'move'
-                @actions.push(new MoveAction(action.col, action.row, action.movePath))
-            if action.kind == 'road'
-                @actions.push(new BuildRoadAction(action.col, action.row))
-            if action.kind == 'tree'
-                @actions.push(new ClearForestAction(action.col, action.row))
-            if action.kind == 'recruit'
-                @actions.push(new RecruitUnitAction(action.col, action.row))
-
+        for actionData in json
+            action_class = ActionManager.MAPPINGS[actionData.kind]
+            @actions.push(new action_class(actionData.col, actionData.row, actionData.movePath))
 
     handleAction: (kind, col, row) ->
-        if kind == 'initial'
-            action = new InitialPlacementAction(col, row)
-        if kind == 'move'
-            action = @moveInProgress
-            action.col = TB.currentUnit.col
-            action.row = TB.currentUnit.row
-        if kind == 'road'
-            action = new BuildRoadAction(col, row)
-        if kind == 'city'
-            action = new BuildCityAction(col, row)
-        if kind == 'tree'
-            action = new ClearForestAction(col, row)
-            #if kind == 'recruit'
-            #    action = new RecruitUnitAction(col, row)
+        action = new ActionManager.MAPPINGS[kind](col, row)
 
-        action.unit = TB.currentUnit
+        if kind == 'move'
+            action.col = @moveInProgress.col
+            action.row = @moveInProgress.row
+            action.moves = @moveInProgress.moves
+
+        #action.unit = TB.currentUnit
 
         if action.isValid()
             action.save()
             @actions.push(action)
-            return false
-        else
             return true
+        else
+            @moveInProgress = null
+            @overlay = null
+            return false
 
 
     count: -> @actions.length

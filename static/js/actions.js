@@ -13,8 +13,6 @@ Action = (function() {
   Action.prototype.save = function() {
     var actionData;
     actionData = {
-      unitCol: this.unit.col,
-      unitRow: this.unit.row,
       kind: this.kind,
       col: this.col,
       row: this.row,
@@ -102,10 +100,8 @@ MoveAction = (function(_super) {
   };
 
   MoveAction.prototype.isValid = function() {
-    return true;
+    return this.moves.length > 0;
   };
-
-  MoveAction.prototype.finish = function(endCol, endRow) {};
 
   MoveAction.prototype.draw = function() {
     var centerCol, centerRow, graph, i, matrix, mouseColDiff, mouseRowDiff, next, nextCol, nextRow, node, path, prev, thisCol, thisRow, _i, _j, _len, _len1, _ref, _ref1, _results,
@@ -443,6 +439,14 @@ Overlay = (function() {
 })();
 
 ActionManager = (function() {
+  ActionManager.MAPPINGS = {
+    'initial': InitialPlacementAction,
+    'move': MoveAction,
+    'road': BuildRoadAction,
+    'tree': ClearForestAction,
+    'recruit': RecruitUnitAction
+  };
+
   function ActionManager() {
     this.actions = [];
     this.overlay = null;
@@ -481,57 +485,32 @@ ActionManager = (function() {
   };
 
   ActionManager.prototype.loadFromJSON = function(json) {
-    var action, _i, _len, _results;
+    var actionData, action_class, _i, _len, _results;
     _results = [];
     for (_i = 0, _len = json.length; _i < _len; _i++) {
-      action = json[_i];
-      if (action.kind === 'initial') {
-        this.actions.push(new InitialPlacementAction(action.col, action.row));
-      }
-      if (action.kind === 'move') {
-        this.actions.push(new MoveAction(action.col, action.row, action.movePath));
-      }
-      if (action.kind === 'road') {
-        this.actions.push(new BuildRoadAction(action.col, action.row));
-      }
-      if (action.kind === 'tree') {
-        this.actions.push(new ClearForestAction(action.col, action.row));
-      }
-      if (action.kind === 'recruit') {
-        _results.push(this.actions.push(new RecruitUnitAction(action.col, action.row)));
-      } else {
-        _results.push(void 0);
-      }
+      actionData = json[_i];
+      action_class = ActionManager.MAPPINGS[actionData.kind];
+      _results.push(this.actions.push(new action_class(actionData.col, actionData.row, actionData.movePath)));
     }
     return _results;
   };
 
   ActionManager.prototype.handleAction = function(kind, col, row) {
     var action;
-    if (kind === 'initial') {
-      action = new InitialPlacementAction(col, row);
-    }
+    action = new ActionManager.MAPPINGS[kind](col, row);
     if (kind === 'move') {
-      action = this.moveInProgress;
-      action.col = TB.currentUnit.col;
-      action.row = TB.currentUnit.row;
+      action.col = this.moveInProgress.col;
+      action.row = this.moveInProgress.row;
+      action.moves = this.moveInProgress.moves;
     }
-    if (kind === 'road') {
-      action = new BuildRoadAction(col, row);
-    }
-    if (kind === 'city') {
-      action = new BuildCityAction(col, row);
-    }
-    if (kind === 'tree') {
-      action = new ClearForestAction(col, row);
-    }
-    action.unit = TB.currentUnit;
     if (action.isValid()) {
       action.save();
       this.actions.push(action);
-      return false;
-    } else {
       return true;
+    } else {
+      this.moveInProgress = null;
+      this.overlay = null;
+      return false;
     }
   };
 
