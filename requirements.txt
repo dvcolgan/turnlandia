@@ -5,6 +5,8 @@ MarkupSafe==0.18
 Pillow==2.2.1
 South==0.8.2
 blessings==1.5.1
+django-bootstrap-form==3.0
+django-bootstrap-forms==0.1
 django-debug-toolbar==0.9.4
 django-filter==0.7
 django-nose==1.2
