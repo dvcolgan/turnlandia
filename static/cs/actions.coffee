@@ -1,13 +1,17 @@
 class Action
+    constructor: (@kind, @col, @row, @unitCol, @unitRow, @movePath) ->
 
     isValid: ->
         return false
 
     save: ->
+
         actionData =
             kind: @kind
             col: @col
             row: @row
+            unit_col: @unitCol
+            unit_row: @unitRow
             move_path: @movePath
 
         $.ajax
@@ -15,15 +19,17 @@ class Action
             method: 'POST'
             dataType: 'json'
             data: actionData
-            success: (response) ->
+            success: (response) =>
+
             error: (response) ->
                 alert("Error saving move.  Please check your internet connection and try again: #{JSON.stringify(response)}")
 
+        unit = TB.board.units.get(@unitCol, @unitRow)
+        unit.actionsLeft -= 1
+        return unit.actionsLeft
+
 
 class InitialPlacementAction extends Action
-    constructor: (@col, @row) ->
-        @kind = 'initial'
-        @name = 'Initial Placement'
 
     isValid: ->
         return TB.actions.count() < 8 and TB.board.isPassable(@col, @row) and TB.board.getUnitCount(@col, @row) == 0
@@ -37,19 +43,17 @@ class InitialPlacementAction extends Action
 
 
 class MoveAction extends Action
-    parseMovePath: (movePath) ->
-        moves = (coord.split(',') for coord in movePath.split('|'))
-        _.map(moves, (coords) -> [parseInt(coords[0]), parseInt(coords[1])])
-
-    constructor: (@col, @row, @movePath) ->
-        @kind = 'move'
-        @name = 'Move'
+    constructor: (@kind, @col, @row, @unitCol, @unitRow, @movePath) ->
         if @movePath == undefined
             @finished = false
             @moves = []
         else
             @finished = true
             @moves = @parseMovePath(@movePath)
+
+    parseMovePath: (movePath) ->
+        moves = (coord.split(',') for coord in movePath.split('|'))
+        _.map(moves, (coords) -> [parseInt(coords[0]), parseInt(coords[1])])
 
     save: ->
         @finished = true
@@ -62,41 +66,44 @@ class MoveAction extends Action
     draw: ->
         # Calculate the move on the fly from the unit to the cursor
         if not @finished
-            centerCol = @col
-            centerRow = @row
-            mouseColDiff = TB.activeSquare.col - centerCol
-            mouseRowDiff = TB.activeSquare.row - centerRow
+            try
+                centerCol = @unitCol
+                centerRow = @unitRow
+                mouseColDiff = TB.activeSquare.col - centerCol
+                mouseRowDiff = TB.activeSquare.row - centerRow
 
-            matrix = [[0,0,0,0,0,0,0,0,0,0,0,0,0]
-                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                      [0,0,0,0,0,0,0,0,0,0,0,0,0]
-                      [0,0,0,0,0,0,0,0,0,0,0,0,0]]
+                matrix = [[0,0,0,0,0,0,0,0,0,0,0,0,0]
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0]
+                        [0,0,0,0,0,0,0,0,0,0,0,0,0]]
 
-            TB.actions.overlay.terrainCosts.iterateIntKeys (col, row, cost) =>
-                matrix[6 + (col - centerCol)][6 + (row - centerRow)] = cost
+                TB.actions.overlay.terrainCosts.iterateIntKeys (col, row, cost) =>
+                    matrix[6 + (col - centerCol)][6 + (row - centerRow)] = cost
 
-            graph = new Graph(matrix)
+                graph = new Graph(matrix)
 
-            path = astar.search(graph.nodes, graph.nodes[6][6], graph.nodes[6+mouseColDiff][6+mouseRowDiff])
-            @moves = []
-            for node in path
-                @moves.push [node.x - 6 + centerCol, node.y - 6 + centerRow]
-            #@moves = []
+                path = astar.search(graph.nodes, graph.nodes[6][6], graph.nodes[6+mouseColDiff][6+mouseRowDiff])
+                @moves = []
+                for node in path
+                    @moves.push [node.x - 6 + centerCol, node.y - 6 + centerRow]
+                #@moves = []
+            catch
+                @moves = []
 
         # Draw the arrows for the move
         prev = 'start'
         next = 'end'
-        thisCol = @col
-        thisRow = @row
+        thisCol = @unitCol
+        thisRow = @unitRow
         for [nextCol,nextRow], i in @moves
 
             if nextCol > thisCol then next = 'east'
@@ -154,10 +161,6 @@ class MoveAction extends Action
 
 class RecruitUnitAction extends Action
 
-    constructor: (@col, @row) ->
-        @kind = 'recruit'
-        @name = 'Recruit Unit'
-
     isValid: ->
         for action in TB.actions.actions
             if action.col == @col and action.row == @row and action.kind == 'recruit' then return false
@@ -176,10 +179,6 @@ class RecruitUnitAction extends Action
 
 
 class BuildRoadAction extends Action
-
-    constructor: (@col, @row) ->
-        @kind = 'road'
-        @name = 'Build Road'
 
     isValid: ->
         for action in TB.actions.actions
@@ -200,10 +199,6 @@ class BuildRoadAction extends Action
 
 
 class ClearForestAction extends Action
-
-    constructor: (@col, @row) ->
-        @kind = 'tree'
-        @name = 'Clear Forest'
 
     isValid: ->
         for action in TB.actions.actions
@@ -231,13 +226,13 @@ class ClearForestAction extends Action
 
 class BuildCityAction extends Action
 
-    constructor: (@col, @row) ->
-        @kind = 'city'
-        @name = 'Build city'
-
     isValid: -> TB.myAccount.wood >= 10 and TB.board.isPassable(@col, @row)
 
     draw: ->
+
+
+
+
 
 
 class Overlay
@@ -296,6 +291,15 @@ class ActionManager
         @overlay = null
         @moveInProgress = null
 
+
+    unitsActionCount: (col, row) ->
+        count = 0
+        for action in @actions
+            if action.unitCol == col and action.unitRow == row
+                count++
+        return count
+
+
     createOverlay: (unit, kind) ->
         fn = if kind == 'move'
             (col, row) -> TB.board.isPassable(col, row)
@@ -306,43 +310,54 @@ class ActionManager
         if fn then @overlay = new Overlay unit, fn
 
     undo: ->
-        @actions.pop()
+        action = @actions.pop()
+        if action
+            unit = TB.board.units.get(action.unitCol, action.unitRow)
+            if unit
+                unit.actionsLeft++
 
-        $.ajax
-            url: '/api/undo/'
-            method: 'POST'
-            dataType: 'json'
-            success: (response) ->
-            error: (response) ->
-                $('html').text("Error undoing move.  Please check your internet connection and try again: #{JSON.stringify(response)}")
+            $.ajax
+                url: '/api/undo/'
+                method: 'POST'
+                dataType: 'json'
+                success: (response) ->
+                error: (response) ->
+                    $('html').text("Error undoing move.  Please check your internet connection and try again: #{JSON.stringify(response)}")
 
 
-    beginMove: (col, row) -> @moveInProgress = new MoveAction(col, row)
+    beginMove: (col, row) -> @moveInProgress = new MoveAction('move', col, row, col, row)
 
     loadFromJSON: (json) ->
         for actionData in json
             action_class = ActionManager.MAPPINGS[actionData.kind]
-            @actions.push(new action_class(actionData.col, actionData.row, actionData.movePath))
+            @actions.push(
+                new action_class(
+                    actionData.kind,
+                    actionData.col, actionData.row,
+                    actionData.unitCol, actionData.unitRow,
+                    actionData.movePath))
+                    #unit = TB.board.units.get(actionData.unitCol, actionData.unitRow)
+                    #unit.actionsLeft -= 1
 
-    handleAction: (kind, col, row) ->
-        action = new ActionManager.MAPPINGS[kind](col, row)
+    handleAction: (kind, col, row, unitCol, unitRow) ->
+        action = new ActionManager.MAPPINGS[kind](kind, col, row, unitCol, unitRow)
 
-        if kind == 'move'
-            action.col = @moveInProgress.col
-            action.row = @moveInProgress.row
-            action.moves = @moveInProgress.moves
-
-        #action.unit = TB.currentUnit
+        if kind == 'move' then action.moves = @moveInProgress.moves
 
         if action.isValid()
-            action.save()
+            actionsLeft = action.save()
             @actions.push(action)
+            console.log actionsLeft > 0
+            more = (actionsLeft > 0)
+        else
+            more = false
+        
+        if more
             return true
         else
             @moveInProgress = null
             @overlay = null
             return false
-
 
     count: -> @actions.length
 
@@ -357,8 +372,6 @@ class ActionManager
                 @moveInProgress.draw()
         else
             for action, i in @actions
-                TB.fillOutlinedText(action.name, TB.camera.width - 16, 24 + i*24 + 24)
-
                 if TB.isInitialPlacement
                     initialPlacements.increment(action.col, action.row)
 

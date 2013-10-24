@@ -269,6 +269,8 @@ def api_action(request):
 
     serializer = ActionSerializer(data=request.DATA)
     print request.DATA
+    print serializer.object
+    print serializer.data
 
     if serializer.is_valid():
 

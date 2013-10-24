@@ -72,7 +72,6 @@ window.TB =
 
 
     registerEventHandlers: ->
-
         $('.board-canvas').mousedown (event) =>
             $('.action-ring').hide()
             event.preventDefault()
@@ -127,7 +126,7 @@ window.TB =
                             .css('top', TB.camera.worldRowToScreenPosY(row) + TB.camera.zoomedGridSize/2)
                 else # Do the action
                     console.log 'doing action'
-                    valid = TB.actions.handleAction(TB.currentAction, col, row)
+                    valid = TB.actions.handleAction(TB.currentAction, col, row, TB.currentUnit.col, TB.currentUnit.row)
                     if not valid
                         TB.currentUnit = null
                         TB.currentAction = null
@@ -140,11 +139,15 @@ window.TB =
 
         $('.btn-action').not('.btn-undo').click (event) ->
             kind = $(@).data('action')
-            TB.currentAction = kind
             $('.action-ring').hide()
-            TB.actions.createOverlay(TB.currentUnit, kind)
-            if kind == 'move'
-                TB.actions.beginMove(TB.currentUnit.col, TB.currentUnit.row)
+            if TB.currentUnit.actionsLeft > 0
+                TB.currentAction = kind
+                TB.actions.createOverlay(TB.currentUnit, kind)
+                if kind == 'move'
+                    TB.actions.beginMove(TB.currentUnit.col, TB.currentUnit.row)
+            else
+                TB.currentUnit = null
+                TB.currentAction = null
 
             requestAnimationFrame(TB.mainLoop)
 
@@ -192,7 +195,6 @@ window.TB =
 
 
     mainLoop: (timestamp) ->
-
         TB.board.drawFirst()
         TB.actions.draw()
         TB.board.drawSecond()
@@ -218,7 +220,6 @@ window.TB =
         TB.fillOutlinedText(TB.activeSquare.col + ',' + TB.activeSquare.row, textX, textY)
 
 
-
     fillOutlinedText: (text, screenX, screenY) ->
         TB.ctx.save()
         TB.ctx.font = 'bold 16px Arial'
@@ -230,4 +231,3 @@ window.TB =
         TB.ctx.fillStyle = 'white'
         TB.ctx.fillText(text, screenX, screenY)
         TB.ctx.restore()
-

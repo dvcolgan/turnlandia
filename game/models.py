@@ -405,14 +405,22 @@ class ActionManager(models.Manager):
         actions = self.filter(turn=current_turn, kind='move')
         moves = []
         for action in actions:
-            if action.move_path != '':
-                # Sometime figure out what to do if we have an invalid move here
-                units = Unit.objects.filter(col=action.col, row=action.row, owner=action.player)
-                for unit in units:
-                    col, row = parse_move(action.move_path)[-1]
-                    unit.col = col
-                    unit.row = row
-                    unit.save()
+            # Sometime figure out what to do if we have an invalid
+            # move here - no the moves should all have been validated when they were saved
+            unit = Unit.objects.get(col=action.unit_col, row=action.unit_row, owner=action.player)
+            unit.amount -= 1
+            if unit.amount > 0:
+                unit.save()
+            else:
+                unit.delete()
+
+            # This will need to change at some point to take into account the movement path
+            dest_unit = get_object_or_None(Unit, col=action.col, row=action.row, owner=action.player)
+            if dest_unit == None:
+                dest_unit = Unit.objects.create(col=action.col, row=action.row, owner=action.player, amount=1)
+            else:
+                dest_unit.amount += 1
+                dest_unit.save()
 
         # Merge any units that have moved onto the same square
         for account in Account.objects.all().prefetch_related('units'):
@@ -452,7 +460,6 @@ class ActionManager(models.Manager):
     def resolve_recruit_units(self, current_turn):
         actions = self.filter(turn=current_turn, kind='recruit')
         for action in actions:
-            print action.col, action.row, action.kind
             unit = Unit.objects.get(col=action.col, row=action.row, owner=action.player)
             unit.amount += 1
             unit.save()
@@ -468,12 +475,17 @@ ACTION_KINDS = (
 # Squares are more or less read only until the turn resolves, before that we deal with actions
 class Action(models.Model):
     player = models.ForeignKey(Account, related_name='actions')
-    unit = models.ForeignKey(Unit, related_name='actions', null=True, blank=True)
     turn = models.IntegerField()
 
     kind = models.CharField(max_length=30, choices=ACTION_KINDS)
+
+    # Represents the col and row of the effect of the action
     col = models.IntegerField()
     row = models.IntegerField()
+
+    # The location of the unit which is doing this action
+    unit_col = models.IntegerField()
+    unit_row = models.IntegerField()
 
     move_path = models.CharField(max_length=255, blank=True)
 

@@ -129,7 +129,7 @@ window.TB = {
           }
         } else {
           console.log('doing action');
-          valid = TB.actions.handleAction(TB.currentAction, col, row);
+          valid = TB.actions.handleAction(TB.currentAction, col, row, TB.currentUnit.col, TB.currentUnit.row);
           if (!valid) {
             TB.currentUnit = null;
             TB.currentAction = null;
@@ -145,11 +145,16 @@ window.TB = {
     $('.btn-action').not('.btn-undo').click(function(event) {
       var kind;
       kind = $(this).data('action');
-      TB.currentAction = kind;
       $('.action-ring').hide();
-      TB.actions.createOverlay(TB.currentUnit, kind);
-      if (kind === 'move') {
-        TB.actions.beginMove(TB.currentUnit.col, TB.currentUnit.row);
+      if (TB.currentUnit.actionsLeft > 0) {
+        TB.currentAction = kind;
+        TB.actions.createOverlay(TB.currentUnit, kind);
+        if (kind === 'move') {
+          TB.actions.beginMove(TB.currentUnit.col, TB.currentUnit.row);
+        }
+      } else {
+        TB.currentUnit = null;
+        TB.currentAction = null;
       }
       return requestAnimationFrame(TB.mainLoop);
     });

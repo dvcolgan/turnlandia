@@ -2,6 +2,8 @@ class Unit
     constructor: (@col, @row, @ownerID, @amount) ->
         @ownerColor = TB.accounts[@ownerID].color
 
+        @actionsLeft = @amount - TB.actions.unitsActionCount(@col, @row)
+
     draw: ->
         screenX = TB.camera.worldToScreenPosX(@col * TB.gridSize)
         screenY = TB.camera.worldToScreenPosY(@row * TB.gridSize)
@@ -27,5 +29,5 @@ class Unit
         TB.ctx.fill()
         TB.ctx.stroke()
         TB.ctx.textAlign = 'center'
-        TB.fillOutlinedText("#{@amount}", textX, textY)
+        TB.fillOutlinedText("#{@actionsLeft}/#{@amount}", textX, textY)
         TB.ctx.restore()

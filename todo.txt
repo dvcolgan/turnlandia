@@ -13,11 +13,13 @@ Ones that change the terrain:
 Move
 Attack
 
+investigate fabric for automated deployment
 
 surrender units button
 
 turnlandia ai contest
 
+add a time slider on the top of the screen that lets you view the last 5 or so turns
 add signs
 
 Instead of moving a unit on top a thing and directly building the thing with the unit, units are camps of units that can build things inside of their sphere of influence

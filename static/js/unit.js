@@ -8,6 +8,7 @@ Unit = (function() {
     this.ownerID = ownerID;
     this.amount = amount;
     this.ownerColor = TB.accounts[this.ownerID].color;
+    this.actionsLeft = this.amount - TB.actions.unitsActionCount(this.col, this.row);
   }
 
   Unit.prototype.draw = function() {
@@ -32,7 +33,7 @@ Unit = (function() {
     TB.ctx.fill();
     TB.ctx.stroke();
     TB.ctx.textAlign = 'center';
-    TB.fillOutlinedText("" + this.amount, textX, textY);
+    TB.fillOutlinedText("" + this.actionsLeft + "/" + this.amount, textX, textY);
     return TB.ctx.restore();
   };
 
