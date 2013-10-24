@@ -32,7 +32,7 @@ class Action
 class InitialPlacementAction extends Action
 
     isValid: ->
-        return TB.actions.count() < 8 and TB.board.isPassable(@col, @row) and TB.board.getUnitCount(@col, @row) == 0
+        return TB.actions.count() < 8 and TB.board.isPassable(@unitCol, @unitRow) and TB.board.getUnitCount(@unitCol, @unitRow) == 0
 
     save: ->
         super()

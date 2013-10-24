@@ -129,10 +129,14 @@ window.TB = {
           }
         } else {
           console.log('doing action');
-          valid = TB.actions.handleAction(TB.currentAction, col, row, TB.currentUnit.col, TB.currentUnit.row);
-          if (!valid) {
-            TB.currentUnit = null;
-            TB.currentAction = null;
+          if (TB.currentAction === 'initial') {
+            TB.actions.handleAction(TB.currentAction, col, row, col, row);
+          } else {
+            valid = TB.actions.handleAction(TB.currentAction, col, row, TB.currentUnit.col, TB.currentUnit.row);
+            if (!valid) {
+              TB.currentUnit = null;
+              TB.currentAction = null;
+            }
           }
         }
       }

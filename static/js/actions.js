@@ -56,7 +56,7 @@ InitialPlacementAction = (function(_super) {
   }
 
   InitialPlacementAction.prototype.isValid = function() {
-    return TB.actions.count() < 8 && TB.board.isPassable(this.col, this.row) && TB.board.getUnitCount(this.col, this.row) === 0;
+    return TB.actions.count() < 8 && TB.board.isPassable(this.unitCol, this.unitRow) && TB.board.getUnitCount(this.unitCol, this.unitRow) === 0;
   };
 
   InitialPlacementAction.prototype.save = function() {
