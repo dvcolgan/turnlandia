@@ -3,12 +3,6 @@
 {% block title %}Play that Game{% endblock %}
 
 {% block head %}
-<style type="text/css">
-    #canvas {
-        display: block;
-        margin: 0 auto;
-    }
-</style>
 {% endblock %}
 
 {% block foot %}
@@ -18,28 +12,20 @@
 
 {% block content %}
 
-<div class="stats-bar">
-    <div class="stat-box pull-left">Total Units: <span id="total-unit-display"></span></div>
-    <div class="stat-box pull-left">Wood: <span id="wood-display">100</span></div>
-    <div class="stat-box pull-left">Food: <span id="food-display">100</span></div>
-    <div class="stat-box pull-left">Ore: <span id="ore-display">100</span></div>
-    <div class="stat-box pull-left">Money: <span id="money-display">100</span></div>
-    <div class="stat-box pull-left">Turn: {{ day_counter }}</div>
-</div>
 
 <div class="board">
     <div class="action-ring">
         <div class="inner">
 
-            <button class="btn btn-action btn-move"     data-action="move"     type="button"><i class="icon"></i><span>Move<br/>Unit</span></button>
-            <button class="btn btn-action btn-yellow btn-attack"   data-action="attack"   type="button"><i class="icon"></i>Attack<br/>Unit</button>
-            <button class="btn btn-action btn-road"     data-action="road"     type="button"><i class="icon"></i>Build<br/>Road</button>
-            <button class="btn btn-action btn-yellow btn-city"     data-action="city"     type="button"><i class="icon"></i>Build<br/>City</button>
-            <button class="btn btn-action btn-undo"     data-action="undo"     type="button"><i class="icon"></i>Undo</button>
-            <button class="btn btn-action btn-recruit"  data-action="recruit"  type="button"><i class="icon"></i>Recruit<br/>Unit</button>
-            <button class="btn btn-action btn-yellow btn-scavenge" data-action="scavenge" type="button"><i class="icon"></i>Find<br/>Food</button>
-            <button class="btn btn-action btn-tree"     data-action="tree"     type="button"><i class="icon"></i>Clear<br/>Forest</button>
-            <button class="btn btn-action btn-yellow btn-mine"     data-action="mine"     type="button"><i class="icon"></i>Mine<br/>Ore</button>
+            <button class="btn btn-inverse btn-action btn-move"                data-action="move"     type="button"><i class="icon"></i><span>Move<br/>Unit</span></button>
+            <button class="btn btn-danger btn-action btn-attack"   data-action="attack"   type="button"><i class="icon"></i>Attack<br/>Unit</button>
+            <button class="btn btn-inverse btn-action btn-road"                data-action="road"     type="button"><i class="icon"></i>Build<br/>Road</button>
+            <button class="btn btn-inverse btn-action btn-city"     data-action="city"     type="button"><i class="icon"></i>Build<br/>City</button>
+            <button class="btn btn-inverse btn-action btn-undo"                data-action="undo"     type="button"><i class="icon"></i>Undo</button>
+            <button class="btn btn-danger btn-action btn-recruit"             data-action="recruit"  type="button"><i class="icon"></i>Recruit<br/>Unit</button>
+            <button class="btn btn-danger btn-action btn-scavenge" data-action="scavenge" type="button"><i class="icon"></i>Find<br/>Food</button>
+            <button class="btn btn-inverse btn-action btn-tree"                data-action="tree"     type="button"><i class="icon"></i>Clear<br/>Forest</button>
+            <button class="btn btn-danger btn-action btn-mine"     data-action="mine"     type="button"><i class="icon"></i>Mine<br/>Ore</button>
 
         </div>
     </div>
@@ -47,6 +33,15 @@
     {% comment %}
             <button class="btn btn-action btn-plant"    data-action="plant"    type="button"><i class="icon"></i>Plant<br/>Forest</button>
             {% endcomment %}
+</div>
+
+<div class="stats-bar">
+    <div class="stat-box pull-left total-unit-display"><i class="icon"></i> Units: <span></span></div>
+    <div class="stat-box pull-left wood-display"      ><i class="icon"></i> Wood: <span></span></div>
+    <div class="stat-box pull-left food-display"      ><i class="icon"></i> Food: <span></span></div>
+    <div class="stat-box pull-left ore-display"       ><i class="icon"></i> Ore: <span></span></div>
+    <div class="stat-box pull-left money-display"     ><i class="icon"></i> Money: <span></span></div>
+    <div class="stat-box pull-left turn-display"      ><i class="icon"></i> Turn: {{ day_counter }}</div>
 </div>
 
 <div id="preload">

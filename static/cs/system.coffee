@@ -53,11 +53,11 @@ window.TB =
             #TB.fpsCounter = util.makeFPSCounter(20)
             TB.myAccount = data.account
 
-            $('#total-unit-display').text(data.totalUnits)
-            $('#wood-display').text(data.account.wood)
-            $('#food-display').text(data.account.food)
-            $('#ore-display').text(data.account.ore)
-            $('#money-display').text(data.account.money)
+            $('.total-unit-display span').text(data.totalUnits)
+            $('.wood-display span').text(data.account.wood)
+            $('.food-display span').text(data.account.food)
+            $('.ore-display span').text(data.account.ore)
+            $('.money-display span').text(data.account.money)
             TB.actions.loadFromJSON(data.actions)
             requestAnimationFrame(TB.mainLoop)
             TB.camera.moveTo(

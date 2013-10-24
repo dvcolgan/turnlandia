@@ -39,8 +39,8 @@ class Camera
 
 
     resize: ->
-        @width = $(window).width() - 2
-        @height = $(window).height() - 67
+        @width = $(window).width()
+        @height = $(window).height() - 69
 
     zoom: (x, y, delta) ->
         #previousCol = TB.worldToScreenPosX(TB.pixelToSectorCoord(x))

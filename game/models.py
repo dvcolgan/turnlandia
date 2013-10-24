@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.safestring import mark_safe
 from django.db.models import Sum, Avg
 from django.contrib.auth.models import *
 from settings import SECTOR_SIZE
@@ -54,7 +55,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
             validators.RegexValidator(re.compile('^[\w.@+-]+$'), 'Usernames can be at most 25 characters and include letters, numbers and @ . + - _', 'invalid')
         ]
     )
-    email = models.EmailField()
+    email = models.EmailField(help_text='We promise never to spam or sell your address')
     color = models.CharField(max_length=10, blank=True, validators=[
         validators.RegexValidator(re.compile('^#[0-9a-fA-F]{6}$'), 'Enter a valid color.', 'invalid')
     ])
@@ -463,6 +464,14 @@ class ActionManager(models.Manager):
             unit = Unit.objects.get(col=action.col, row=action.row, owner=action.player)
             unit.amount += 1
             unit.save()
+
+    def resolve_build_cities(self, current_turn):
+        actions = self.filter(turn=current_turn, kind='city')
+        for action in actions:
+            print action.col, action.row
+            square = Square.objects.get(col=action.col, row=action.row)
+            square.terrain_type = CITY
+            square.save()
 ACTION_KINDS = (
     ('initial', 'Initial Placement'),
     ('move', 'Move Units'),

@@ -290,6 +290,9 @@ def api_action(request):
         elif serializer.object.kind == 'tree':
             pass
 
+        elif serializer.object.kind == 'city':
+            pass
+
         elif serializer.object.kind == 'recruit':
             pass
 

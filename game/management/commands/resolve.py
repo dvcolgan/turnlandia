@@ -27,6 +27,9 @@ class Command(BaseCommand):
         print 'Recruiting new units'
         Action.objects.resolve_recruit_units(current_turn)
 
+        print 'Building new cities'
+        Action.objects.resolve_build_cities(current_turn)
+
         current_turn += 1
         turn = Setting.objects.set('turn', current_turn)
         print 'It is now turn %d.' % current_turn

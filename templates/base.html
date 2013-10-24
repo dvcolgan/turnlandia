@@ -10,10 +10,10 @@
     <link rel="shortcut icon" href="{{ STATIC_URL }}images/favicon.ico">
 
     <link href='http://fonts.googleapis.com/css?family=Patua+One' rel='stylesheet' type='text/css'>
+    <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" rel="stylesheet" media="screen">
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/style.css">
 
     {% block head %}{% endblock %}
-
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/style.css">
 </head>
 <body class="{% block body_class %}{% endblock %}">
 <!--
@@ -30,47 +30,48 @@ IT WAS DETERMINED THAT THIS GAME NEEDED MOAR COWBELL BY JOEB3219
       (_)
 THEREFORE NOW IT DOES
 -->
-    {% if request.user.is_authenticated %}
-    <div class="header">
-        <h1 class="pull-left"><a href="{% url 'game' %}">Turnlandia!</a></h1>
 
-        <ul class="left-menu pull-left">
-            <li><a>
-                {% if request.user.leader_name %}
-                Hail {{ request.user.leader_name }}{% if request.user.people_name %}, leader of the {{ request.user.people_name }}{% endif %}{% if request.user.country_name %} of {{ request.user.country_name }}{% endif %}!
+    <nav class="navbar navbar-default navbar-inverse" role="navigation">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-header-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{% url 'game' %}">Turnlandia!</a>
+        </div>
+
+        <div class="collapse navbar-collapse navbar-header-collapse">
+            <ul class="nav navbar-nav">
+                {% if request.user.is_authenticated %}
+                <li><a>Hail {{ request.user.leader_name }}!</a></li>
                 {% endif %}
-            </a></li>
-            <li><a>({{ request.user.username }})</a></li>
-        </ul>
-
-
-
-        {% comment %}
-            {% if request.user.is_authenticated %}
-            <li><a href="{% url 'game' %}">&nbsp;Join {{ player_count }} Players on Turn {{ day_counter }}</a></li>
-            {% else %}
-            <li><a href="{% url 'create-account' %}">&nbsp;Join {{ player_count }} Players on Turn {{ day_counter }}</a></li>
-            {% endif %}
-        {% endcomment %}
-        <ul class="right-menu pull-right">
-            <!--<li><a href="{% url 'how-to-play' %}">How to Play</a></li> |-->
-            <li><a href="{% url 'messages' %}">Messages</a></li> |
-            <li><a href="{% url 'bug_tracker' %}">Submit a Bug Report</a></li> |
-            <li><a href="{% url 'settings' %}">Account Settings</a></li> |
-            <li><a href="{% url 'logout' %}">Log Out</a></li>
-        </ul>
-    </div>
-    {% endif %}
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                {% if request.user.is_authenticated %}
+                <!--<li><a href="{% url 'how-to-play' %}">How to Play</a></li>-->
+                <li><a href="{% url 'messages' %}">Messages</a></li>
+                <li><a href="{% url 'bug_tracker' %}">Submit a Bug Report</a></li>
+                <li><a href="{% url 'settings' %}">Account Settings</a></li>
+                <li><a href="{% url 'logout' %}">Log Out</a></li>
+                {% else %}
+                <li><a href="{% url 'login' %}">Log In</a></li>
+                {% endif %}
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </nav>
 
     {% block content %}{% endblock %}
 
-
     <script src='{{ STATIC_URL }}js/lib/jquery.js'></script>
+    <script src="{{ STATIC_URL }}bootstrap/dist/js/bootstrap.js"></script>
     <script src="{{ STATIC_URL }}js/lib/jquery.cookie.js"></script>
     <script src="{{ STATIC_URL }}js/lib/jquery.mousewheel.js"></script>
     <script src='{{ STATIC_URL }}js/lib/lodash.js'></script>
     <script src="{{ STATIC_URL }}js/lib/astar.js"></script>
     <script src="{{ STATIC_URL }}js/lib/knockout-2.3.0.js"></script>
+    <script src="{{ STATIC_URL }}js/lib/countdown/jquery.countdown.min.js"></script>
 
     <script src="{{ STATIC_URL }}js/util.js"></script>
     <script src="{{ STATIC_URL }}js/camera.js"></script>
@@ -83,5 +84,41 @@ THEREFORE NOW IT DOES
 
     <script src="{{ STATIC_URL }}js/all-pages.js"></script>
     {% block foot %}{% endblock %}
+    {% comment %}
+    <script>
+        // Include the UserVoice JavaScript SDK (only needed once on a page)
+            UserVoice=window.UserVoice||[];(function(){var uv=document.createElement('script');uv.type='text/javascript';uv.async=true;uv.src='//widget.uservoice.com/GDnG7upjqNVYjcHs0wi0Tw.js';var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(uv,s)})();
+
+            //
+            // UserVoice Javascript SDK developer documentation:
+            // https://www.uservoice.com/o/javascript-sdk
+            //
+
+            // Set colors
+            UserVoice.push(['set', {
+                    accent_color: '#e2753a',
+                        trigger_color: 'white',
+                        trigger_background_color: 'rgba(46, 49, 51, 0.6)'
+                        }]);
+
+        // Identify the user and pass traits
+        // To enable, replace sample data with actual user traits and uncomment the line
+        UserVoice.push(['identify', {
+                email:      '{{ request.user.email }}',
+                name:       '{{ request.user.username }}',
+                created_at: {{ request.user.date_joined|date:"U" }},
+                id:         {{ request.user.id }}
+                }]);
+
+        // Add default trigger to the bottom-right corner of the window:
+        UserVoice.push(['addTrigger', { mode: 'contact', trigger_position: 'bottom-right' }]);
+
+        // Or, use your own custom trigger:
+        //UserVoice.push(['addTrigger', '#id', { mode: 'contact' }]);
+
+        // Autoprompt for Satisfaction and SmartVote (only displayed under certain conditions)
+        UserVoice.push(['autoprompt', {}]);
+    </script>
+    {% endcomment %}
 </body>
 </html>

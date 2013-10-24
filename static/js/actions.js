@@ -382,10 +382,33 @@ BuildCityAction = (function(_super) {
   }
 
   BuildCityAction.prototype.isValid = function() {
-    return TB.myAccount.wood >= 10 && TB.board.isPassable(this.col, this.row);
+    var action, terrainType, _i, _len, _ref5;
+    _ref5 = TB.actions.actions;
+    for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
+      action = _ref5[_i];
+      if (action.col === this.col && action.row === this.row && action.kind === 'city') {
+        return false;
+      }
+    }
+    terrainType = TB.board.getTerrainType(this.col, this.row);
+    if (terrainType !== 'plains' && terrainType !== 'road') {
+      return false;
+    }
+    if (TB.actions.overlay.positions.get(this.col, this.row) === null) {
+      return false;
+    }
+    return true;
   };
 
-  BuildCityAction.prototype.draw = function() {};
+  BuildCityAction.prototype.draw = function() {
+    var screenX, screenY;
+    screenX = TB.camera.worldColToScreenPosX(this.col);
+    screenY = TB.camera.worldRowToScreenPosY(this.row);
+    TB.ctx.save();
+    TB.ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    TB.ctx.fillRect(screenX, screenY, TB.camera.zoomedGridSize, TB.camera.zoomedGridSize);
+    return TB.ctx.restore();
+  };
 
   return BuildCityAction;
 
@@ -456,7 +479,8 @@ ActionManager = (function() {
     'move': MoveAction,
     'road': BuildRoadAction,
     'tree': ClearForestAction,
-    'recruit': RecruitUnitAction
+    'recruit': RecruitUnitAction,
+    'city': BuildCityAction
   };
 
   function ActionManager() {
@@ -486,6 +510,10 @@ ActionManager = (function() {
       return TB.board.getTerrainType(col, row) === 'forest';
     } : kind === 'road' ? function(col, row) {
       return TB.board.getTerrainType(col, row) === 'plains';
+    } : kind === 'city' ? function(col, row) {
+      var terrainType;
+      terrainType = TB.board.getTerrainType(col, row);
+      return terrainType === 'plains' || terrainType === 'road';
     } : void 0;
     if (fn) {
       return this.overlay = new Overlay(unit, fn);

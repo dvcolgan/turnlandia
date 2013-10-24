@@ -4,7 +4,7 @@ class Square
 
     draw: ->
 
-        if @terrainType == 'water' or @terrainType == 'mountains' or @terrainType == 'forest' or @terrainType == 'road'
+        if @terrainType == 'water' or @terrainType == 'mountains' or @terrainType == 'forest' or @terrainType == 'road' or @terrainType == 'city'
             if not @subTiles
                 @subTiles = TB.board.getSubtiles(@col, @row)
             @drawSubTile(@subTiles[0][0], 0, 0)

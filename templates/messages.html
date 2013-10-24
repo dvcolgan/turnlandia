@@ -33,32 +33,32 @@
                                 </thead>
                                 <tbody>
                                 {% for message in received_messages %}
-                                    <tr>
-                                        <td><strong>{{ message.sender.username }}</strong></td>
-                                        <td>{{ message.subject }}</td>
-                                        <td>{{ message.time_sent }}</td>
-                                        <td>
-                                            <div class="accordion-group">
-                                                <div class="accordion-heading">
-                                                    <a class="btn btn-primary accordion-toggle"
-                                                            data-toggle="collapse"
-                                                            data-parent="#accordion-received"
-                                                            href="#collapse-received-{{ forloop.counter }}">
-                                                        Show Message
-                                                    </a>
-                                                </div>
+                                <tr>
+                                    <td><strong>{{ message.sender.username }}</strong></td>
+                                    <td>{{ message.subject }}</td>
+                                    <td>{{ message.time_sent }}</td>
+                                    <td>
+                                        <div class="accordion-group">
+                                            <div class="accordion-heading">
+                                                <a class="btn btn-primary accordion-toggle"
+                                                    data-toggle="collapse"
+                                                    data-parent="#accordion-received"
+                                                    href="#collapse-received-{{ forloop.counter }}">
+                                                    Show Message
+                                                </a>
                                             </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="4">
-                                            <div id="collapse-received-{{ forloop.counter }}" class="accordion-body collapse">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4">
+                                        <div id="collapse-received-{{ forloop.counter }}" class="accordion-body collapse">
                                             <div class="well accordion-inner no-bottom-margin">
                                                 {{ message.body }}
                                             </div>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                        </div>
+                                    </td>
+                                </tr>
                                 {% endfor %}
                                 </tbody>
                             </table>
@@ -78,32 +78,32 @@
                                 </thead>
                                 <tbody>
                                 {% for message in sent_messages %}
-                                    <tr>
-                                        <td><strong>{{ message.receiver.username }}</strong></td>
-                                        <td>{{ message.subject }}</td>
-                                        <td>{{ message.time_sent }}</td>
-                                        <td>
-                                            <div class="accordion-group">
-                                                <div class="accordion-heading">
-                                                    <a class="btn btn-primary accordion-toggle"
-                                                            data-toggle="collapse"
-                                                            data-parent="#accordion-sent"
-                                                            href="#collapse-sent-{{ forloop.counter }}">
-                                                        Show Message
-                                                    </a>
-                                                </div>
+                                <tr>
+                                    <td><strong>{{ message.recipient.username }}</strong></td>
+                                    <td>{{ message.subject }}</td>
+                                    <td>{{ message.time_sent }}</td>
+                                    <td>
+                                        <div class="accordion-group">
+                                            <div class="accordion-heading">
+                                                <a class="btn btn-primary accordion-toggle"
+                                                    data-toggle="collapse"
+                                                    data-parent="#accordion-sent"
+                                                    href="#collapse-sent-{{ forloop.counter }}">
+                                                    Show Message
+                                                </a>
                                             </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="4">
-                                            <div id="collapse-sent-{{ forloop.counter }}" class="accordion-body collapse">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4">
+                                        <div id="collapse-sent-{{ forloop.counter }}" class="accordion-body collapse">
                                             <div class="well accordion-inner no-bottom-margin">
                                                 {{ message.body }}
                                             </div>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                        </div>
+                                    </td>
+                                </tr>
                                 {% endfor %}
                                 </tbody>
                             </table>

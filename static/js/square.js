@@ -9,7 +9,7 @@ Square = (function() {
   }
 
   Square.prototype.draw = function() {
-    if (this.terrainType === 'water' || this.terrainType === 'mountains' || this.terrainType === 'forest' || this.terrainType === 'road') {
+    if (this.terrainType === 'water' || this.terrainType === 'mountains' || this.terrainType === 'forest' || this.terrainType === 'road' || this.terrainType === 'city') {
       if (!this.subTiles) {
         this.subTiles = TB.board.getSubtiles(this.col, this.row);
       }

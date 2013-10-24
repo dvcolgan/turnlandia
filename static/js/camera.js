@@ -69,8 +69,8 @@ Camera = (function() {
   };
 
   Camera.prototype.resize = function() {
-    this.width = $(window).width() - 2;
-    return this.height = $(window).height() - 67;
+    this.width = $(window).width();
+    return this.height = $(window).height() - 69;
   };
 
   Camera.prototype.zoom = function(x, y, delta) {

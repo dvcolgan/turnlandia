@@ -1,17 +1,32 @@
-Categories of actions:
-Ones that simply take an action point:
-    Recruit unit
-    find food
 
-Ones that change the terrain:
-    Build road
-    Build city
-    Clear forest
-    Mine ore
-    Plant forest
 
-Move
-Attack
+
+
+
+if you build a city, you can place 1 city tile per 2 or 3 or 4 units in the camp
+add a timer showing how much time is left in the turn
+add signs
+
+
+fix the home page at smaller sizes
+
+
+Every day at turn resolution, send out an email update of everything that happened to your player
+- Anything that attacked you
+- Any new units or roads
+- How many resources you got
+- Any messages that were sent to you
+turn this off for the dev site
+
+
+
+
+
+
+add a potato unit type
+
+add a resolve button if you are logged in as superuser
+moving a unit on top of an enemy unit deletes the enemy unit
 
 investigate fabric for automated deployment
 
@@ -20,14 +35,9 @@ surrender units button
 turnlandia ai contest
 
 add a time slider on the top of the screen that lets you view the last 5 or so turns
-add signs
 
-Instead of moving a unit on top a thing and directly building the thing with the unit, units are camps of units that can build things inside of their sphere of influence
+make a less boring account for all these games
 
-Each unit is now called a camp
-each camp gets one type of action per turn,
-if you build a road, you can build one road square for every unit in the camp
-if you build a city, you can place 1 city tile per 2 or 3 or 4 units in the camp
 if you recruit, you get one unit the next turn
 if you harvest wood, you can click on trees equal to the number of units in the camp, and you get 1 resource per tree you cut down, and then you can also mine mountains for ore
 
@@ -266,19 +276,20 @@ you place your units anywhere you want, a certain distance away from all existin
 
 
 Cities:
+    have a limit on the number of units per square? - 16 or 20
     you build cities on plains
-    cities must be x squares from another city
-    the city starts out as a 2x2 square?
-    initial placement must be within a certain distance from another city
     Cities require wood
     Cities are surrounded by walls, only build buildings inside cities
-    build farms around a city
-    to trade with someone, you'd have to build a road between your cities
-    cities have influence
-    city roles
-    you have to have more cities to support more units
-    cities that span multiple squares
+    maybe build farms around a city
+    maybe you have to have more cities to support more units
     the outer part of the cities have walls around them
+
+    build city center
+    build city inside area
+    build city wall square
+
+    start by placing a city center on a plains
+    you can expand the city by placing raw city area or walls
 
 
 Units:
@@ -538,3 +549,7 @@ Phildo3:
 
 
 
+-Instead of moving a unit on top a thing and directly building the thing with the unit, units are camps of units that can build things inside of their sphere of influence
+
+-Each unit is now called a camp
+-if you build a road, you can build one road square for every unit in the camp

@@ -6,8 +6,8 @@ class CreateAccountForm(forms.ModelForm):
         'username_taken': "That username is taken.",
         'password_mismatch': "Passwords do not match",
     }
-    password1 = forms.CharField(label="Password", widget=forms.PasswordInput)
-    password2 = forms.CharField(label="Repeat password", widget=forms.PasswordInput)
+    password1 = forms.CharField(label="Password", help_text='Make it real secure', widget=forms.PasswordInput)
+    password2 = forms.CharField(label="Repeat password", help_text='Just in case', widget=forms.PasswordInput)
 
     class Meta:
         model = Account

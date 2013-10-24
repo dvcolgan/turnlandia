@@ -1,35 +1,37 @@
 {% extends "base.html" %}
 {% load widget_tweaks %}
+{% load bootstrap %}
+
 
 {% block title %}Log In{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h2>Log Thou In</h2>
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-3">
+            <div class="well">
+                <h2>Log Thou In</h2>
 
-    {% if not form.non_field_errors %}
-    <p>You approach a tightly locked gatehouse.  You knock firmly on the door.
-    The peephole flings open, and an old hag appears.</p>
-    {% else %}
-    <p>Unimpressed, she angrily bellows out:</p>
-    <p class="errorlist">I don't know anyone with that name or that password!</p>
-    <p>Once again she bellows,</p>
-    {% endif %}
+                {% if not form.non_field_errors %}
+                <p>You approach a tightly locked gatehouse.  You knock firmly on the door.
+                The peephole flings open, and an old hag appears.</p>
+                {% else %}
+                <p>Unimpressed, she angrily bellows out:</p>
+                <p class="errorlist">I don't know anyone with that name or that password!</p>
+                <p>Once again she bellows,</p>
+                {% endif %}
 
-    <form action="" method="POST">{% csrf_token %}
-        <div class="form-group">
-            <label>"Who are you?" <small><em>she yells.</em></small></label>
-            {{ form.username|attr:'placeholder:username'|add_class:"form-control" }}
-            {{ form.username.errors }}
+                <form role="form" method="POST">{% csrf_token %}
+                        <p>&quot;Who are you?&quot; <small><em>she yells.</em></small></p>
+                        {{ form.username|bootstrap }}
+                        <p>&quot;What's the Password?&quot; <small><em>she then asks.</em></small></p>
+                        {{ form.password|bootstrap }}
+                    <input type="submit" class="btn btn-success" value="Let me in!" />
+                </form>
+                <br/>
+                <p><a href="{% url 'create-account' %}">Or Create an Account</a></p>
+            </div>
         </div>
-        <div class="form-group">
-            <label>"What's the Password?" <small><em>she then asks.</em></small></label>
-            {{ form.password|attr:'placeholder:password'|add_class:"form-control" }}
-            {{ form.password.errors }}
-        </div>
-        <input type="submit" class="btn btn-success" value="Let me in!" />
-    </form>
-    <br/>
-    <p><a href="{% url 'create-account' %}">Or Create an Account</a></p>
+    </div>
 </div>
 {% endblock %}

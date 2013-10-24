@@ -1,12 +1,3 @@
-html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline;}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block;}body{line-height:1;}ol,ul{list-style:none;}blockquote,q{quotes:none;}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none;}table{border-collapse:collapse;border-spacing:0;}
-
-*, *:before, *:after {
-    -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
-}
-
-
-/* CLEARFIX */
-.cf:before, .cf:after { content:""; display:table; } .cf:after { clear:both; } .cf { zoom:1; }
 
 #preload { display: none; }
 
@@ -29,140 +20,44 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Patua One', sans-serif;
-}
-
-h1 {
-    margin-left: 5px;
-    font-size: 26px;
-    line-height: 35px;
     color: white;
     text-shadow: 2px 2px 4px black;
-    a {
-        color: white;
-        text-shadow: 2px 2px 4px black;
-        text-decoration: none;
-    }
 }
 
-h2 {
-    text-shadow: 2px 2px 4px black;
-    font-size: 30px;
-    margin-bottom: 20px;
-    color: white;
-}
-
-a {
-    color: #222;
-}
 
 .errorlist {
     font-weight: bold;
     color: red;
 }
 
-p {
-    margin: 10px 0;
-    font-size: 16px;
-    line-height: 20px;
-}
 
-.pull-left { float: left; }
-.pull-right { float: right; }
-.pull-center {
-    margin: 0 auto;
-}
-
-small {
-    font-size: 80%;
-}
-em {
-    font-style: italic;
-}
-strong {
-    font-weight: bold;
-}
-
-label {
-    font-weight: bold;
-    display: block;
-    font-size: 16px;
-    &:focus {
-        outline: 0;
-    }
-}
-
-form {
-}
-
-
-.form-group {
-    margin: 10px 0;
-}
-input[type="text"], input[type="password"] {
-    font-size: 16px;
-    padding: 4px;
-    border-radius: 4px;
-    border: none;
-    color: #222;
-    box-shadow: inset 0px 1px 1px #444;
-    width: 100%;
-}
-
-.btn {
-    text-shadow: 1px 1px 1px black;
-    text-align: center;
-    padding: 10px;
-    display: block;
-    margin: 10px 0;
-    height: 42px;
-    line-height: 22px;
+.btn-inverse {
+    color: white;
     background-color: #444;
+    border-color: #222;
+}
+.btn-inverse:hover, .btn-inverse:active {
     color: white;
-    font-weight: bold;
-    border: none;
-    font-size: 16px;
-    border-radius: 6px;
-    box-shadow: inset 0 1px 1px #ccc;
-    border: 1px solid #222;
-    text-decoration: none;
-    outline: none;
-    &:hover {
-        background-color: #666;
-        outline: none;
-    }
-    &:active {
-        box-shadow: inset 0 1px 1px black;
-        outline: none;
-    }
-    &.btn-blue {
-        background-color: #3276b1;
-        &:hover {
-            background-color: #428bca;
-        }
-    }
-    &.btn-green, &.active {
-        background-color: #47a447;
-        &:hover {
-            background-color: #5cb85c;
-        }
-    }
-    &.btn-yellow {
-        background-color: #ed9c28;
-        &:hover {
-            background-color: #f0ad4e;
-        }
-    }
+    background-color: #333;
+    border-color: #111;
 }
 
-.header {
-    height: 35px;
-    width: 100%;
-    color: white;
 
-    .left-menu, .right-menu {
-        line-height: 35px;
-        margin-right: 5px;
-        margin-left: 10px;
+.navbar {
+    border-radius: 0;
+    .navbar-brand {
+        font-family: 'Patua One', sans-serif;
+        font-size: 26px;
+        color: white;
+        text-shadow: 2px 2px 4px black;
+        a {
+            color: white;
+            text-shadow: 2px 2px 4px black;
+            text-decoration: none;
+        }
+    }
+
+    .navbar-nav {
         li {
             a {
                 color: white;
@@ -170,18 +65,15 @@ input[type="text"], input[type="password"] {
                 text-decoration: none;
 
             }
-            display: inline;
         }
     }
 }
-
-.home, .create_account {
-    padding: 20px;
-    h1 {
-        font-size: 50px;
-        margin-bottom: 10px;
+.game {
+    .navbar {
+        margin-bottom: 0;
     }
 }
+
 .home-btn-container {
     a {
         display: block;
@@ -198,118 +90,18 @@ input[type="text"], input[type="password"] {
     position: relative;
 }
 
-.container {
-    background-color: rgba(255,255,255,0.8);
-    width: 600px;
-    margin: 0 auto;
-    box-shadow: 0 0 8px black;
-    border-radius: 6px;
-    padding: 40px;
+.well {
+    background-color: #dbdbdb;
 }
-
 
 .board {
     display: block;
-    margin-left:1px;
     position: relative;
     font-size: 16px;
     overflow: hidden;
     .board-canvas {
         cursor: crosshair;
         display: block;
-    }
-}
-
-
-.arrow-controls {
-    width: 150px;
-    height: 106px;
-    font-size: 24px;
-    position: relative;
-    .button {
-        position: absolute;
-        padding: 8px 14px;
-    }
-    .go-left {
-        left: 0;
-        top: 24px;
-    }
-    .go-up {
-        left: 50px;
-        top: 0;
-    }
-    .go-down {
-        left: 50px;
-        bottom: 0;
-    }
-    .go-right {
-        right: 0;
-        top: 24px;
-    }
-}
-
-.arrow {
-    z-index: 100;
-    position: absolute;
-    pointer-events: none;
-    width: 48px;
-    height: 48px;
-    &.west-end {
-        background-image: url(/static/images/newtiles.png);
-        background-position: 0 0;
-    }
-    &.south-end {
-        background-image: url(/static/images/newtiles.png);
-        background-position: -48px 0;
-    }
-    &.east-end {
-        background-image: url(/static/images/newtiles.png);
-        background-position: -96px 0;
-    }
-    &.north-end {
-        background-image: url(/static/images/newtiles.png);
-        background-position: -144px 0;
-    }
-    &.south-east, &.east-south {
-        background-image: url(/static/images/newtiles.png);
-        background-position: 0 -48px;
-    }
-    &.north-east, &.east-north {
-        background-image: url(/static/images/newtiles.png);
-        background-position: -48px -48px;
-    }
-    &.west-north, &.north-west {
-        background-image: url(/static/images/newtiles.png);
-        background-position: -96px -48px;
-    }
-    &.west-south, &.south-west {
-        background-image: url(/static/images/newtiles.png);
-        background-position: -144px -48px;
-    }
-    &.east-start, &.start-east {
-        background-image: url(/static/images/newtiles.png);
-        background-position: 0 -96px;
-    }
-    &.north-start, &.start-north {
-        background-image: url(/static/images/newtiles.png);
-        background-position: -48px -96px;
-    }
-    &.west-start, &.start-west {
-        background-image: url(/static/images/newtiles.png);
-        background-position: -96px -96px;
-    }
-    &.south-start, &.start-south {
-        background-image: url(/static/images/newtiles.png);
-        background-position: -144px -96px;
-    }
-
-    &.east-west, &.west-east {
-        background-image: url(/static/images/newtiles.png);
-        background-position: 0 -144px;
-    }
-    &.north-south, &.south-north {
-        background-image: url(/static/images/newtiles.png);
-        background-position: -48px -144px;
     }
 }
 
@@ -322,14 +114,12 @@ input[type="text"], input[type="password"] {
     -ms-user-select: none;
     user-select: none;
 }
-#players-summary {
-    float: right;
-}
 
 /* Messages page */
 body.messages {
     .tab-content {
         background-color: white;
+        margin-bottom: 20px;
     }
     .table td {
         vertical-align: middle;
@@ -354,63 +144,39 @@ body.messages {
     }
 }
 
-.home-minimap {
-    text-align: center;
-    padding: 20px 0;
-}
-
-.square-action-popup {
-    width: 264px;
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 9999;
-    background-color: white;
-    border: 2px solid #444;
-    .container {
-        padding-bottom: 20px;
-    }
-    .close {
-        margin-top: 10px;
-    }
-}
-
-.moving-through {
-    background-image: url(/static/images/footprints-tile.png) !important;
-}
-
-
 .stats-bar {
     position: relative;
-    float: left;
-    height: 26px;
+    height: 27px;
     width: 100%;
     background-color: #222;
-    box-shadow:inset 0px 1px 0px 0px #888;
-    margin-top: 5px;
     color: white;
     font-size: 14px;
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
+    border-top: 1px solid #101010;
     .stat-box {
         background-color: #222;
-        box-shadow: inset -1px 1px 0px 0px #888;
+        border-right: 1px solid #888;
         float: left;
-        width: 120px;
         height: 26px;
         line-height: 26px;
         padding: 0 8px;
-        &:first-child {
-            border-top-left-radius: 6px;
-            box-shadow: inset -1px 1px 0px 0px #888, inset 1px 1px 0px 0px #888;
+
+        .icon {
+            background-image: url(/static/images/resource-icons.png);
+            width: 20px;
+            height: 20px;
+            display: block;
+            margin-right: 6px;
+            margin-top: 3px;
+            border-radius: 4px;
+            background-color: #ddd;
+            float: left;
         }
-        &.pull-center {
-            position: absolute;
-            left: 50%;
-            margin-left: -60px;
-        }
-        &:last-child {
-        }
+        &.total-unit-display .icon { background-position:   0   0; }
+        &.wood-display       .icon { background-position: -20px 0; }
+        &.food-display       .icon { background-position: -40px 0; }
+        &.ore-display        .icon { background-position: -60px 0; }
+        &.money-display      .icon { background-position: -80px 0; }
+        &.turn-display       .icon { background-position: -100px 0; }
     }
 }
 
@@ -435,6 +201,8 @@ body.messages {
         border-radius: 86px;
     }
     .btn-action {
+        font-weight: bold;
+        text-shadow: 1px 1px 1px black;
         font-size: 14px;
         border-radius: 39px;
         line-height: 14px;
