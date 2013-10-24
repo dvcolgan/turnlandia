@@ -24,7 +24,7 @@ class Action
             error: (response) ->
                 alert("Error saving move.  Please check your internet connection and try again: #{JSON.stringify(response)}")
 
-        if kind != 'initial'
+        if @kind != 'initial'
             unit = TB.board.units.get(@unitCol, @unitRow)
             unit.actionsLeft -= 1
             return unit.actionsLeft

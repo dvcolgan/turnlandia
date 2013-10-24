@@ -38,7 +38,7 @@ Action = (function() {
         return alert("Error saving move.  Please check your internet connection and try again: " + (JSON.stringify(response)));
       }
     });
-    if (kind !== 'initial') {
+    if (this.kind !== 'initial') {
       unit = TB.board.units.get(this.unitCol, this.unitRow);
       unit.actionsLeft -= 1;
       return unit.actionsLeft;
