@@ -15,27 +15,7 @@ MANAGERS = ADMINS
 HOSTNAME = socket.gethostname()
 FILEPATH = os.path.abspath(__file__)
 
-if HOSTNAME == 'impetus':
-    DEBUG = True
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            #'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': 'turnbased',
-            'TEST_NAME': 'turnbased_test',
-            'USER': 'dcolgan',
-            'USER': '',
-            'PASSWORD': '',
-            'HOST': '',
-            'PORT': '',
-        }
-    }
-    SITE_DOMAIN = 'localhost:8000'
-    SERVER = 'local'
-    # Print emails to stdout if we are local
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-elif HOSTNAME == 'luffy' and '_testing' in FILEPATH:
+if HOSTNAME == 'luffy' and '_testing' in FILEPATH:
     DEBUG = True
     DATABASES = {
         'default': {
@@ -52,6 +32,26 @@ elif HOSTNAME == 'luffy' and '_testing' in FILEPATH:
     SERVER = 'testing'
     # Print emails to stdout if we are local
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    DEBUG = True
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            #'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'turnbased',
+            'TEST_NAME': 'turnbased_test',
+            'USER': 'turnbased',
+            #'USER': '',
+            'PASSWORD': '',
+            'HOST': '',
+            'PORT': '',
+        }
+    }
+    SITE_DOMAIN = 'localhost:8000'
+    SERVER = 'local'
+    # Print emails to stdout if we are local
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
 
 
